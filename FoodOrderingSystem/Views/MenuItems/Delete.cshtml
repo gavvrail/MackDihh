@@ -1,0 +1,48 @@
+﻿@model FoodOrderingSystem.Models.MenuItem
+
+@{
+    ViewData["Title"] = "Delete Item";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-header">
+    <div class="container">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead mb-0 text-danger">Are you sure you want to permanently delete this item?</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">@Model.Name</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Description)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Description)</dd>
+
+                        <dt class="col-sm-3">Price</dt>
+                        <dd class="col-sm-9">RM@Model.Price.ToString("F2")</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Category)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Category.Name)</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <form asp-action="Delete" class="mt-4">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    <input type="submit" value="Delete" class="btn btn-danger" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

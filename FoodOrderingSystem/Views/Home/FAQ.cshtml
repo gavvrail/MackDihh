@@ -1,0 +1,254 @@
+@{
+    ViewData["Title"] = "FAQ";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/faq.css" asp-append-version="true" />
+}
+
+<!-- Hero Section -->
+<div class="faq-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold text-white mb-4">Frequently Asked Questions</h1>
+                <p class="lead text-white mb-4">Find quick answers to the most common questions about our services, ordering process, and policies.</p>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-question-circle fa-5x text-white"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container my-5">
+    <!-- Search Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="search-section text-center">
+                <input type="text" id="faqSearch" class="form-control form-control-lg" placeholder="Search FAQ...">
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Categories -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Ordering Questions -->
+            <div class="faq-category mb-5">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-shopping-cart text-primary me-2"></i>
+                    Ordering & Delivery
+                </h2>
+                <div class="accordion" id="orderingAccordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ordering1">
+                                How do I place an order?
+                            </button>
+                        </h3>
+                        <div id="ordering1" class="accordion-collapse collapse show" data-bs-parent="#orderingAccordion">
+                            <div class="accordion-body">
+                                <p>Placing an order is easy! Simply browse our menu, add items to your cart, and proceed to checkout. You can customize your order with special instructions and track your delivery in real-time.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ordering2">
+                                What are your delivery areas?
+                            </button>
+                        </h3>
+                        <div id="ordering2" class="accordion-collapse collapse" data-bs-parent="#orderingAccordion">
+                            <div class="accordion-body">
+                                <p>We currently deliver to most areas in Kota Kinabalu and surrounding regions. Enter your address during checkout to confirm if we deliver to your area.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ordering3">
+                                How long does delivery take?
+                            </button>
+                        </h3>
+                        <div id="ordering3" class="accordion-collapse collapse" data-bs-parent="#orderingAccordion">
+                            <div class="accordion-body">
+                                <p>Delivery typically takes 30-45 minutes depending on your location and current order volume. You'll receive real-time updates on your order status.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Questions -->
+            <div class="faq-category mb-5">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-credit-card text-success me-2"></i>
+                    Payment & Pricing
+                </h2>
+                <div class="accordion" id="paymentAccordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#payment1">
+                                What payment methods do you accept?
+                            </button>
+                        </h3>
+                        <div id="payment1" class="accordion-collapse collapse show" data-bs-parent="#paymentAccordion">
+                            <div class="accordion-body">
+                                <p>We accept cash on delivery, credit/debit cards, and major digital wallets including Touch 'n Go, GrabPay, and Boost.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#payment2">
+                                Are there any delivery fees?
+                            </button>
+                        </h3>
+                        <div id="payment2" class="accordion-collapse collapse" data-bs-parent="#paymentAccordion">
+                            <div class="accordion-body">
+                                <p>Delivery fees vary by distance and start from RM3.00. Orders over RM50 qualify for free delivery!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#payment3">
+                                Do you offer refunds?
+                            </button>
+                        </h3>
+                        <div id="payment3" class="accordion-collapse collapse" data-bs-parent="#paymentAccordion">
+                            <div class="accordion-body">
+                                <p>We offer refunds for orders that arrive damaged or incorrect. Please contact us within 30 minutes of delivery for refund requests.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Questions -->
+            <div class="faq-category mb-5">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-utensils text-warning me-2"></i>
+                    Menu & Food
+                </h2>
+                <div class="accordion" id="menuAccordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#menu1">
+                                Are your ingredients fresh?
+                            </button>
+                        </h3>
+                        <div id="menu1" class="accordion-collapse collapse show" data-bs-parent="#menuAccordion">
+                            <div class="accordion-body">
+                                <p>Yes! We use only the freshest ingredients sourced from local suppliers. Our vegetables are delivered daily, and our meat is sourced from certified suppliers.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#menu2">
+                                Do you have vegetarian options?
+                            </button>
+                        </h3>
+                        <div id="menu2" class="accordion-collapse collapse" data-bs-parent="#menuAccordion">
+                            <div class="accordion-body">
+                                <p>Absolutely! We offer a variety of vegetarian options including salads, veggie burgers, and plant-based alternatives. Look for the vegetarian icon on our menu.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#menu3">
+                                Can I customize my order?
+                            </button>
+                        </h3>
+                        <div id="menu3" class="accordion-collapse collapse" data-bs-parent="#menuAccordion">
+                            <div class="accordion-body">
+                                <p>Yes! You can customize your order by adding or removing ingredients, choosing different sauces, or requesting special preparation instructions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Questions -->
+            <div class="faq-category mb-5">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-user text-info me-2"></i>
+                    Account & Technical
+                </h2>
+                <div class="accordion" id="accountAccordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#account1">
+                                How do I create an account?
+                            </button>
+                        </h3>
+                        <div id="account1" class="accordion-collapse collapse show" data-bs-parent="#accountAccordion">
+                            <div class="accordion-body">
+                                <p>Click the "Register" button in the top navigation to create your account. You'll need to provide your email address and create a password.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#account2">
+                                I forgot my password. What should I do?
+                            </button>
+                        </h3>
+                        <div id="account2" class="accordion-collapse collapse" data-bs-parent="#accountAccordion">
+                            <div class="accordion-body">
+                                <p>Click "Login" and then "Forgot Password" to reset your password. You'll receive a reset link via email.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#account3">
+                                How do I track my order?
+                            </button>
+                        </h3>
+                        <div id="account3" class="accordion-collapse collapse" data-bs-parent="#accountAccordion">
+                            <div class="accordion-body">
+                                <p>Once your order is confirmed, you'll receive real-time updates via email and SMS. You can also track your order in your account dashboard.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="contact-section text-center">
+                <h3>Still Have Questions?</h3>
+                <p class="lead mb-4">Can't find the answer you're looking for? Our customer service team is here to help!</p>
+                <a asp-controller="Home" asp-action="Contact" class="btn btn-primary btn-lg me-3">Contact Us</a>
+                <a href="tel:+60881234567" class="btn btn-outline-primary btn-lg">Call Now</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // FAQ Search functionality
+        document.getElementById('faqSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            
+            accordionItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+} 

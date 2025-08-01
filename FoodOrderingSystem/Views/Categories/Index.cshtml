@@ -1,0 +1,111 @@
+@model IEnumerable<FoodOrderingSystem.Models.Category>
+
+@{
+    ViewData["Title"] = "Categories Management";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-header">
+    <div class="container">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead mb-0">Manage menu categories and their organization.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Categories</h5>
+                    <a asp-action="Create" class="btn btn-create-new">
+                        <i class="fas fa-plus me-2"></i>Add New Category
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Category Name</th>
+                                    <th>Menu Items Count</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Any())
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@Html.DisplayFor(modelItem => item.Name)</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">@item.MenuItems.Count</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary btn-action">
+                                                    <i class="fas fa-edit me-1"></i>Edit
+                                                </a>
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary btn-action">
+                                                    <i class="fas fa-eye me-1"></i>Details
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger btn-action">
+                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4">
+                                            <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                                            <h5 class="text-muted">No categories found</h5>
+                                            <p class="text-muted">Create your first category to get started.</p>
+                                            <a asp-action="Create" class="btn btn-create-new">
+                                                <i class="fas fa-plus me-2"></i>Add First Category
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+} 

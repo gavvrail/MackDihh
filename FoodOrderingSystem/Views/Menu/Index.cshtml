@@ -1,0 +1,83 @@
+﻿@model IEnumerable<FoodOrderingSystem.Models.Category>
+
+@{
+    ViewData["Title"] = "Our Menu";
+}
+
+@Html.AntiForgeryToken()
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
+}
+@section Scripts {
+    <script src="~/js/menu.js" asp-append-version="true"></script>
+}
+
+<div class="menu-page-container">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Sidebar: Categories & Search -->
+            <div class="col-lg-3">
+                <aside class="menu-sidebar sticky-top">
+                    <div class="sidebar-search-box mb-4">
+                        <input type="text" id="menuSearch" class="form-control form-control-lg rounded-pill" placeholder="Search in menu...">
+                    </div>
+                    <nav class="category-nav">
+                        <ul class="nav flex-column">
+                            @foreach (var category in Model.Where(c => c.MenuItems.Any()))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#category-@category.Id">@category.Name</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+
+            <!-- Right Content: Menu Items -->
+            <div class="col-lg-9">
+                <main class="menu-content">
+                    <h1 class="mb-4">MackDihh Menu</h1>
+
+                    @foreach (var category in Model.Where(c => c.MenuItems.Any()))
+                    {
+                        <section class="category-section mb-5" id="category-@category.Id">
+                            <h2 class="category-title">@category.Name</h2>
+                            <div class="row">
+                                @foreach (var item in category.MenuItems)
+                                {
+                                    <div class="col-lg-6 mb-4 menu-item-card" data-name="@item.Name.ToLower() @item.Description.ToLower()">
+                                        <div class="card product-card-horizontal h-100">
+                                            <div class="row g-0">
+                                                <div class="col-md-8">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title">@item.Name</h5>
+                                                        <p class="card-text text-muted">@item.Description</p>
+                                                        <!-- This line has been updated to show RM -->
+                                                        <p class="card-text fw-bold mt-3">RM@(item.Price.ToString("F2"))</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 product-image-container">
+                                                    <img src="@item.ImageUrl"
+                                                         class="img-fluid rounded"
+                                                         alt="@item.Name"
+                                                         onerror="this.onerror=null;this.src='https://placehold.co/200x200/E8E8E8/B7B7B7?text=Image+Error';">
+
+                                                    <form asp-controller="Cart" asp-action="AddToCart" method="post" class="add-to-cart-form">
+                                                        <input type="hidden" name="menuItemId" value="@item.Id" />
+                                                        <button type="submit" class="btn btn-danger btn-add-to-cart">+</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </section>
+                    }
+                </main>
+            </div>
+        </div>
+    </div>
+</div>

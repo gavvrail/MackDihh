@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Hot Deals";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/deals.css" asp-append-version="true" />
+}
+
+<!-- Page Header -->
+<div class="deals-header">
+    <div class="container">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead">Don't miss out on our amazing offers!</p>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container deals-content">
+    <div class="row">
+        <!-- Deal 1 - Breakfast Deal -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="deal-card h-100">
+                <img src="~/images/macksausageburgur.png" class="deal-card-img-top" alt="Breakfast Deal - Sausage Burger">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title mt-3">Morning Saver Combo</h5>
+                                            <p class="card-text">Start your day right! Get a sausage muffin and a coffee for just RM4.99. Valid until 11 AM.</p>
+                    <a href="#" class="btn btn-claim mt-auto">Claim Deal</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deal 2 - Family Bundle -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="deal-card h-100">
+                <img src="~/images/mackfamilybucket.png" class="deal-card-img-top" alt="Family Bundle">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title mt-3">Family Feast Bundle</h5>
+                    <p class="card-text">Perfect for sharing! Includes 2 Big MackDihhs, 20pc McNuggets, and 4 Large Fries.</p>
+                    <a href="#" class="btn btn-claim mt-auto">Order Now</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deal 3 - Free Dessert -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="deal-card h-100">
+                <img src="~/images/freakysundae.png" class="deal-card-img-top" alt="Free Dessert - McFlurry">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title mt-3">Free McFlurry</h5>
+                                            <p class="card-text">Enjoy a free McFlurry on us with any purchase over RM15. A sweet treat for a sweet deal!</p>
+                    <a href="#" class="btn btn-claim mt-auto">Redeem Offer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,287 @@
+﻿/* Orders Page Styles */
+.orders-container {
+    background: #28a745;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+/* --- Orders History Page Styles --- */
+
+.orders-header {
+    background: #28a745;
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.orders-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.orders-header h1 {
+    font-weight: 800;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.orders-header .lead {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+.orders-content {
+    background: #f8f9fa;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.orders-content .accordion {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.orders-content .accordion-item {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    background: white;
+}
+
+.orders-content .accordion-item:last-child {
+    border-bottom: none;
+}
+
+.orders-content .accordion-button {
+    background: white;
+    border: none;
+    padding: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.orders-content .accordion-button:not(.collapsed) {
+    background: #28a745;
+    color: white;
+    box-shadow: none;
+}
+
+.orders-content .accordion-button:focus {
+    box-shadow: none;
+    border-color: transparent;
+}
+
+.orders-content .accordion-button::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.orders-content .accordion-button.collapsed::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%232c3e50'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.orders-content .accordion-body {
+    background: #f8f9fa;
+    padding: 1.5rem;
+}
+
+.order-date {
+    font-weight: 600;
+    color: inherit;
+}
+
+.order-number {
+    font-weight: 600;
+    color: inherit;
+    margin-left: 1rem;
+}
+
+.order-total {
+    font-weight: 700;
+    color: inherit;
+    font-size: 1.1rem;
+}
+
+.orders-content .list-group-item {
+    background: white;
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 0;
+    transition: background-color 0.3s ease;
+}
+
+.orders-content .list-group-item:hover {
+    background: #f8f9fa;
+}
+
+.orders-content .list-group-item:last-child {
+    border-bottom: none;
+}
+
+.orders-content .list-group-item .fw-bold {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.orders-content .list-group-item small {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.orders-content .list-group-item .fw-bold:last-child {
+    color: #28a745;
+    font-size: 1.1rem;
+}
+
+/* Empty state styling */
+.orders-content .text-center {
+    background: white;
+    border-radius: 20px;
+    padding: 4rem 2rem;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    margin: 2rem 0;
+}
+
+.orders-content .text-center .lead {
+    color: #6c757d;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.orders-content .text-center .btn-primary {
+    background: #28a745;
+    border: none;
+    border-radius: 50px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    transition: transform 0.3s ease;
+}
+
+.orders-content .text-center .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+/* Order status badges */
+.order-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.order-status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.order-status.completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.order-status.cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.order-status.processing {
+    background: #cce5ff;
+    color: #004085;
+}
+
+/* Order summary card */
+.order-summary {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.order-summary .row {
+    align-items: center;
+}
+
+.order-summary .col-md-3 {
+    text-align: center;
+}
+
+.order-summary .col-md-3:not(:last-child) {
+    border-right: 1px solid #e9ecef;
+}
+
+.order-summary .summary-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.order-summary .summary-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .orders-header {
+        padding: 3rem 0;
+    }
+    
+    .orders-content {
+        padding: 2rem 0;
+    }
+    
+    .orders-content .accordion-button {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+    
+    .orders-content .accordion-body {
+        padding: 1rem;
+    }
+    
+    .order-number {
+        margin-left: 0.5rem;
+    }
+    
+    .orders-content .text-center {
+        padding: 3rem 1.5rem;
+    }
+}
+
+/* Animation for accordion items */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.accordion-collapse.show {
+    animation: slideDown 0.3s ease-out;
+}

@@ -1,0 +1,155 @@
+﻿/* --- Account Page Styles --- */
+.account-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 1rem;
+    background-color: #f8f9fa;
+}
+
+.account-form-wrapper {
+    max-width: 500px;
+    width: 100%;
+    padding: 2.5rem;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+    .account-form-wrapper h1 {
+        color: #272727;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .account-form-wrapper .text-muted {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+.form-floating > .form-control {
+    border-radius: 12px;
+    border: 1px solid #ced4da;
+    padding: 1rem;
+    height: calc(3.5rem + 2px);
+}
+
+.form-floating > label {
+    padding: 1rem 1rem;
+}
+
+button.btn-account {
+    background-color: #D83028;
+    color: white !important;
+    font-weight: 600;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    width: 100%;
+    font-size: 1.1rem;
+    transition: background-color 0.2s ease;
+}
+
+    button.btn-account:hover {
+        background-color: #a60c24;
+        color: white !important;
+    }
+
+.btn-account a {
+    color: #ffffff !important;
+    text-decoration: none;
+}
+
+.account-form-wrapper a {
+    color: #D83028;
+    text-decoration: none;
+}
+
+    .account-form-wrapper a:hover {
+        text-decoration: underline;
+    }
+
+.account-form-wrapper hr {
+    margin: 2rem 0;
+}
+
+/* --- Account Management Styles --- */
+.manage-nav {
+    padding: 1rem 0;
+}
+
+.manage-nav .nav-link {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    color: #6c757d;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.manage-nav .nav-link:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+    border-color: #dee2e6;
+}
+
+.manage-nav .nav-link.active {
+    background-color: #D83028;
+    color: white;
+    border-color: #D83028;
+}
+
+.manage-nav .nav-link i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Card styling for account management */
+.card-header.bg-primary {
+    background-color: #D83028 !important;
+    border-color: #D83028;
+}
+
+.card-header .opacity-75 {
+    opacity: 0.9 !important;
+}
+
+/* Form improvements */
+.form-control:focus {
+    border-color: #D83028;
+    box-shadow: 0 0 0 0.2rem rgba(216, 48, 40, 0.25);
+}
+
+.btn-primary {
+    background-color: #D83028;
+    border-color: #D83028;
+}
+
+.btn-primary:hover {
+    background-color: #a60c24;
+    border-color: #a60c24;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .col-md-3.border-end {
+        border-right: none !important;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .manage-nav {
+        padding: 1rem;
+    }
+    
+    .manage-nav ul {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+    }
+    
+    .manage-nav .nav-item {
+        flex-shrink: 0;
+        margin-right: 0.5rem;
+    }
+}

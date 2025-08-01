@@ -1,0 +1,21 @@
+﻿@page
+@model RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Register confirmation";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
+}
+
+<div class="account-container">
+    <div class="account-form-wrapper text-center">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead mt-4">
+            Please check your email to confirm your account.
+        </p>
+        <p class="text-muted">
+            A confirmation link has been sent to <strong>@Model.Email</strong>.
+        </p>
+    </div>
+</div>

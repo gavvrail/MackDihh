@@ -1,0 +1,139 @@
+﻿/* --- Admin Page Styles --- */
+
+.admin-header {
+    background-color: #272727; /* Use your dark color */
+    color: white;
+    padding: 2.5rem 0;
+    margin-bottom: 2rem;
+}
+
+    .admin-header h1 {
+        font-weight: 700;
+        color: white; /* Ensure heading is white */
+    }
+
+    .admin-header p {
+        color: rgba(255, 255, 255, 0.8); /* Make subtitle slightly muted white */
+    }
+
+.admin-table {
+    font-size: 0.95rem;
+}
+
+    .admin-table thead {
+        background-color: #f8f9fa;
+    }
+
+    .admin-table th {
+        font-weight: 600;
+        color: #272727; /* Use your dark color */
+    }
+
+    .admin-table .btn-action {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.6rem;
+        margin: 0 2px;
+    }
+
+/* --- THIS IS THE FIX FOR THE BUTTONS --- */
+.btn-create-new {
+    background-color: #D83028; /* Use your brand red */
+    color: white;
+    font-weight: 600;
+    border: none;
+}
+
+    .btn-create-new:hover {
+        background-color: #a60c24; /* Darker red on hover */
+        color: white;
+    }
+
+/* Style for the table action buttons */
+.table .btn-outline-primary {
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+    .table .btn-outline-primary:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+.table .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+    .table .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+/* --- Admin Function Cards --- */
+.admin-function-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #dee2e6;
+}
+
+.admin-function-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.admin-function-card .card-body {
+    padding: 2rem 1.5rem;
+}
+
+.admin-function-card i {
+    transition: transform 0.2s ease;
+}
+
+.admin-function-card:hover i {
+    transform: scale(1.1);
+}
+
+.admin-function-card h5 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.admin-function-card p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Statistics Cards --- */
+.stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card .card-body {
+    padding: 1.5rem;
+}
+
+.stat-card h3 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .admin-function-card {
+        margin-bottom: 1rem;
+    }
+    
+    .admin-function-card .card-body {
+        padding: 1.5rem 1rem;
+    }
+    
+    .stat-card .card-body {
+        padding: 1rem;
+    }
+}

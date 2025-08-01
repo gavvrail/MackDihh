@@ -1,0 +1,188 @@
+﻿@using FoodOrderingSystem.ViewModels
+@model FoodOrderingSystem.Controllers.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-header">
+    <div class="container">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead mb-0">Overview of your food ordering system</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">@Model.TotalUsers</h3>
+                    <p class="mb-0">Total Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <h3 class="text-success">@Model.TotalMenuItems</h3>
+                    <p class="mb-0">Menu Items</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <h3 class="text-info">@Model.TotalOrders</h3>
+                    <p class="mb-0">Total Orders</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <h3 class="text-warning">@Model.PendingOrders</h3>
+                    <p class="mb-0">Pending Orders</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="text-success">RM @Model.TotalSales.ToString("F2")</h2>
+                    <p class="mb-0">Total Revenue</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Orders -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Orders</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentOrders.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var order in Model.RecentOrders)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@order.OrderNumber</strong>
+                                        <br>
+                                        <small class="text-muted">@order.User?.UserName - @order.OrderDate.ToString("MMM dd, yyyy")</small>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">RM @order.Total.ToString("F2")</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No recent orders</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Selling Items -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Top Selling Items</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.TopSellingItems.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var item in Model.TopSellingItems)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@item.MenuItemName</strong>
+                                        <br>
+                                        <small class="text-muted">@item.TotalQuantity sold</small>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill">RM @item.TotalRevenue.ToString("F2")</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No sales data available</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Reports & Analytics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                                    <h6>Sales Analytics</h6>
+                                    <p class="text-muted small">View detailed sales reports and trends</p>
+                                    <a href="@Url.Action("Reports", "Admin")" class="btn btn-sm btn-outline-primary">View Sales Reports</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-2x text-info mb-2"></i>
+                                    <h6>User Analytics</h6>
+                                    <p class="text-muted small">Track user activity and engagement</p>
+                                    <a href="@Url.Action("Users", "Admin")" class="btn btn-sm btn-outline-info">View User Reports</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-utensils fa-2x text-success mb-2"></i>
+                                    <h6>Menu Analytics</h6>
+                                    <p class="text-muted small">Analyze menu performance and popularity</p>
+                                    <a href="@Url.Action("Index", "MenuItems")" class="btn btn-sm btn-outline-success">View Menu Reports</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-tags fa-2x text-warning mb-2"></i>
+                                    <h6>Categories</h6>
+                                    <p class="text-muted small">Manage menu categories and organization</p>
+                                    <a href="@Url.Action("Index", "Categories")" class="btn btn-sm btn-outline-warning">Manage Categories</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

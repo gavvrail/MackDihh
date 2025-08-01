@@ -1,0 +1,35 @@
+﻿/* --- Privacy Policy Page Styles --- */
+
+.privacy-header {
+    background-color: var(--mcd-yellow); /* Changed from dark to bright yellow */
+    color: var(--mcd-dark); /* Changed from white to dark for readability */
+    padding: 4rem 0;
+    text-align: center;
+}
+
+    .privacy-header h1 {
+        font-weight: 800;
+    }
+
+.privacy-content {
+    padding: 3rem 0;
+}
+
+    .privacy-content h2 {
+        color: var(--mcd-red);
+        font-weight: 700;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--mcd-yellow);
+        padding-left: 1rem;
+    }
+
+    .privacy-content p, .privacy-content li {
+        color: #6c757d; /* A soft, dark grey for readability */
+        line-height: 1.8;
+    }
+
+    .privacy-content .last-updated {
+        font-style: italic;
+        color: #6c757d;
+    }

@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MackDihh</title>
+    <link rel="icon" href="~/favicon.ico?v=2" type="image/x-icon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    @Html.AntiForgeryToken()
+    <div class="body-wrapper">
+        <header class="sticky-top">
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
+                <div class="container-fluid">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                        <img src="~/images/logo.png" alt="MackDihh's Logo" class="navbar-logo">
+                        MackDihh
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Menu" asp-action="Index">Menu</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Deals" asp-action="Index">Deals</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="History">My Orders</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <partial name="_LoginPartial" />
+                            @await Component.InvokeAsync("CartWidget")
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <main role="main" class="pb-3">
+            <!-- Notification Container -->
+            <div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; display: none;">
+                <div id="notification" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <span id="notification-message"></span>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="hideNotification()" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+            
+            @RenderBody()
+        </main>
+
+        <footer class="footer mt-auto pt-5 pb-4 bg-dark text-white">
+            <div class="container text-center text-md-start">
+                <div class="row">
+                    <div class="col-md-4 col-lg-4 col-xl-4 mx-auto mb-4">
+                        <h6 class="text-uppercase fw-bold mb-4">
+                            <img src="~/images/logo.png" alt="MackDihh's Logo" class="footer-logo">
+                            MackDihh
+                        </h6>
+                        <p>
+                            Your favorite meals, delivered fast. Quality ingredients and unforgettable taste, right to your doorstep.
+                        </p>
+                    </div>
+                    <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-4">
+                        <h6 class="text-uppercase fw-bold mb-4">Useful Links</h6>
+                        <p><a asp-controller="Home" asp-action="About" class="text-reset">About Us</a></p>
+                        <p><a asp-controller="Home" asp-action="Contact" class="text-reset">Contact Us</a></p>
+                        <p><a asp-controller="Home" asp-action="FAQ" class="text-reset">FAQ</a></p>
+                        <p><a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-reset">Privacy Policy</a></p>
+                    </div>
+                    <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+                        <h6 class="text-uppercase fw-bold mb-4">Contact</h6>
+                        <p><i class="fas fa-home me-3"></i> Kota Kinabalu, Sabah, MY</p>
+                        <p><i class="fas fa-envelope me-3"></i> info@mackdihh.com</p>
+                        <p><i class="fas fa-phone me-3"></i> + 01 234 567 88</p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+                © 2025 Copyright: MackDihh
+            </div>
+        </footer>
+    </div>
+
+    <!-- SCRIPT LOADING SECTION - THIS ORDER IS CRITICAL -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/notifications.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

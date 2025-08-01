@@ -1,0 +1,22 @@
+﻿@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Confirm email";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
+}
+
+<div class="account-container">
+    <div class="account-form-wrapper text-center">
+        <h1>@ViewData["Title"]</h1>
+        <partial name="_StatusMessage" model="Model.StatusMessage" />
+
+        @if (Model.StatusMessage == "Thank you for confirming your email.")
+        {
+            <p class="lead mt-4">Your email has been successfully confirmed.</p>
+            <a class="btn btn-account mt-3" asp-page="./Login">Click here to Log in</a>
+        }
+    </div>
+</div>

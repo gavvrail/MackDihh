@@ -1,0 +1,56 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/password-toggle.js" asp-append-version="true"></script>
+}
+
+<div class="account-container">
+    <div class="account-form-wrapper">
+        <section>
+            <form id="account" method="post">
+                <h1>@ViewData["Title"]</h1>
+                <p class="text-muted">Welcome back! Please log in to continue.</p>
+                <hr />
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.EmailOrUsername" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <label asp-for="Input.EmailOrUsername" class="form-label"></label>
+                    <span asp-validation-for="Input.EmailOrUsername" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="Input.RememberMe" />
+                        <label asp-for="Input.RememberMe" class="form-label">
+                            Remember me
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-account">Log in</button>
+                </div>
+                <div class="text-center mt-4">
+                    <p>
+                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                    </p>
+                    <p>
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Don't have an account? Register here</a>
+                    </p>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>

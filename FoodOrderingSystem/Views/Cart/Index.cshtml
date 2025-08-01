@@ -1,0 +1,118 @@
+﻿@model FoodOrderingSystem.Models.Cart
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions {
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken ?? string.Empty;
+    }
+}
+
+@{
+    ViewData["Title"] = "Your Cart";
+    decimal subtotal = Model.CartItems.Sum(item => item.Quantity * item.MenuItem.Price);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+}
+@section Scripts {
+    <script src="~/js/cart.js" asp-append-version="true"></script>
+}
+
+<input type="hidden" name="__RequestVerificationToken" value="@GetAntiXsrfRequestToken()">
+
+<div class="container my-5">
+    <div class="cart-header text-center">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead text-muted">Review your items before proceeding to checkout.</p>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-lg-8">
+            @if (Model.CartItems.Any())
+            {
+                foreach (var item in Model.CartItems)
+                {
+                    <div class="cart-item-card card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                <img src="@(string.IsNullOrEmpty(item.MenuItem.ImageUrl) ? "https://placehold.co/150x150/E8E8E8/B7B7B7?text=Image" : item.MenuItem.ImageUrl)" class="img-fluid rounded-start" alt="@item.MenuItem.Name" style="height: 100px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-10">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <h5 class="card-title">@item.MenuItem.Name</h5>
+                                        <p class="card-text fw-bold">RM@((item.Quantity * item.MenuItem.Price).ToString("F2"))</p>
+                                    </div>
+                                    <p class="card-text"><small class="text-muted">RM@item.MenuItem.Price.ToString("F2") each</small></p>
+                                    <div class="d-flex align-items-center justify-content-between mt-3">
+                                        <div class="input-group quantity-selector" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary btn-update-quantity" type="button" data-itemid="@item.Id" data-change="-1">-</button>
+                                            <input type="text" class="form-control text-center quantity-input" value="@item.Quantity" readonly>
+                                            <button class="btn btn-outline-secondary btn-update-quantity" type="button" data-itemid="@item.Id" data-change="1">+</button>
+                                        </div>
+                                        <a href="#" class="btn btn-sm btn-outline-danger btn-remove-item" data-itemid="@item.Id">Remove</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center p-5 bg-light rounded">
+                    <h4>Your cart is empty.</h4>
+                    <p>Looks like you haven't added anything to your cart yet.</p>
+                    <a asp-controller="Menu" asp-action="Index" class="btn btn-primary mt-3">Browse Menu</a>
+                </div>
+            }
+        </div>
+        <div class="col-lg-4">
+            <div class="summary-card card sticky-top">
+                <div class="card-body">
+                    <h5 class="card-title">Order Summary</h5>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <span>RM @subtotal.ToString("F2")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Taxes & Fees</span>
+                        <span>Calculated at checkout</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold h5">
+                        <span>Total</span>
+                        <span>RM @subtotal.ToString("F2")</span>
+                    </div>
+                    
+                    @if (subtotal < 100)
+                    {
+                        <div class="alert alert-info mt-3">
+                            <small>
+                                <i class="fas fa-info-circle me-1"></i>
+                                Add RM @((100 - subtotal).ToString("F2")) more for FREE delivery!
+                            </small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mt-3">
+                            <small>
+                                <i class="fas fa-check-circle me-1"></i>
+                                You qualify for FREE delivery!
+                            </small>
+                        </div>
+                    }
+                    
+                    <div class="d-grid mt-4">
+                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-danger btn-lg">
+                            <i class="fas fa-credit-card me-2"></i>Proceed to Checkout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

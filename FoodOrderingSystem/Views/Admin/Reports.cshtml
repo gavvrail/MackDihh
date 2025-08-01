@@ -1,0 +1,58 @@
+﻿@using FoodOrderingSystem.ViewModels
+@model ReportViewModel
+
+@{
+    ViewData["Title"] = "Reports Dashboard";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-header">
+    <div class="container">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead mb-0">An overview of your application's activity.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Total Sales Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Sales</h6>
+                    <h2 class="card-title fw-bolder">RM @Model.TotalSales.ToString("F2")</h2>
+                </div>
+            </div>
+        </div>
+        <!-- Total Orders Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Orders</h6>
+                    <h2 class="card-title fw-bolder">@Model.TotalOrders</h2>
+                </div>
+            </div>
+        </div>
+        <!-- Total Users Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Users</h6>
+                    <h2 class="card-title fw-bolder">@Model.TotalUsers</h2>
+                </div>
+            </div>
+        </div>
+        <!-- Total Menu Items Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Menu Items</h6>
+                    <h2 class="card-title fw-bolder">@Model.TotalMenuItems</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

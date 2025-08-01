@@ -1,0 +1,188 @@
+@model IEnumerable<FoodOrderingSystem.Models.Order>
+
+@{
+    ViewData["Title"] = "Manage Orders";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-header">
+    <div class="container">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead mb-0">View and manage all orders in the system.</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Status Filter</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">Pending</option>
+                        <option value="Confirmed" selected="@(ViewBag.StatusFilter == "Confirmed")">Confirmed</option>
+                        <option value="Preparing" selected="@(ViewBag.StatusFilter == "Preparing")">Preparing</option>
+                        <option value="Ready" selected="@(ViewBag.StatusFilter == "Ready")">Ready</option>
+                        <option value="Delivered" selected="@(ViewBag.StatusFilter == "Delivered")">Delivered</option>
+                        <option value="Cancelled" selected="@(ViewBag.StatusFilter == "Cancelled")">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" name="search" id="search" class="form-control" 
+                           placeholder="Search by order number, customer, or address" 
+                           value="@ViewBag.SearchTerm">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle admin-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Items</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@order.OrderNumber</strong>
+                                        @if (!string.IsNullOrEmpty(order.DeliveryAddress))
+                                        {
+                                            <br><small class="text-muted">@order.DeliveryAddress</small>
+                                        }
+                                    </td>
+                                    <td>@order.User?.UserName</td>
+                                    <td>@order.OrderDate.ToString("MMM dd, yyyy HH:mm")</td>
+                                    <td>
+                                        <span class="badge bg-@(order.Status switch {
+                                            OrderStatus.Pending => "warning",
+                                            OrderStatus.Confirmed => "info",
+                                            OrderStatus.Preparing => "primary",
+                                            OrderStatus.Ready => "success",
+                                            OrderStatus.Delivered => "secondary",
+                                            OrderStatus.Cancelled => "danger",
+                                            _ => "light"
+                                        })">
+                                            @order.Status
+                                        </span>
+                                    </td>
+                                    <td><strong>RM @order.Total.ToString("F2")</strong></td>
+                                    <td>
+                                        <small>
+                                            @order.OrderItems.Count item@(order.OrderItems.Count != 1 ? "s" : "")
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" 
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                Actions
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="viewOrderDetails('@order.Id')">View Details</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Pending')">Mark as Pending</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Confirmed')">Mark as Confirmed</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Preparing')">Mark as Preparing</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Ready')">Mark as Ready</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Delivered')">Mark as Delivered</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger" href="#" onclick="updateOrderStatus('@order.Id', 'Cancelled')">Cancel Order</a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <p class="text-muted">No orders found matching your criteria.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="orderDetailsContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateOrderStatus(orderId, status) {
+            if (confirm(`Are you sure you want to mark this order as ${status}?`)) {
+                fetch('@Url.Action("UpdateOrderStatus", "Admin")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `orderId=${orderId}&status=${status}`
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Error updating order status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the order status.');
+                });
+            }
+        }
+
+        function viewOrderDetails(orderId) {
+            // For now, just show a simple message
+            // In a real application, you would fetch order details via AJAX
+            document.getElementById('orderDetailsContent').innerHTML = `
+                <div class="text-center">
+                    <p>Order details for order ID: ${orderId}</p>
+                    <p class="text-muted">This feature would show detailed order information including items, delivery details, etc.</p>
+                </div>
+            `;
+            
+            var modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+            modal.show();
+        }
+    </script>
+} 
