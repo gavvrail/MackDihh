@@ -56,6 +56,26 @@ namespace FoodOrderingSystem.Controllers
             return View(dashboardViewModel);
         }
 
+        // Debug action to check admin user status (remove this in production)
+        [AllowAnonymous]
+        public async Task<IActionResult> DebugAdmin()
+        {
+            var adminUser = await _userManager.FindByEmailAsync("admin@mackdihh.com");
+            var adminUserByUsername = await _userManager.FindByNameAsync("admin");
+            
+            var result = new
+            {
+                AdminByEmail = adminUser != null ? new { adminUser.Id, adminUser.UserName, adminUser.Email, adminUser.EmailConfirmed } : null,
+                AdminByUsername = adminUserByUsername != null ? new { adminUserByUsername.Id, adminUserByUsername.UserName, adminUserByUsername.Email, adminUserByUsername.EmailConfirmed } : null,
+                IsInAdminRole = adminUser != null ? await _userManager.IsInRoleAsync(adminUser, "Admin") : false,
+                IsInAdminRoleByUsername = adminUserByUsername != null ? await _userManager.IsInRoleAsync(adminUserByUsername, "Admin") : false,
+                TotalUsers = await _context.Users.CountAsync(),
+                TotalMenuItems = await _context.MenuItems.CountAsync()
+            };
+            
+            return Json(result);
+        }
+
         // GET: /Admin/Orders
         public async Task<IActionResult> Orders(string status = "", string search = "")
         {
@@ -218,7 +238,7 @@ namespace FoodOrderingSystem.Controllers
             return await _context.OrderItems
                 .Include(oi => oi.MenuItem)
                 .ThenInclude(mi => mi.Category)
-                .GroupBy(oi => oi.MenuItem.Category.Name)
+                .GroupBy(oi => oi.MenuItem.Category!.Name)
                 .Select(g => new ViewModels.CategorySalesData
                 {
                     CategoryName = g.Key,

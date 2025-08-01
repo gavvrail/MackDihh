@@ -95,6 +95,116 @@ namespace FoodOrderingSystem.Controllers
             return View(menuItem);
         }
 
+        // Debug action to check database connection and menu items (remove in production)
+        [AllowAnonymous]
+        public async Task<IActionResult> DebugMenuItems()
+        {
+            try
+            {
+                var menuItems = await _context.MenuItems.Include(m => m.Category).ToListAsync();
+                var categories = await _context.Categories.ToListAsync();
+                
+                var result = new
+                {
+                    TotalMenuItems = menuItems.Count,
+                    TotalCategories = categories.Count,
+                    MenuItems = menuItems.Select(m => new { m.Id, m.Name, m.Price, Category = m.Category?.Name, m.ImageUrl }),
+                    Categories = categories.Select(c => new { c.Id, c.Name })
+                };
+                
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Error = ex.Message, StackTrace = ex.StackTrace });
+            }
+        }
+
+        // Action to fix missing images (remove in production)
+        [AllowAnonymous]
+        public async Task<IActionResult> FixMissingImages()
+        {
+            try
+            {
+                var menuItems = await _context.MenuItems.ToListAsync();
+                var updatedCount = 0;
+                
+                foreach (var item in menuItems)
+                {
+                    if (string.IsNullOrEmpty(item.ImageUrl) || !item.ImageUrl.StartsWith("/images/"))
+                    {
+                        item.ImageUrl = "/images/4.png"; // Use a default image
+                        updatedCount++;
+                    }
+                }
+                
+                if (updatedCount > 0)
+                {
+                    await _context.SaveChangesAsync();
+                }
+                
+                return Json(new { 
+                    Success = true, 
+                    UpdatedCount = updatedCount,
+                    Message = $"Updated {updatedCount} menu items with default images"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Error = ex.Message, StackTrace = ex.StackTrace });
+            }
+        }
+
+        // Test action to verify database connection and add a test item (remove in production)
+        [AllowAnonymous]
+        public async Task<IActionResult> TestDatabaseConnection()
+        {
+            try
+            {
+                // Test 1: Check if we can connect to the database
+                var categories = await _context.Categories.ToListAsync();
+                var menuItems = await _context.MenuItems.ToListAsync();
+                
+                // Test 2: Try to add a test menu item
+                var testItem = new MenuItem
+                {
+                    Name = "Test Item - " + DateTime.Now.ToString("HH:mm:ss"),
+                    Description = "This is a test item to verify database connection",
+                    Price = 9.99m,
+                    CategoryId = categories.FirstOrDefault()?.Id ?? 1,
+                    IsAvailable = true,
+                    IsFeatured = false,
+                    PreparationTimeMinutes = 10,
+                    ImageUrl = "/images/4.png"
+                };
+                
+                _context.MenuItems.Add(testItem);
+                await _context.SaveChangesAsync();
+                
+                var result = new
+                {
+                    Success = true,
+                    Message = "Database connection test successful!",
+                    TestItemId = testItem.Id,
+                    TestItemName = testItem.Name,
+                    TotalCategories = categories.Count,
+                    TotalMenuItems = menuItems.Count + 1,
+                    Categories = categories.Select(c => new { c.Id, c.Name }),
+                    RecentMenuItems = await _context.MenuItems.OrderByDescending(m => m.Id).Take(5).Select(m => new { m.Id, m.Name, m.Price, Category = m.Category.Name }).ToListAsync()
+                };
+                
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    Success = false, 
+                    Error = ex.Message, 
+                    StackTrace = ex.StackTrace 
+                });
+            }
+        }
+
         // GET: MenuItems/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {

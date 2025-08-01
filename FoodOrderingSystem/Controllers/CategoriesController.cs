@@ -30,7 +30,7 @@ namespace FoodOrderingSystem.Controllers
                     .ToListAsync();
                 return View(categories);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "An error occurred while loading categories. Please try again.";
                 return View(new List<Category>());
@@ -60,7 +60,7 @@ namespace FoodOrderingSystem.Controllers
                 
                 return View(category);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "An error occurred while loading category details. Please try again.";
                 return RedirectToAction(nameof(Index));
@@ -99,7 +99,7 @@ namespace FoodOrderingSystem.Controllers
                 }
                 return View(category);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "An error occurred while creating the category. Please try again.";
                 return View(category);
@@ -126,7 +126,7 @@ namespace FoodOrderingSystem.Controllers
                 
                 return View(category);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "An error occurred while loading the category. Please try again.";
                 return RedirectToAction(nameof(Index));
@@ -178,7 +178,7 @@ namespace FoodOrderingSystem.Controllers
                     return View(category);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "An error occurred while updating the category. Please try again.";
                 return View(category);
@@ -208,7 +208,7 @@ namespace FoodOrderingSystem.Controllers
                 
                 return View(category);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "An error occurred while loading the category. Please try again.";
                 return RedirectToAction(nameof(Index));
@@ -244,7 +244,7 @@ namespace FoodOrderingSystem.Controllers
                 TempData["SuccessMessage"] = $"Category '{category.Name}' deleted successfully.";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "An error occurred while deleting the category. Please try again.";
                 return RedirectToAction(nameof(Index));

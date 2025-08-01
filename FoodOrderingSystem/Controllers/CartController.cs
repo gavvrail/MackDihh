@@ -117,7 +117,7 @@ namespace FoodOrderingSystem.Controllers
 
                 // Check for existing cart item using direct database query
                 var existingCartItem = await _context.CartItems
-                    .FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.MenuItemId == menuItemId);
+                    .FirstOrDefaultAsync(ci => ci.CartId == cart!.Id && ci.MenuItemId == menuItemId);
 
                 if (existingCartItem != null)
                 {
@@ -131,7 +131,7 @@ namespace FoodOrderingSystem.Controllers
                     var newCartItem = new CartItem
                     {
                         MenuItemId = menuItemId,
-                        CartId = cart.Id,
+                        CartId = cart!.Id,
                         Quantity = 1
                     };
                     _context.CartItems.Add(newCartItem);
@@ -141,7 +141,7 @@ namespace FoodOrderingSystem.Controllers
                 var newCount = await _cartService.GetCartItemCountAsync();
                 return Json(new { success = true, message = $"{menuItem.Name} added to cart!", newCount = newCount });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Json(new { success = false, message = "An error occurred while adding item to cart." });
             }

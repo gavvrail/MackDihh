@@ -60,7 +60,7 @@ namespace FoodOrderingSystem.Controllers
 
                 return View(checkoutViewModel);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception here if you have logging configured
                 TempData["ErrorMessage"] = "An error occurred while loading the checkout page. Please try again.";

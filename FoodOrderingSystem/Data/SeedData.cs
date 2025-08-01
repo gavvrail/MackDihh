@@ -45,8 +45,8 @@ namespace FoodOrderingSystem.Data
                 // --- Create Menu Items ---
                 context.MenuItems.AddRange(
                     // Limited Time Offers
-                    new MenuItem { Name = "Spicy Habanero Burger", Description = "A fiery habanero sauce with a crispy chicken patty. Only for a limited time!", Price = 9.99m, CategoryId = limitedTimeCategory.Id, ImageUrl = "/images/7.png" },
-                    new MenuItem { Name = "Durian McFlurry", Description = "A local favorite! Creamy vanilla soft serve with real D24 durian puree.", Price = 5.99m, CategoryId = limitedTimeCategory.Id, ImageUrl = "/images/8.png" },
+                    new MenuItem { Name = "Spicy Habanero Burger", Description = "A fiery habanero sauce with a crispy chicken patty. Only for a limited time!", Price = 9.99m, CategoryId = limitedTimeCategory.Id, ImageUrl = "/images/4.png" },
+                    new MenuItem { Name = "Durian McFlurry", Description = "A local favorite! Creamy vanilla soft serve with real D24 durian puree.", Price = 5.99m, CategoryId = limitedTimeCategory.Id, ImageUrl = "/images/5.png" },
 
                     // Value Meals / Combos
                     new MenuItem { Name = "Big MackDihh Combo", Description = "Big MackDihh, World Famous Fries, and a medium Cola.", Price = 12.99m, CategoryId = combosCategory.Id, ImageUrl = "/images/9.png" },
@@ -76,17 +76,17 @@ namespace FoodOrderingSystem.Data
                     // Drinks
                     new MenuItem { Name = "Cola", Description = "A refreshing and bubbly classic.", Price = 1.99m, CategoryId = drinksCategory.Id, ImageUrl = "/images/24.png" },
                     new MenuItem { Name = "Iced Lemon Tea", Description = "Sweet and tangy, perfect for a hot day.", Price = 2.49m, CategoryId = drinksCategory.Id, ImageUrl = "/images/25.png" },
-                    new MenuItem { Name = "Orange Juice", Description = "Freshly squeezed orange juice.", Price = 2.99m, CategoryId = drinksCategory.Id, ImageUrl = "/images/26.png" },
+                    new MenuItem { Name = "Orange Juice", Description = "Freshly squeezed orange juice.", Price = 2.99m, CategoryId = drinksCategory.Id, ImageUrl = "/images/100plus.png" },
 
                     // Snacks & Sides
-                    new MenuItem { Name = "World Famous Fries", Description = "Golden, crispy, and perfectly salted.", Price = 2.79m, CategoryId = snacksCategory.Id, ImageUrl = "/images/27.png" },
-                    new MenuItem { Name = "Chicken McNuggets (6pcs)", Description = "Bite-sized pieces of seasoned chicken.", Price = 4.49m, CategoryId = snacksCategory.Id, ImageUrl = "/images/28.png" },
-                    new MenuItem { Name = "Onion Rings", Description = "Crispy battered onion rings.", Price = 3.29m, CategoryId = snacksCategory.Id, ImageUrl = "/images/29.png" },
+                    new MenuItem { Name = "World Famous Fries", Description = "Golden, crispy, and perfectly salted.", Price = 2.79m, CategoryId = snacksCategory.Id, ImageUrl = "/images/4.png" },
+                    new MenuItem { Name = "Chicken McNuggets (6pcs)", Description = "Bite-sized pieces of seasoned chicken.", Price = 4.49m, CategoryId = snacksCategory.Id, ImageUrl = "/images/5.png" },
+                    new MenuItem { Name = "Onion Rings", Description = "Crispy battered onion rings.", Price = 3.29m, CategoryId = snacksCategory.Id, ImageUrl = "/images/6.png" },
 
                     // Desserts
-                    new MenuItem { Name = "McFlurry", Description = "Creamy vanilla soft serve with OREO® cookies.", Price = 3.29m, CategoryId = dessertsCategory.Id, ImageUrl = "/images/30.png" },
-                    new MenuItem { Name = "Apple Pie", Description = "A flaky, baked crust filled with warm apple filling.", Price = 1.49m, CategoryId = dessertsCategory.Id, ImageUrl = "/images/31.png" },
-                    new MenuItem { Name = "Chocolate Sundae", Description = "Vanilla soft serve topped with rich chocolate fudge.", Price = 3.99m, CategoryId = dessertsCategory.Id, ImageUrl = "/images/32.png" }
+                    new MenuItem { Name = "McFlurry", Description = "Creamy vanilla soft serve with OREO® cookies.", Price = 3.29m, CategoryId = dessertsCategory.Id, ImageUrl = "/images/4.png" },
+                    new MenuItem { Name = "Apple Pie", Description = "A flaky, baked crust filled with warm apple filling.", Price = 1.49m, CategoryId = dessertsCategory.Id, ImageUrl = "/images/5.png" },
+                    new MenuItem { Name = "Chocolate Sundae", Description = "Vanilla soft serve topped with rich chocolate fudge.", Price = 3.99m, CategoryId = dessertsCategory.Id, ImageUrl = "/images/6.png" }
                 );
 
                 // Save all the new menu items to the database

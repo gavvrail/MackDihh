@@ -201,8 +201,8 @@ namespace FoodOrderingSystem.Controllers
                 new { area = "Identity", userId = user.Id, code = code },
                 protocol: Request.Scheme);
 
-            var emailBody = EmailTemplates.GetEmailConfirmationTemplate(user.UserName ?? "User", HtmlEncoder.Default.Encode(callbackUrl));
-            await _emailSender.SendEmailAsync(user.Email, "Welcome to MackDihh! Please confirm your email", emailBody);
+            var emailBody = EmailTemplates.GetEmailConfirmationTemplate(user.UserName ?? "User", HtmlEncoder.Default.Encode(callbackUrl ?? ""));
+            await _emailSender.SendEmailAsync(user.Email ?? "", "Welcome to MackDihh! Please confirm your email", emailBody);
 
             TempData["SuccessMessage"] = "Verification email sent! Please check your inbox and click the confirmation link.";
             return RedirectToAction(nameof(Index));
