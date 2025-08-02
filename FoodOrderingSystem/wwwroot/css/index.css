@@ -5,7 +5,7 @@
     position: relative;
     height: 60vh;
     color: white;
-    background-image: url('../images/background.png');
+    background-image: url('/images/background.png');
     background-repeat: no-repeat;
     background-position: center 28.5%;
     background-size: cover;

@@ -190,7 +190,7 @@ namespace FoodOrderingSystem.Controllers
                     TotalCategories = categories.Count,
                     TotalMenuItems = menuItems.Count + 1,
                     Categories = categories.Select(c => new { c.Id, c.Name }),
-                    RecentMenuItems = await _context.MenuItems.OrderByDescending(m => m.Id).Take(5).Select(m => new { m.Id, m.Name, m.Price, Category = m.Category.Name }).ToListAsync()
+                    RecentMenuItems = await _context.MenuItems.OrderByDescending(m => m.Id).Take(5).Select(m => new { m.Id, m.Name, m.Price, Category = m.Category!.Name }).ToListAsync()
                 };
                 
                 return Json(result);

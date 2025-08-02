@@ -1,6 +1,5 @@
 ﻿using FoodOrderingSystem.Models; // We need to use our custom ApplicationUser
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication;
 
 namespace FoodOrderingSystem.Data
 {
@@ -64,34 +63,19 @@ namespace FoodOrderingSystem.Data
             }
             else
             {
-                Console.WriteLine("Admin user already exists. Checking password...");
+                Console.WriteLine("Admin user already exists. Ensuring correct password and role...");
                 
-                // Check if the password is correct by trying to sign in
-                var signInManager = serviceProvider.GetRequiredService<SignInManager<ApplicationUser>>();
-                var signInResult = await signInManager.PasswordSignInAsync(adminUser.UserName, "Password123!", false, lockoutOnFailure: false);
+                // Always reset the password to ensure it's correct
+                var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+                var resetResult = await userManager.ResetPasswordAsync(adminUser, token, "Password123!");
                 
-                if (!signInResult.Succeeded)
+                if (resetResult.Succeeded)
                 {
-                    Console.WriteLine("Admin password is incorrect. Resetting password...");
-                    
-                    // Reset the password
-                    var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
-                    var resetResult = await userManager.ResetPasswordAsync(adminUser, token, "Password123!");
-                    
-                    if (resetResult.Succeeded)
-                    {
-                        Console.WriteLine("Admin password reset successfully.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Failed to reset admin password: {string.Join(", ", resetResult.Errors.Select(e => e.Description))}");
-                    }
+                    Console.WriteLine("Admin password reset successfully.");
                 }
                 else
                 {
-                    Console.WriteLine("Admin password is correct.");
-                    // Sign out after testing
-                    await signInManager.SignOutAsync();
+                    Console.WriteLine($"Failed to reset admin password: {string.Join(", ", resetResult.Errors.Select(e => e.Description))}");
                 }
                 
                 // Ensure admin user is in Admin role
@@ -106,6 +90,10 @@ namespace FoodOrderingSystem.Data
                     {
                         Console.WriteLine($"Failed to add admin user to role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
                     }
+                }
+                else
+                {
+                    Console.WriteLine("Admin user already has Admin role.");
                 }
             }
         }
