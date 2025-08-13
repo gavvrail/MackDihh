@@ -10,7 +10,9 @@
 }
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script src="~/js/password-toggle.js" asp-append-version="true"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 }
 
 <div class="account-container">
@@ -39,6 +41,11 @@
                         </label>
                     </div>
                 </div>
+
+                <div class="mb-3">
+                    <div class="g-recaptcha" data-sitekey="@Model.RecaptchaSiteKey"></div>
+                </div>
+
                 <div>
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-account">Log in</button>
                 </div>

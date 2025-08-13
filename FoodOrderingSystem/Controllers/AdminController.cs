@@ -27,6 +27,12 @@ namespace FoodOrderingSystem.Controllers
         // GET: /Admin (Dashboard)
         public async Task<IActionResult> Index()
         {
+            // Clear any non-admin related success messages
+            var successMessage = TempData["SuccessMessage"]?.ToString();
+            if (successMessage != null && successMessage.Contains("Order placed"))
+            {
+                TempData.Remove("SuccessMessage");
+            }
             var dashboardViewModel = new AdminDashboardViewModel
             {
                 TotalUsers = await _context.Users.CountAsync(),
@@ -79,6 +85,12 @@ namespace FoodOrderingSystem.Controllers
         // GET: /Admin/Orders
         public async Task<IActionResult> Orders(string status = "", string search = "")
         {
+            // Clear any non-admin related success messages
+            var successMessage = TempData["SuccessMessage"]?.ToString();
+            if (successMessage != null && successMessage.Contains("Order placed"))
+            {
+                TempData.Remove("SuccessMessage");
+            }
             var query = _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderItems)
@@ -107,10 +119,72 @@ namespace FoodOrderingSystem.Controllers
             return View(orders);
         }
 
+        // GET: /Admin/GetOrderDetails/{orderId}
+        [HttpGet]
+        [Route("Admin/GetOrderDetails/{orderId}")]
+        public async Task<IActionResult> GetOrderDetails(int orderId)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Looking for order with ID: {orderId}");
+                
+                var order = await _context.Orders
+                    .Include(o => o.User)
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                    .FirstOrDefaultAsync(o => o.Id == orderId);
+
+                if (order == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Order with ID {orderId} not found");
+                    
+                    // Check if any orders exist at all
+                    var allOrders = await _context.Orders.Select(o => new { o.Id, o.OrderNumber }).ToListAsync();
+                    var ordersList = string.Join(", ", allOrders.Select(o => $"ID:{o.Id}({o.OrderNumber})"));
+                    
+                    return Json(new { 
+                        success = false, 
+                        message = $"Order not found. Available orders: {ordersList}" 
+                    });
+                }
+
+                var orderData = new
+                {
+                    id = order.Id,
+                    orderNumber = order.OrderNumber,
+                    customerName = order.User?.UserName ?? "Unknown",
+                    orderDate = order.OrderDate,
+                    status = order.Status.ToString(),
+                    total = order.Total,
+                    subtotal = order.Subtotal,
+                    tax = order.Tax,
+                    deliveryFee = order.DeliveryFee,
+                    deliveryAddress = order.DeliveryAddress,
+                    customerPhone = order.CustomerPhone,
+                    deliveryInstructions = order.DeliveryInstructions,
+                    notes = order.Notes,
+                    estimatedDeliveryTime = order.EstimatedDeliveryTime,
+                    actualDeliveryTime = order.ActualDeliveryTime,
+                    orderItems = order.OrderItems.Select(oi => new
+                    {
+                        menuItemName = oi.MenuItem.Name,
+                        quantity = oi.Quantity,
+                        price = oi.Price
+                    }).ToList()
+                };
+
+                return Json(new { success = true, order = orderData });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error loading order details: " + ex.Message });
+            }
+        }
+
         // POST: /Admin/UpdateOrderStatus
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateOrderStatus(int orderId, OrderStatus status)
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
         {
             try
             {
@@ -120,14 +194,22 @@ namespace FoodOrderingSystem.Controllers
                     return Json(new { success = false, message = "Order not found" });
                 }
 
-                order.Status = status;
-                if (status == OrderStatus.Delivered)
+                if (Enum.TryParse<OrderStatus>(status, out var orderStatus))
                 {
-                    order.ActualDeliveryTime = DateTime.UtcNow;
-                }
+                    order.Status = orderStatus;
+                    
+                    if (orderStatus == OrderStatus.Delivered)
+                    {
+                        order.ActualDeliveryTime = DateTime.UtcNow;
+                    }
 
-                await _context.SaveChangesAsync();
-                return Json(new { success = true, message = $"Order {order.OrderNumber} status updated to {status}" });
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, message = $"Order {order.OrderNumber} status updated to {status}" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Invalid status value" });
+                }
             }
             catch (Exception ex)
             {
@@ -135,9 +217,166 @@ namespace FoodOrderingSystem.Controllers
             }
         }
 
+        // GET: /Admin/PointsRewards
+        public async Task<IActionResult> PointsRewards()
+        {
+            // Clear any non-admin related success messages
+            var successMessage = TempData["SuccessMessage"]?.ToString();
+            if (successMessage != null && successMessage.Contains("Order placed"))
+            {
+                TempData.Remove("SuccessMessage");
+            }
+            var rewards = await _context.PointsRewards
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            return View(rewards);
+        }
+
+        // GET: /Admin/PointsRewards/Create
+        public IActionResult CreatePointsReward()
+        {
+            return View();
+        }
+
+        // POST: /Admin/PointsRewards/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePointsReward(PointsReward reward)
+        {
+            if (ModelState.IsValid)
+            {
+                reward.CreatedAt = DateTime.UtcNow;
+                _context.PointsRewards.Add(reward);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Points reward created successfully!";
+                return RedirectToAction(nameof(PointsRewards));
+            }
+            return View(reward);
+        }
+
+        // GET: /Admin/PointsRewards/Edit/5
+        public async Task<IActionResult> EditPointsReward(int id)
+        {
+            var reward = await _context.PointsRewards.FindAsync(id);
+            if (reward == null)
+            {
+                return NotFound();
+            }
+            return View(reward);
+        }
+
+        // POST: /Admin/PointsRewards/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPointsReward(int id, PointsReward reward)
+        {
+            if (id != reward.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    reward.UpdatedAt = DateTime.UtcNow;
+                    _context.Update(reward);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Points reward updated successfully!";
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!PointsRewardExists(reward.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(PointsRewards));
+            }
+            return View(reward);
+        }
+
+        // POST: /Admin/PointsRewards/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePointsReward(int id)
+        {
+            var reward = await _context.PointsRewards.FindAsync(id);
+            if (reward != null)
+            {
+                _context.PointsRewards.Remove(reward);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Points reward deleted successfully!";
+            }
+            return RedirectToAction(nameof(PointsRewards));
+        }
+
+        // GET: /Admin/RedemptionHistory
+        public async Task<IActionResult> RedemptionHistory()
+        {
+            // Clear any non-admin related success messages
+            var successMessage = TempData["SuccessMessage"]?.ToString();
+            if (successMessage != null && successMessage.Contains("Order placed"))
+            {
+                TempData.Remove("SuccessMessage");
+            }
+            var redemptions = await _context.UserRedemptions
+                .Include(r => r.User)
+                .Include(r => r.PointsReward)
+                .OrderByDescending(r => r.RedeemedAt)
+                .ToListAsync();
+
+            return View(redemptions);
+        }
+
+        // POST: /Admin/MarkRedemptionAsUsed
+        [HttpPost]
+        public async Task<IActionResult> MarkRedemptionAsUsed([FromBody] int id)
+        {
+            try
+            {
+                var redemption = await _context.UserRedemptions.FindAsync(id);
+                if (redemption == null)
+                {
+                    return Json(new { success = false, message = "Redemption not found" });
+                }
+
+                if (redemption.IsUsed)
+                {
+                    return Json(new { success = false, message = "Redemption already marked as used" });
+                }
+
+                redemption.IsUsed = true;
+                redemption.UsedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Redemption marked as used successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error updating redemption: " + ex.Message });
+            }
+        }
+
+        private bool PointsRewardExists(int id)
+        {
+            return _context.PointsRewards.Any(e => e.Id == id);
+        }
+
         // GET: /Admin/Users
         public async Task<IActionResult> Users()
         {
+            // Clear any non-admin related success messages
+            var successMessage = TempData["SuccessMessage"]?.ToString();
+            if (successMessage != null && successMessage.Contains("Order placed"))
+            {
+                TempData.Remove("SuccessMessage");
+            }
             var users = await _userManager.Users.ToListAsync();
             var userRolesViewModel = new List<UserRolesViewModel>();
 
@@ -188,6 +427,12 @@ namespace FoodOrderingSystem.Controllers
         // GET: /Admin/Reports
         public async Task<IActionResult> Reports()
         {
+            // Clear any non-admin related success messages
+            var successMessage = TempData["SuccessMessage"]?.ToString();
+            if (successMessage != null && successMessage.Contains("Order placed"))
+            {
+                TempData.Remove("SuccessMessage");
+            }
             var reportViewModel = new ReportViewModel
             {
                 TotalUsers = await _context.Users.CountAsync(),

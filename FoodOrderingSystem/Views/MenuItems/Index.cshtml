@@ -43,6 +43,9 @@
                                 Price (RM)
                             </th>
                             <th>
+                                Points
+                            </th>
+                            <th>
                                 @Html.DisplayNameFor(model => model.Category)
                             </th>
                             <th></th>
@@ -63,6 +66,9 @@
                                 </td>
                                 <td>
                                     @item.Price.ToString("F2")
+                                </td>
+                                <td>
+                                    @item.PointsPerItem
                                 </td>
                                 <td>
                                     @Html.DisplayFor(modelItem => item.Category!.Name)

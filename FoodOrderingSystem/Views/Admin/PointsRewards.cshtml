@@ -1,0 +1,206 @@
+@model IEnumerable<FoodOrderingSystem.Models.PointsReward>
+
+@{
+    ViewData["Title"] = "Manage Points Rewards";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-header">
+    <div class="container">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead mb-0">Create and manage customer rewards</p>
+    </div>
+</div>
+
+<div class="container">
+    @{
+        var successMessage = TempData["SuccessMessage"]?.ToString();
+    }
+    @if (successMessage != null && !successMessage.Contains("Order placed"))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a asp-action="CreatePointsReward" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create New Reward
+                    </a>
+                    <a asp-action="RedemptionHistory" class="btn btn-info">
+                        <i class="fas fa-history me-2"></i>View Redemption History
+                    </a>
+                </div>
+                <div>
+                    <span class="badge bg-secondary">Total Rewards: @Model.Count()</span>
+                    <span class="badge bg-success">Active: @Model.Count(r => r.IsActive)</span>
+                    <span class="badge bg-warning">Inactive: @Model.Count(r => !r.IsActive)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rewards Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-gift me-2"></i>Points Rewards
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Title</th>
+                                        <th>Points Required</th>
+                                        <th>Discount</th>
+                                        <th>Redemptions</th>
+                                        <th>Status</th>
+                                        <th>Valid Until</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var reward in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(reward.ImageUrl))
+                                                {
+                                                    <img src="@Url.Content(reward.ImageUrl)" alt="@reward.Title" class="reward-thumbnail" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 8px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@reward.Title</strong>
+                                                <br>
+                                                <small class="text-muted">@reward.Description</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-coins me-1"></i>@reward.PointsRequired
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (reward.DiscountAmount > 0)
+                                                {
+                                                    <span class="text-success fw-bold">RM@reward.DiscountAmount.ToString("F2")</span>
+                                                }
+                                                @if (reward.DiscountPercentage > 0)
+                                                {
+                                                    <span class="text-success fw-bold">@reward.DiscountPercentage%</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    @reward.CurrentRedemptions
+                                                    @if (reward.MaxRedemptions > 0)
+                                                    {
+                                                        <text>/@reward.MaxRedemptions</text>
+                                                    }
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (reward.IsActive && reward.StartDate <= DateTime.UtcNow && reward.EndDate >= DateTime.UtcNow)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else if (!reward.IsActive)
+                                                {
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                }
+                                                else if (reward.StartDate > DateTime.UtcNow)
+                                                {
+                                                    <span class="badge bg-primary">Scheduled</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Expired</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <small>@reward.EndDate.ToString("MMM dd, yyyy")</small>
+                                            </td>
+                                            <td>
+                                                <small>@reward.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="EditPointsReward" asp-route-id="@reward.Id" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete(@reward.Id, '@reward.Title')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-gift fa-5x text-muted mb-3"></i>
+                            <h4>No Rewards Created Yet</h4>
+                            <p class="text-muted">Create your first points reward to get started!</p>
+                            <a asp-action="CreatePointsReward" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Create First Reward
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the reward "<span id="rewardTitle"></span>"?</p>
+                <p class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i>This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" asp-action="DeletePointsReward" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deleteId" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">Delete Reward</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-rewards.js" asp-append-version="true"></script>
+}

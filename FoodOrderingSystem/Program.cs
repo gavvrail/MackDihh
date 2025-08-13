@@ -1,10 +1,7 @@
-// --- USING STATEMENTS ---
-// These must be at the top.
 using FoodOrderingSystem.Data;
 using FoodOrderingSystem.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-// Add these using statements for the email sender and cart service
 using Microsoft.AspNetCore.Identity.UI.Services;
 using FoodOrderingSystem.Services;
 
@@ -24,6 +21,9 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CartService>();
+
+// --- MERGE THE RECAPTCHA SERVICE REGISTRATION HERE ---
+builder.Services.AddHttpClient<RecaptchaService>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

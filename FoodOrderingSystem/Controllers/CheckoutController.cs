@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FoodOrderingSystem.Data;
 using FoodOrderingSystem.Models;
 using FoodOrderingSystem.Services;
-using Microsoft.AspNetCore.Identity.UI.Services;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +17,10 @@ namespace FoodOrderingSystem.Controllers
     public class CheckoutController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IEmailSender _emailSender;
 
-        public CheckoutController(ApplicationDbContext context, IEmailSender emailSender)
+        public CheckoutController(ApplicationDbContext context)
         {
             _context = context;
-            _emailSender = emailSender;
         }
 
         // GET: /Checkout
@@ -58,6 +56,12 @@ namespace FoodOrderingSystem.Controllers
                     Notes = ""
                 };
 
+                // Show helpful message if user has saved information
+                if (!string.IsNullOrEmpty(user?.Address) || !string.IsNullOrEmpty(user?.PhoneNumber))
+                {
+                    TempData["InfoMessage"] = "Your saved delivery information has been pre-filled. You can modify it if needed.";
+                }
+
                 return View(checkoutViewModel);
             }
             catch (Exception)
@@ -77,9 +81,22 @@ namespace FoodOrderingSystem.Controllers
             {
                 System.Diagnostics.Debug.WriteLine("=== Starting Order Placement ===");
                 
-                if (!ModelState.IsValid)
+                // Manual validation for required fields only
+                if (string.IsNullOrWhiteSpace(model.DeliveryAddress))
                 {
-                    System.Diagnostics.Debug.WriteLine("ModelState is invalid");
+                    TempData["ErrorMessage"] = "Delivery address is required.";
+                    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var currentCart = await _context.Carts
+                        .Include(c => c.CartItems)
+                        .ThenInclude(ci => ci.MenuItem)
+                        .FirstOrDefaultAsync(c => c.UserId == currentUserId);
+                    model.Cart = currentCart ?? new Cart();
+                    return View("Index", model);
+                }
+                
+                if (string.IsNullOrWhiteSpace(model.CustomerPhone))
+                {
+                    TempData["ErrorMessage"] = "Phone number is required.";
                     var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                     var currentCart = await _context.Carts
                         .Include(c => c.CartItems)
@@ -120,6 +137,22 @@ namespace FoodOrderingSystem.Controllers
 
                 System.Diagnostics.Debug.WriteLine($"Subtotal: {subtotal}, Tax: {tax}, Delivery: {deliveryFee}, Total: {total}");
 
+                // Save user information to profile for future use
+                var user = await _context.Users.FindAsync(userId);
+                if (user != null)
+                {
+                    // Update user's address and phone if provided
+                    if (!string.IsNullOrWhiteSpace(model.DeliveryAddress))
+                    {
+                        user.Address = model.DeliveryAddress.Trim();
+                    }
+                    if (!string.IsNullOrWhiteSpace(model.CustomerPhone))
+                    {
+                        user.PhoneNumber = model.CustomerPhone.Trim();
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
                 // Create order
                 var order = new Order
                 {
@@ -141,7 +174,11 @@ namespace FoodOrderingSystem.Controllers
 
                 _context.Orders.Add(order);
 
-                // Create order items
+                // Save the order first to get the generated ID
+                await _context.SaveChangesAsync();
+                System.Diagnostics.Debug.WriteLine($"Order saved with ID: {order.Id}");
+
+                // Create order items with the correct OrderId
                 foreach (var cartItem in cart.CartItems)
                 {
                     var orderItem = new OrderItem
@@ -152,46 +189,69 @@ namespace FoodOrderingSystem.Controllers
                         Price = cartItem.MenuItem.Price
                     };
                     _context.OrderItems.Add(orderItem);
-                    System.Diagnostics.Debug.WriteLine($"Added order item: {cartItem.MenuItem.Name} x {cartItem.Quantity}");
+                    System.Diagnostics.Debug.WriteLine($"Added order item: {cartItem.MenuItem.Name} x {cartItem.Quantity} for Order ID: {order.Id}");
                 }
 
-                // Clear cart
-                _context.CartItems.RemoveRange(cart.CartItems);
-
-                // Save all changes to database
-                System.Diagnostics.Debug.WriteLine("Saving to database...");
-                await _context.SaveChangesAsync();
-                System.Diagnostics.Debug.WriteLine("Database save completed successfully");
-
-                // Send confirmation email (don't let email failure stop the order)
-                var user = await _context.Users.FindAsync(userId);
-                if (user?.Email != null)
+                // Clear cart completely
+                System.Diagnostics.Debug.WriteLine($"Clearing {cart.CartItems.Count} items from cart...");
+                
+                // Award points to user based on items ordered (BEFORE clearing cart)
+                int totalPointsEarned = 0;
+                if (user != null)
                 {
-                    try
+                    foreach (var cartItem in cart.CartItems)
                     {
-                        var emailBody = EmailTemplates.GetOrderConfirmationTemplate(
-                            order.OrderNumber, 
-                            user.UserName ?? "Customer", 
-                            order.Total, 
-                            order.DeliveryAddress ?? "N/A", 
-                            order.OrderDate);
-                        
-                        await _emailSender.SendEmailAsync(user.Email, 
-                            $"Order Confirmation - {order.OrderNumber}", 
-                            emailBody);
-                        System.Diagnostics.Debug.WriteLine("Email sent successfully");
+                        // Calculate points based on PointsPerItem field from menu item
+                        int pointsForThisItem = cartItem.MenuItem.PointsPerItem * cartItem.Quantity;
+                        totalPointsEarned += pointsForThisItem;
                     }
-                    catch (Exception emailEx)
+
+                    if (totalPointsEarned > 0)
                     {
-                        // Log email error but don't fail the order
-                        // The order is already saved, so we just log the email failure
-                        System.Diagnostics.Debug.WriteLine($"Email sending failed: {emailEx.Message}");
+                        user.Points += totalPointsEarned;
+                        user.TotalPointsEarned += totalPointsEarned;
+
+                        // Create points transaction record
+                        var pointsTransaction = new UserPointsTransaction
+                        {
+                            UserId = userId,
+                            Points = totalPointsEarned,
+                            Type = PointsTransactionType.Earned,
+                            Description = $"Order #{order.OrderNumber} - {totalPointsEarned} points earned",
+                            OrderId = order.Id
+                        };
+
+                        _context.UserPointsTransactions.Add(pointsTransaction);
+                        System.Diagnostics.Debug.WriteLine($"Awarded {totalPointsEarned} points to user {userId}");
                     }
                 }
+                
+                _context.CartItems.RemoveRange(cart.CartItems);
+                
+                // Also remove the cart itself if it's empty
+                if (!cart.CartItems.Any())
+                {
+                    _context.Carts.Remove(cart);
+                    System.Diagnostics.Debug.WriteLine("Removed empty cart");
+                }
+
+                // Save order items and cart changes
+                System.Diagnostics.Debug.WriteLine("Saving order items and clearing cart...");
+                await _context.SaveChangesAsync();
+                System.Diagnostics.Debug.WriteLine("Database save completed successfully - Order items saved and cart cleared!");
+
+                // Email sending removed for instant order completion
 
                 // Success - redirect to confirmation page
                 System.Diagnostics.Debug.WriteLine("Order placement completed successfully");
-                TempData["SuccessMessage"] = $"Order placed successfully! Order number: {order.OrderNumber}";
+                
+                // Show points earned message
+                if (totalPointsEarned > 0)
+                {
+                    TempData["SuccessMessage"] = $"Order placed successfully! You earned {totalPointsEarned} points from this order.";
+                }
+                
+                // Don't set TempData message here - the confirmation page itself shows success
                 return RedirectToAction("Confirmation", new { orderId = order.Id });
             }
             catch (Exception ex)
@@ -235,10 +295,10 @@ namespace FoodOrderingSystem.Controllers
         [Phone(ErrorMessage = "Please enter a valid phone number")]
         public string CustomerPhone { get; set; } = "";
         
-        [StringLength(500, ErrorMessage = "Delivery instructions cannot be longer than 500 characters")]
-        public string DeliveryInstructions { get; set; } = "";
+        [Display(Name = "Delivery Instructions")]
+        public string? DeliveryInstructions { get; set; }
         
-        [StringLength(500, ErrorMessage = "Notes cannot be longer than 500 characters")]
-        public string Notes { get; set; } = "";
+        [Display(Name = "Order Notes")]
+        public string? Notes { get; set; }
     }
 } 

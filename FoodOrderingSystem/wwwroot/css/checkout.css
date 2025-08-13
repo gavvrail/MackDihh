@@ -220,4 +220,156 @@
 .status-cancelled {
     background-color: #f8d7da;
     color: #721c24;
+}
+
+/* Order Status Timeline Styles */
+.order-status-timeline {
+    position: relative;
+    padding: 1rem 0;
+}
+
+.order-status-timeline::before {
+    content: '';
+    position: absolute;
+    left: 30px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+    z-index: 1;
+}
+
+.status-step {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    z-index: 2;
+}
+
+.status-step:last-child {
+    margin-bottom: 0;
+}
+
+.status-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border: 3px solid #e9ecef;
+    color: #6c757d;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 3;
+}
+
+.status-content {
+    margin-left: 1.5rem;
+    flex: 1;
+}
+
+.status-content h6 {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.status-content small {
+    color: #6c757d;
+    line-height: 1.4;
+}
+
+/* Completed status styles */
+.status-step.completed .status-icon {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-color: #28a745;
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.status-step.completed .status-content h6 {
+    color: #28a745;
+    font-weight: 700;
+}
+
+.status-step.completed .status-content small {
+    color: #495057;
+}
+
+/* Current status styles */
+.status-step.current .status-icon {
+    background: linear-gradient(135deg, #007bff, #6610f2);
+    border-color: #007bff;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    animation: currentStatusPulse 2s infinite;
+}
+
+.status-step.current .status-content h6 {
+    color: #007bff;
+    font-weight: 700;
+}
+
+.status-step.current .status-content small {
+    color: #495057;
+    font-weight: 500;
+}
+
+@keyframes currentStatusPulse {
+    0% {
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(0, 123, 255, 0.5);
+    }
+    100% {
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+}
+
+/* Timeline line completed styling */
+.status-step.completed + .status-step::before {
+    content: '';
+    position: absolute;
+    left: 30px;
+    top: -2rem;
+    height: 2rem;
+    width: 2px;
+    background: #28a745;
+    z-index: 2;
+}
+
+.current-status-info .alert {
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    .order-status-timeline::before {
+        left: 20px;
+    }
+    
+    .status-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .status-content {
+        margin-left: 1rem;
+    }
+    
+    .status-content h6 {
+        font-size: 0.9rem;
+    }
+    
+    .status-content small {
+        font-size: 0.8rem;
+    }
 } 

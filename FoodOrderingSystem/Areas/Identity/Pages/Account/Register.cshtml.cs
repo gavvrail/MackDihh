@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using FoodOrderingSystem.Models;
-using FoodOrderingSystem.Services;
+using FoodOrderingSystem.Services; // Assuming your RecaptchaService is here
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -23,12 +23,20 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _sender;
 
+        // --- 1. ADD NEW FIELDS FOR RECAPTCHA ---
+        private readonly RecaptchaService _recaptchaService;
+        public string RecaptchaSiteKey { get; }
+
+
+        // --- 2. UPDATE THE CONSTRUCTOR TO RECEIVE NEW SERVICES ---
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender sender)
+            IEmailSender sender,
+            IConfiguration configuration, // For reading appsettings.json
+            RecaptchaService recaptchaService) // Our custom service
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -36,6 +44,10 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _sender = sender;
+
+            // Assign new services
+            _recaptchaService = recaptchaService;
+            RecaptchaSiteKey = configuration["RecaptchaSettings:SiteKey"];
         }
 
         [BindProperty]
@@ -77,13 +89,22 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            // --- 3. ADD VALIDATION LOGIC AT THE BEGINNING OF OnPostAsync ---
+            var recaptchaToken = Request.Form["g-recaptcha-response"];
+            var isRecaptchaValid = await _recaptchaService.Validate(recaptchaToken);
+
+            if (!isRecaptchaValid)
+            {
+                ModelState.AddModelError(string.Empty, "CAPTCHA validation failed. Please try again.");
+            }
+
+
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
 
-                // This correctly sets the username from the form
                 await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -92,7 +113,6 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    // Assign the new user to the "Customer" role by default
                     await _userManager.AddToRoleAsync(user, "Customer");
 
                     var userId = await _userManager.GetUserIdAsync(user);
@@ -107,7 +127,6 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
                     var emailBody = EmailTemplates.GetEmailConfirmationTemplate(Input.Username, HtmlEncoder.Default.Encode(callbackUrl));
                     await _sender.SendEmailAsync(Input.Email, "Welcome to MackDihh! Please confirm your email", emailBody);
 
-                    // Send confirmation email but don't require it for login
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(returnUrl);
                 }
@@ -117,6 +136,7 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
                 }
             }
 
+            // If we got this far, something failed, redisplay form
             return Page();
         }
 

@@ -26,25 +26,111 @@
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="heading-@order.Id">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@order.Id" aria-expanded="false" aria-controls="collapse-@order.Id">
-                            <span class="order-date">@order.OrderDate.ToString("MMMM dd, yyyy")</span>
-                            <span class="order-number">Order #@order.OrderNumber</span>
-                            <span class="order-total ms-auto">RM @order.Total.ToString("F2")</span>
+                            <div class="d-flex w-100 align-items-center">
+                                <div class="flex-grow-1">
+                                    <span class="order-date fw-bold">@order.OrderDate.ToString("MMMM dd, yyyy")</span>
+                                    <br>
+                                    <span class="order-number text-muted">Order #@order.OrderNumber</span>
+                                </div>
+                                <div class="text-center me-3">
+                                    <span class="badge bg-@(order.Status switch {
+                                        OrderStatus.Pending => "warning",
+                                        OrderStatus.Confirmed => "info",
+                                        OrderStatus.Preparing => "primary",
+                                        OrderStatus.Ready => "success",
+                                        OrderStatus.Delivering => "primary",
+                                        OrderStatus.Delivered => "secondary",
+                                        OrderStatus.Cancelled => "danger",
+                                        _ => "light"
+                                    }) fs-6 py-2 px-3">
+                                        @order.Status
+                                    </span>
+                                </div>
+                                <div class="text-end">
+                                    <span class="order-total fw-bold fs-5">RM @order.Total.ToString("F2")</span>
+                                    <br>
+                                    <small class="text-muted">@order.OrderItems.Count item@(order.OrderItems.Count != 1 ? "s" : "")</small>
+                                </div>
+                            </div>
                         </button>
                     </h2>
                     <div id="collapse-@order.Id" class="accordion-collapse collapse" aria-labelledby="heading-@order.Id" data-bs-parent="#ordersAccordion">
                         <div class="accordion-body">
+                            <!-- Order Details -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-map-marker-alt me-2"></i>Delivery Information</h6>
+                                    @if (!string.IsNullOrEmpty(order.DeliveryAddress))
+                                    {
+                                        <p class="mb-1"><strong>Address:</strong> @order.DeliveryAddress</p>
+                                    }
+                                    @if (!string.IsNullOrEmpty(order.CustomerPhone))
+                                    {
+                                        <p class="mb-1"><strong>Phone:</strong> @order.CustomerPhone</p>
+                                    }
+                                    @if (order.EstimatedDeliveryTime.HasValue)
+                                    {
+                                        <p class="mb-1"><strong>Estimated Delivery:</strong> @order.EstimatedDeliveryTime.Value.ToString("h:mm tt")</p>
+                                    }
+                                    @if (order.ActualDeliveryTime.HasValue)
+                                    {
+                                        <p class="mb-1"><strong>Delivered At:</strong> @order.ActualDeliveryTime.Value.ToString("MMMM dd, yyyy h:mm tt")</p>
+                                    }
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Order Summary</h6>
+                                    <p class="mb-1"><strong>Subtotal:</strong> RM @order.Subtotal.ToString("F2")</p>
+                                    <p class="mb-1"><strong>Tax (6%):</strong> RM @order.Tax.ToString("F2")</p>
+                                    <p class="mb-1"><strong>Delivery Fee:</strong> @(order.DeliveryFee == 0 ? "FREE" : $"RM {order.DeliveryFee:F2}")</p>
+                                    <hr class="my-2">
+                                    <p class="mb-1 fw-bold"><strong>Total:</strong> RM @order.Total.ToString("F2")</p>
+                                </div>
+                            </div>
+
+                            <!-- Order Items -->
+                            <h6><i class="fas fa-utensils me-2"></i>Order Items</h6>
                             <ul class="list-group list-group-flush">
                                 @foreach (var item in order.OrderItems)
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
                                             <span class="fw-bold">@item.MenuItem.Name</span>
-                                            <small class="text-muted d-block">@item.Quantity x RM@item.Price.ToString("F2")</small>
+                                            <small class="text-muted d-block">@item.Quantity x RM@item.Price.ToString("F2") each</small>
                                         </div>
                                         <span class="fw-bold">RM@((item.Quantity * item.Price).ToString("F2"))</span>
                                     </li>
                                 }
                             </ul>
+
+                            @if (!string.IsNullOrEmpty(order.Notes))
+                            {
+                                <div class="mt-3">
+                                    <h6><i class="fas fa-sticky-note me-2"></i>Order Notes</h6>
+                                    <div class="alert alert-info">
+                                        @order.Notes
+                                    </div>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(order.DeliveryInstructions))
+                            {
+                                <div class="mt-3">
+                                    <h6><i class="fas fa-truck me-2"></i>Delivery Instructions</h6>
+                                    <div class="alert alert-warning">
+                                        @order.DeliveryInstructions
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Action Buttons for Active Orders -->
+                            @if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.Cancelled)
+                            {
+                                <div class="mt-3 text-center">
+                                    <a asp-controller="Checkout" asp-action="Confirmation" asp-route-orderId="@order.Id" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-2"></i>Track Order Status
+                                    </a>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>

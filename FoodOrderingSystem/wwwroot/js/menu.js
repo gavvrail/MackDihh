@@ -1,5 +1,31 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
 
+    // --- VIEW MORE FUNCTIONALITY FOR DESCRIPTIONS ---
+    const viewMoreButtons = document.querySelectorAll('.view-more-btn');
+    
+    viewMoreButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const descriptionText = this.previousElementSibling;
+            const fullText = descriptionText.dataset.fullText;
+            const isExpanded = descriptionText.dataset.expanded === 'true';
+            
+            if (isExpanded) {
+                // Collapse the text
+                const truncatedText = fullText.length > 80 ? fullText.substring(0, 80) + '...' : fullText;
+                descriptionText.textContent = truncatedText;
+                descriptionText.dataset.expanded = 'false';
+                this.textContent = 'View More';
+            } else {
+                // Expand the text
+                descriptionText.textContent = fullText;
+                descriptionText.dataset.expanded = 'true';
+                this.textContent = 'View Less';
+            }
+        });
+    });
+
     // --- LIVE SEARCH FUNCTIONALITY ---
     const searchInput = document.getElementById('menuSearch');
     const menuItems = document.querySelectorAll('.menu-item-card');

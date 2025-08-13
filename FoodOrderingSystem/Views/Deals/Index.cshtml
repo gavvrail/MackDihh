@@ -1,5 +1,7 @@
-﻿@{
-    ViewData["Title"] = "Hot Deals";
+﻿@model FoodOrderingSystem.Controllers.DealsViewModel
+
+@{
+    ViewData["Title"] = "Hot Deals & Promotions";
 }
 
 @section Styles {
@@ -11,46 +13,466 @@
     <div class="container">
         <h1>@ViewData["Title"]</h1>
         <p class="lead">Don't miss out on our amazing offers!</p>
+        
+        @if (Model.User != null)
+        {
+            <div class="user-status-badges">
+                @if (Model.IsMember)
+                {
+                    <span class="badge bg-gold me-2">
+                        <i class="fas fa-crown me-1"></i>Member
+                    </span>
+                }
+                @if (Model.IsStudentVerified)
+                {
+                    <span class="badge bg-primary me-2">
+                        <i class="fas fa-graduation-cap me-1"></i>Student
+                    </span>
+                }
+                <span class="badge bg-success">
+                    <i class="fas fa-coins me-1"></i>@Model.UserPoints Points
+                </span>
+            </div>
+        }
     </div>
 </div>
 
 <!-- Main Content -->
 <div class="container deals-content">
-    <div class="row">
-        <!-- Deal 1 - Breakfast Deal -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="deal-card h-100">
-                                    <img src="@Url.Content("~/images/macksausageburgur.png")" class="deal-card-img-top" alt="Breakfast Deal - Sausage Burger">
-                <div class="card-body text-center d-flex flex-column">
-                    <h5 class="card-title mt-3">Morning Saver Combo</h5>
-                                            <p class="card-text">Start your day right! Get a sausage muffin and a coffee for just RM4.99. Valid until 11 AM.</p>
-                    <a href="#" class="btn btn-claim mt-auto">Claim Deal</a>
-                </div>
+    <!-- Flash Sales Section -->
+    @if (Model.FlashSales.Any())
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-bolt text-warning me-2"></i>Flash Sales</h2>
+                <p class="text-muted">Limited time offers - act fast!</p>
+            </div>
+            <div class="row">
+                @foreach (var deal in Model.FlashSales)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="deal-card h-100 flash-sale">
+                            <div class="deal-badge">
+                                <span class="badge bg-danger">FLASH SALE</span>
+                            </div>
+                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
+                            <div class="card-body text-center d-flex flex-column">
+                                <h5 class="card-title mt-3">@deal.Title</h5>
+                                <p class="card-text">@deal.Description</p>
+                                <div class="price-info mb-3">
+                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
+                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
+                                    <span class="discount-percentage">-@deal.DiscountPercentage%</span>
+                                </div>
+                                <div class="deal-requirements">
+                                    @if (deal.RequiresMember && !Model.IsMember)
+                                    {
+                                        <span class="badge bg-warning text-dark">Members Only</span>
+                                    }
+                                    @if (deal.RequiresStudentVerification && !Model.IsStudentVerified)
+                                    {
+                                        <span class="badge bg-info">Student Verification Required</span>
+                                    }
+                                </div>
+                                <a href="#" class="btn btn-claim mt-auto">Claim Deal</a>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
+    }
 
-        <!-- Deal 2 - Family Bundle -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="deal-card h-100">
-                                    <img src="@Url.Content("~/images/mackfamilybucket.png")" class="deal-card-img-top" alt="Family Bundle">
-                <div class="card-body text-center d-flex flex-column">
-                    <h5 class="card-title mt-3">Family Feast Bundle</h5>
-                    <p class="card-text">Perfect for sharing! Includes 2 Big MackDihhs, 20pc McNuggets, and 4 Large Fries.</p>
-                    <a href="#" class="btn btn-claim mt-auto">Order Now</a>
-                </div>
+    <!-- Current Deals Section -->
+    @if (Model.CurrentDeals.Any())
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-fire text-danger me-2"></i>Current Deals</h2>
+                <p class="text-muted">Hot offers available now!</p>
+            </div>
+            <div class="row">
+                @foreach (var deal in Model.CurrentDeals)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="deal-card h-100">
+                            @if (!string.IsNullOrEmpty(deal.BadgeText))
+                            {
+                                <div class="deal-badge">
+                                    <span class="badge bg-@deal.BadgeColor">@deal.BadgeText</span>
+                                </div>
+                            }
+                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
+                            <div class="card-body text-center d-flex flex-column">
+                                <h5 class="card-title mt-3">@deal.Title</h5>
+                                <p class="card-text">@deal.Description</p>
+                                <div class="price-info mb-3">
+                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
+                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
+                                </div>
+                                <a href="#" class="btn btn-claim mt-auto">Claim Deal</a>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
+    }
 
-        <!-- Deal 3 - Free Dessert -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="deal-card h-100">
-                                    <img src="@Url.Content("~/images/freakysundae.png")" class="deal-card-img-top" alt="Free Dessert - McFlurry">
-                <div class="card-body text-center d-flex flex-column">
-                    <h5 class="card-title mt-3">Free McFlurry</h5>
-                                            <p class="card-text">Enjoy a free McFlurry on us with any purchase over RM15. A sweet treat for a sweet deal!</p>
-                    <a href="#" class="btn btn-claim mt-auto">Redeem Offer</a>
+    <!-- Bundle Offers Section -->
+    @if (Model.BundleOffers.Any())
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-box text-primary me-2"></i>Bundle Offers</h2>
+                <p class="text-muted">Save more with our value bundles!</p>
+            </div>
+            <div class="row">
+                @foreach (var deal in Model.BundleOffers)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="deal-card h-100 bundle-offer">
+                            <div class="deal-badge">
+                                <span class="badge bg-primary">BUNDLE</span>
+                            </div>
+                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
+                            <div class="card-body text-center d-flex flex-column">
+                                <h5 class="card-title mt-3">@deal.Title</h5>
+                                <p class="card-text">@deal.Description</p>
+                                <div class="price-info mb-3">
+                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
+                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
+                                    <span class="discount-percentage">-@deal.DiscountPercentage%</span>
+                                </div>
+                                <a href="#" class="btn btn-claim mt-auto">Order Bundle</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Seasonal Discounts Section -->
+    @if (Model.SeasonalDiscounts.Any())
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-alt text-success me-2"></i>Seasonal Discounts</h2>
+                <p class="text-muted">Special offers for special occasions!</p>
+            </div>
+            <div class="row">
+                @foreach (var deal in Model.SeasonalDiscounts)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="deal-card h-100 seasonal">
+                            <div class="deal-badge">
+                                <span class="badge bg-success">SEASONAL</span>
+                            </div>
+                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
+                            <div class="card-body text-center d-flex flex-column">
+                                <h5 class="card-title mt-3">@deal.Title</h5>
+                                <p class="card-text">@deal.Description</p>
+                                <div class="price-info mb-3">
+                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
+                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
+                                </div>
+                                <a href="#" class="btn btn-claim mt-auto">Get Offer</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Member Deals Section -->
+    @if (Model.MemberDeals.Any())
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-crown text-warning me-2"></i>Member Exclusive Deals</h2>
+                <p class="text-muted">Special offers for our valued members!</p>
+                @if (!Model.IsMember)
+                {
+                    <a asp-action="MemberPurchase" class="btn btn-outline-warning btn-sm">
+                        <i class="fas fa-crown me-1"></i>Become a Member
+                    </a>
+                }
+            </div>
+            <div class="row">
+                @foreach (var deal in Model.MemberDeals)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="deal-card h-100 member-deal">
+                            <div class="deal-badge">
+                                <span class="badge bg-warning text-dark">MEMBERS ONLY</span>
+                            </div>
+                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
+                            <div class="card-body text-center d-flex flex-column">
+                                <h5 class="card-title mt-3">@deal.Title</h5>
+                                <p class="card-text">@deal.Description</p>
+                                <div class="price-info mb-3">
+                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
+                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
+                                </div>
+                                @if (Model.IsMember)
+                                {
+                                    <a href="#" class="btn btn-claim mt-auto">Claim Member Deal</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="MemberPurchase" class="btn btn-outline-warning mt-auto">Join to Claim</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Student Discounts Section -->
+    @if (Model.StudentDiscounts.Any())
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-graduation-cap text-primary me-2"></i>Student Discounts</h2>
+                <p class="text-muted">Special offers for students!</p>
+                @if (!Model.IsStudentVerified)
+                {
+                    <a asp-action="StudentVerification" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-graduation-cap me-1"></i>Verify Student Status
+                    </a>
+                }
+            </div>
+            <div class="row">
+                @foreach (var deal in Model.StudentDiscounts)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="deal-card h-100 student-discount">
+                            <div class="deal-badge">
+                                <span class="badge bg-primary">STUDENT DISCOUNT</span>
+                            </div>
+                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
+                            <div class="card-body text-center d-flex flex-column">
+                                <h5 class="card-title mt-3">@deal.Title</h5>
+                                <p class="card-text">@deal.Description</p>
+                                <div class="price-info mb-3">
+                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
+                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
+                                </div>
+                                @if (Model.IsStudentVerified)
+                                {
+                                    <a href="#" class="btn btn-claim mt-auto">Claim Student Discount</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="StudentVerification" class="btn btn-outline-primary mt-auto">Verify to Claim</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Promo Codes Section -->
+    @if (Model.PromoCodes.Any())
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-ticket-alt text-info me-2"></i>Promo Codes</h2>
+                <p class="text-muted">Use these codes at checkout for extra savings!</p>
+            </div>
+            <div class="row">
+                @foreach (var deal in Model.PromoCodes)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="deal-card h-100 promo-code">
+                            <div class="deal-badge">
+                                <span class="badge bg-info">PROMO CODE</span>
+                            </div>
+                            <div class="card-body text-center d-flex flex-column">
+                                <h5 class="card-title mt-3">@deal.Title</h5>
+                                <p class="card-text">@deal.Description</p>
+                                <div class="promo-code-display mb-3">
+                                    <span class="promo-code-text">@deal.PromoCode</span>
+                                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-code="@deal.PromoCode">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                                <div class="discount-info mb-3">
+                                    <span class="discount-percentage">-@deal.DiscountPercentage% OFF</span>
+                                </div>
+                                <a href="#" class="btn btn-claim mt-auto">Use Code</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Referral Bonus Section -->
+    @if (Model.ReferralBonus != null)
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-users text-success me-2"></i>Referral Program</h2>
+                <p class="text-muted">Refer friends and earn rewards!</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="deal-card referral-bonus">
+                        <div class="deal-badge">
+                            <span class="badge bg-success">REFERRAL BONUS</span>
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="card-title">@Model.ReferralBonus.Title</h5>
+                            <p class="card-text">@Model.ReferralBonus.Description</p>
+                            <div class="referral-benefits mb-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="benefit-item">
+                                            <i class="fas fa-gift text-success fa-2x mb-2"></i>
+                                            <h6>You Get</h6>
+                                            <p>RM10 credit for each friend who joins</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="benefit-item">
+                                            <i class="fas fa-heart text-danger fa-2x mb-2"></i>
+                                            <h6>Your Friend Gets</h6>
+                                            <p>RM5 credit on their first order</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a asp-action="ReferralProgram" class="btn btn-success btn-lg">
+                                <i class="fas fa-share me-2"></i>Start Referring
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
+
+
+
+    <!-- Points Redemption Section (Free Food) -->
+    @if (Model.User != null)
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-utensils text-success me-2"></i>Redeem Points for Free Food</h2>
+                <p class="text-muted">Use your points to get free menu items! 1 Point = RM 1.00 value</p>
+            </div>
+            
+            <!-- Points Display Card -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mx-auto">
+                    <div class="deal-card points-redemption-header">
+                        <div class="card-body text-center">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <div class="points-display-large">
+                                        <span class="points-number-large">@Model.UserPoints</span>
+                                        <p class="text-muted mb-0">Available Points</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="text-start">
+                                        <h6>How it works:</h6>
+                                        <ul class="list-unstyled small">
+                                            <li>✓ 1 Point = RM 1.00 value</li>
+                                            <li>✓ Minimum 1 point per item</li>
+                                            <li>✓ Get a redemption code instantly</li>
+                                            <li>✓ Show code to claim your free item</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Available Items for Redemption -->
+            <div class="row">
+                @{
+                    var categories = Model.RedeemableItems.GroupBy(item => item.Category?.Name ?? "Uncategorized").OrderBy(g => g.Key);
+                }
+
+                @foreach (var category in categories)
+                {
+                    <div class="col-12 mb-4">
+                        <h4 class="category-title">@category.Key</h4>
+                        <div class="row">
+                            @foreach (var item in category.OrderBy(i => i.Name))
+                            {
+                                var pointsRequired = Math.Max(1, item.PointsPerItem);
+                                var canRedeem = Model.UserPoints >= pointsRequired;
+                                
+                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                    <div class="deal-card redeem-item-card h-100">
+                                        <div class="card-body text-center">
+                                            <img src="@Url.Content(item.ImageUrl ?? "/images/placeholder.png")" 
+                                                 class="img-fluid rounded mb-3" 
+                                                 alt="@item.Name"
+                                                 style="max-height: 120px; object-fit: cover;"
+                                                 onerror="this.onerror=null;this.src='https://placehold.co/200x120/E8E8E8/B7B7B7?text=Image+Error';">
+                                            
+                                            <h6 class="card-title">@item.Name</h6>
+                                            <p class="card-text small text-muted">@item.Description</p>
+                                            
+                                            <div class="points-required-badge mb-2">
+                                                <span class="badge bg-primary">@pointsRequired Points</span>
+                                            </div>
+                                            
+                                            <p class="text-muted small mb-3">
+                                                <del>RM @item.Price.ToString("F2")</del> → <strong class="text-success">FREE!</strong>
+                                            </p>
+                                            
+                                            <form asp-controller="Menu" asp-action="RedeemItem" method="post" class="mt-auto">
+                                                <input type="hidden" name="menuItemId" value="@item.Id" />
+                                                <button type="submit" class="btn btn-success btn-sm w-100" @(canRedeem ? "" : "disabled")>
+                                                    @if (canRedeem)
+                                                    {
+                                                        <i class="fas fa-gift me-1"></i>@("Redeem Now")
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-lock me-1"></i>@($"Need {pointsRequired - Model.UserPoints} more points")
+                                                    }
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (!Model.RedeemableItems.Any())
+                {
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No items available for redemption</h4>
+                            <p class="text-muted">Check back later for new items!</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>
+
+
+@section Scripts {
+    <script src="~/js/deals.js" asp-append-version="true"></script>
+}

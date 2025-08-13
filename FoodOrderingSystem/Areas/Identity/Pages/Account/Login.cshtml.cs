@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+// --- ADD THESE USING STATEMENTS ---
+using FoodOrderingSystem.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace FoodOrderingSystem.Areas.Identity.Pages.Account
 {
@@ -18,11 +21,24 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
         private readonly ILogger<LoginModel> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, UserManager<ApplicationUser> userManager)
+        // --- 1. ADD NEW FIELDS FOR RECAPTCHA ---
+        private readonly RecaptchaService _recaptchaService;
+        public string RecaptchaSiteKey { get; }
+
+        // --- 2. UPDATE THE CONSTRUCTOR TO RECEIVE NEW SERVICES ---
+        public LoginModel(SignInManager<ApplicationUser> signInManager,
+                          ILogger<LoginModel> logger,
+                          UserManager<ApplicationUser> userManager,
+                          IConfiguration configuration,
+                          RecaptchaService recaptchaService)
         {
             _signInManager = signInManager;
             _logger = logger;
             _userManager = userManager;
+
+            // Assign new services
+            _recaptchaService = recaptchaService;
+            RecaptchaSiteKey = configuration["RecaptchaSettings:SiteKey"];
         }
 
         [BindProperty]
@@ -37,7 +53,6 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            // This property now matches the one used in your Login.cshtml file
             [Required]
             [Display(Name = "Email or Username")]
             public string EmailOrUsername { get; set; }
@@ -65,6 +80,16 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            // --- 3. ADD VALIDATION LOGIC AT THE BEGINNING OF OnPostAsync ---
+            var recaptchaToken = Request.Form["g-recaptcha-response"];
+            var isRecaptchaValid = await _recaptchaService.Validate(recaptchaToken);
+            if (!isRecaptchaValid)
+            {
+                ModelState.AddModelError(string.Empty, "CAPTCHA validation failed. Please try again.");
+                return Page(); // Stop processing if CAPTCHA fails
+            }
+
+
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
@@ -103,6 +128,7 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
                 }
             }
 
+            // If we got this far, something failed, redisplay form
             return Page();
         }
     }

@@ -10,12 +10,54 @@
     @if (User.IsInRole("Admin"))
     {
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-user-shield"></i> Panel
+            <a class="nav-link dropdown-toggle admin-dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user-shield me-1"></i> 
+                <span class="admin-label">Admin Panel</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
-                <li><a class="dropdown-item" asp-controller="MenuItems" asp-action="Index"><i class="fas fa-utensils"></i> Manage Menu</a></li>
-                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a></li>
+            <ul class="dropdown-menu dropdown-menu-end admin-dropdown-menu" aria-labelledby="adminDropdown">
+                <!-- Dashboard -->
+                <li class="dropdown-header">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    <strong>Dashboard</strong>
+                </li>
+                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">
+                    <i class="fas fa-home me-2"></i>Admin Dashboard
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                
+                <!-- Reports & Analytics -->
+                <li class="dropdown-header">
+                    <i class="fas fa-chart-line me-2"></i>
+                    <strong>Reports & Analytics</strong>
+                </li>
+                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Reports">
+                    <i class="fas fa-chart-bar me-2"></i>Sales Reports
+                </a></li>
+                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Orders">
+                    <i class="fas fa-shopping-cart me-2"></i>Order Analytics
+                </a></li>
+                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">
+                    <i class="fas fa-users me-2"></i>User Analytics
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                
+                <!-- Management -->
+                <li class="dropdown-header">
+                    <i class="fas fa-cogs me-2"></i>
+                    <strong>Management</strong>
+                </li>
+                <li><a class="dropdown-item" asp-controller="MenuItems" asp-action="Index">
+                    <i class="fas fa-utensils me-2"></i>Manage Menu
+                </a></li>
+                <li><a class="dropdown-item" asp-controller="Categories" asp-action="Index">
+                    <i class="fas fa-tags me-2"></i>Manage Categories
+                </a></li>
+                <li><a class="dropdown-item" asp-controller="Admin" asp-action="PointsRewards">
+                    <i class="fas fa-gift me-2"></i>Manage Rewards
+                </a></li>
+                <li><a class="dropdown-item" asp-controller="Admin" asp-action="RedemptionHistory">
+                    <i class="fas fa-history me-2"></i>Redemption History
+                </a></li>
             </ul>
         </li>
     }

@@ -7,6 +7,38 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <style>
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 0.75rem;
+        }
+        .chart-card .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 0.75rem 0.75rem 0 0;
+            font-weight: 600;
+        }
+        .stat-card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 0.75rem;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
 }
 
 <div class="admin-header">
@@ -17,42 +49,150 @@
 </div>
 
 <div class="container">
-    <div class="row">
+    <!-- Statistics Cards -->
+    <div class="row mb-5">
         <!-- Total Sales Card -->
         <div class="col-md-3 mb-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card stat-card h-100">
                 <div class="card-body text-center">
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
                     <h6 class="card-subtitle mb-2 text-muted">Total Sales</h6>
-                    <h2 class="card-title fw-bolder">RM @Model.TotalSales.ToString("F2")</h2>
+                    <h2 class="card-title fw-bolder text-success">RM @Model.TotalSales.ToString("F2")</h2>
+                    <small class="text-muted">All time revenue</small>
                 </div>
             </div>
         </div>
         <!-- Total Orders Card -->
         <div class="col-md-3 mb-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card stat-card h-100">
                 <div class="card-body text-center">
+                    <div class="stat-icon text-info">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
                     <h6 class="card-subtitle mb-2 text-muted">Total Orders</h6>
-                    <h2 class="card-title fw-bolder">@Model.TotalOrders</h2>
+                    <h2 class="card-title fw-bolder text-info">@Model.TotalOrders</h2>
+                    <small class="text-muted">Orders placed</small>
                 </div>
             </div>
         </div>
         <!-- Total Users Card -->
         <div class="col-md-3 mb-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card stat-card h-100">
                 <div class="card-body text-center">
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
                     <h6 class="card-subtitle mb-2 text-muted">Total Users</h6>
-                    <h2 class="card-title fw-bolder">@Model.TotalUsers</h2>
+                    <h2 class="card-title fw-bolder text-primary">@Model.TotalUsers</h2>
+                    <small class="text-muted">Registered customers</small>
                 </div>
             </div>
         </div>
         <!-- Total Menu Items Card -->
         <div class="col-md-3 mb-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card stat-card h-100">
                 <div class="card-body text-center">
+                    <div class="stat-icon text-warning">
+                        <i class="fas fa-utensils"></i>
+                    </div>
                     <h6 class="card-subtitle mb-2 text-muted">Menu Items</h6>
-                    <h2 class="card-title fw-bolder">@Model.TotalMenuItems</h2>
+                    <h2 class="card-title fw-bolder text-warning">@Model.TotalMenuItems</h2>
+                    <small class="text-muted">Available dishes</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row">
+        <!-- Monthly Sales Trend Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card chart-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Monthly Sales Trend
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="monthlySalesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Status Breakdown -->
+        <div class="col-lg-4 mb-4">
+            <div class="card chart-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Order Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Top Categories Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card chart-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Top Categories
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="topCategoriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Orders Trend -->
+        <div class="col-lg-6 mb-4">
+            <div class="card chart-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Daily Orders (Last 7 Days)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="dailyOrdersChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Pass data to the external JavaScript file
+        window.reportData = {
+            monthlySales: {
+                labels: @Html.Raw(Json.Serialize(Model.MonthlySales.Select(m => System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m.Month)))),
+                data: @Html.Raw(Json.Serialize(Model.MonthlySales.Select(m => m.Sales)))
+            },
+            orderStatus: {
+                labels: @Html.Raw(Json.Serialize(Model.OrderStatusBreakdown.Select(o => o.Status.ToString()))),
+                data: @Html.Raw(Json.Serialize(Model.OrderStatusBreakdown.Select(o => o.Count)))
+            },
+            topCategories: {
+                labels: @Html.Raw(Json.Serialize(Model.TopCategories.Select(c => c.CategoryName))),
+                data: @Html.Raw(Json.Serialize(Model.TopCategories.Select(c => c.TotalSales)))
+            }
+        };
+    </script>
+    <script src="~/js/admin-reports.js" asp-append-version="true"></script>
+}

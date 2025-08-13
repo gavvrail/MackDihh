@@ -49,7 +49,7 @@ namespace FoodOrderingSystem.Data
                     new MenuItem { Name = "Durian McFlurry", Description = "A local favorite! Creamy vanilla soft serve with real D24 durian puree.", Price = 5.99m, CategoryId = limitedTimeCategory.Id, ImageUrl = "/images/5.png" },
 
                     // Value Meals / Combos
-                    new MenuItem { Name = "Big MackDihh Combo", Description = "Big MackDihh, World Famous Fries, and a medium Cola.", Price = 12.99m, CategoryId = combosCategory.Id, ImageUrl = "/images/9.png" },
+                    new MenuItem { Name = "Big MackDihh Combo", Description = "Big MackDihh, World Famous Fries, and a medium Cola. This ultimate combo features our signature double-decker burger with special sauce, perfectly seasoned golden fries, and a refreshing medium cola. Perfect for satisfying your hunger with a complete meal that includes everything you love about MackDihh in one convenient package.", Price = 12.99m, CategoryId = combosCategory.Id, ImageUrl = "/images/9.png" },
                     new MenuItem { Name = "Crispy Chicken Combo", Description = "Crispy Chicken Sandwich, World Famous Fries, and a medium Cola.", Price = 11.49m, CategoryId = combosCategory.Id, ImageUrl = "/images/10.png" },
                     new MenuItem { Name = "McNuggets Combo (9pcs)", Description = "9pcs Chicken McNuggets, World Famous Fries, and a medium Cola.", Price = 13.49m, CategoryId = combosCategory.Id, ImageUrl = "/images/11.png" },
 
@@ -65,11 +65,11 @@ namespace FoodOrderingSystem.Data
                     new MenuItem { Name = "Fish Fillet", Description = "Flaky white fish fillet, topped with tartar sauce.", Price = 5.99m, CategoryId = burgersCategory.Id, ImageUrl = "/images/18.png" },
 
                     // Happy Meals
-                    new MenuItem { Name = "Cheeseburger Happy Meal", Description = "A cheeseburger, small fries, a drink, and a surprise toy.", Price = 9.99m, CategoryId = happyMealsCategory.Id, ImageUrl = "/images/19.png" },
+                    new MenuItem { Name = "Cheeseburger Happy Meal", Description = "A cheeseburger, small fries, a drink, and a surprise toy. This complete kids meal includes a juicy cheeseburger with melted cheese, a small portion of our world-famous fries, a choice of drink (cola, orange juice, or milk), and an exciting surprise toy that will bring joy to any child. Perfect for families looking for a fun and nutritious meal option.", Price = 9.99m, CategoryId = happyMealsCategory.Id, ImageUrl = "/images/19.png" },
                     new MenuItem { Name = "Nuggets Happy Meal (4pcs)", Description = "4pcs McNuggets, small fries, a drink, and a surprise toy.", Price = 9.99m, CategoryId = happyMealsCategory.Id, ImageUrl = "/images/20.png" },
 
                     // Coffee & McCafe
-                    new MenuItem { Name = "Cappuccino", Description = "A warm, frothy coffee made with fresh espresso and steamed milk.", Price = 7.99m, CategoryId = coffeeCategory.Id, ImageUrl = "/images/21.png" },
+                    new MenuItem { Name = "Cappuccino", Description = "A warm, frothy coffee made with fresh espresso and steamed milk. Our signature cappuccino is crafted with premium Arabica beans, perfectly steamed milk, and a rich layer of velvety foam. Each cup is carefully prepared by our trained baristas to ensure the perfect balance of espresso, milk, and foam. Served in a classic ceramic cup for the authentic coffee shop experience.", Price = 7.99m, CategoryId = coffeeCategory.Id, ImageUrl = "/images/21.png" },
                     new MenuItem { Name = "Iced Latte", Description = "Chilled espresso with milk, served over ice.", Price = 8.49m, CategoryId = coffeeCategory.Id, ImageUrl = "/images/22.png" },
                     new MenuItem { Name = "Chocolate Muffin", Description = "A rich and moist chocolate muffin.", Price = 4.99m, CategoryId = coffeeCategory.Id, ImageUrl = "/images/23.png" },
 
@@ -91,6 +91,82 @@ namespace FoodOrderingSystem.Data
 
                 // Save all the new menu items to the database
                 context.SaveChanges();
+
+                // --- Seed Points Rewards ---
+                if (!context.PointsRewards.Any())
+                {
+                    var rewards = new[]
+                    {
+                        new PointsReward
+                        {
+                            Title = "RM5 OFF Your Order",
+                            Description = "Get RM5 off your next order when you spend minimum RM30",
+                            PointsRequired = 100,
+                            DiscountAmount = 5.00m,
+                            DiscountPercentage = 0,
+                            ImageUrl = "~/images/reward-5off.png",
+                            IsActive = true,
+                            MaxRedemptions = -1,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(6)
+                        },
+                        new PointsReward
+                        {
+                            Title = "RM10 OFF Your Order",
+                            Description = "Get RM10 off your next order when you spend minimum RM50",
+                            PointsRequired = 200,
+                            DiscountAmount = 10.00m,
+                            DiscountPercentage = 0,
+                            ImageUrl = "~/images/reward-10off.png",
+                            IsActive = true,
+                            MaxRedemptions = -1,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(6)
+                        },
+                        new PointsReward
+                        {
+                            Title = "15% OFF Any Order",
+                            Description = "Get 15% discount on your entire order, no minimum purchase required",
+                            PointsRequired = 300,
+                            DiscountAmount = 0,
+                            DiscountPercentage = 15.00m,
+                            ImageUrl = "~/images/reward-15percent.png",
+                            IsActive = true,
+                            MaxRedemptions = -1,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(6)
+                        },
+                        new PointsReward
+                        {
+                            Title = "Free Delivery",
+                            Description = "Get free delivery on your next order, regardless of order amount",
+                            PointsRequired = 150,
+                            DiscountAmount = 5.00m, // Equivalent to delivery fee
+                            DiscountPercentage = 0,
+                            ImageUrl = "~/images/reward-free-delivery.png",
+                            IsActive = true,
+                            MaxRedemptions = -1,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(6)
+                        },
+                        new PointsReward
+                        {
+                            Title = "RM25 OFF Premium Orders",
+                            Description = "Get RM25 off when you order RM100 or more - perfect for family meals!",
+                            PointsRequired = 500,
+                            DiscountAmount = 25.00m,
+                            DiscountPercentage = 0,
+                            ImageUrl = "~/images/reward-25off.png",
+                            IsActive = true,
+                            MaxRedemptions = 50, // Limited offer
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(3)
+                        }
+                    };
+
+                    context.PointsRewards.AddRange(rewards);
+                    context.SaveChanges();
+                }
             }
         }
     }

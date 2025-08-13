@@ -1,0 +1,195 @@
+@model IEnumerable<FoodOrderingSystem.Models.UserRedemption>
+
+@{
+    ViewData["Title"] = "My Redemptions";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/deals.css" asp-append-version="true" />
+}
+
+<div class="points-rewards-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-4">
+                <i class="fas fa-history text-primary me-3"></i>My Redemptions
+            </h1>
+            <p class="lead">Track your reward redemptions and codes</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <span class="badge bg-primary">Total Redemptions: @Model.Count()</span>
+                        <span class="badge bg-success">Points Spent: @Model.Sum(r => r.PointsSpent)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Redemptions List -->
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var redemption in Model)
+                {
+                    <div class="col-lg-6 col-xl-4 mb-4">
+                        <div class="card h-100 @(redemption.IsUsed ? "border-success" : "border-warning")">
+                            <div class="card-header @(redemption.IsUsed ? "bg-success text-white" : "bg-warning text-dark")">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        @if (redemption.IsUsed)
+                                        {
+                                            <span><i class="fas fa-check-circle me-2"></i>Used</span>
+                                        }
+                                        else
+                                        {
+                                            <span><i class="fas fa-clock me-2"></i>Unused</span>
+                                        }
+                                    </h6>
+                                    <small>@redemption.RedeemedAt.ToString("MMM dd, yyyy")</small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Reward Info -->
+                                <div class="text-center mb-3">
+                                    @if (!string.IsNullOrEmpty(redemption.PointsReward.ImageUrl))
+                                    {
+                                        <img src="@Url.Content(redemption.PointsReward.ImageUrl)" alt="@redemption.PointsReward.Title" class="img-fluid rounded mb-2" style="max-height: 100px; object-fit: cover;">
+                                    }
+                                    <h5 class="card-title">@redemption.PointsReward.Title</h5>
+                                    <p class="text-muted small">@redemption.PointsReward.Description</p>
+                                </div>
+
+                                <!-- Discount Value -->
+                                <div class="text-center mb-3">
+                                    @if (redemption.PointsReward.DiscountAmount > 0)
+                                    {
+                                        <div class="discount-value">
+                                            <span class="display-6 text-success fw-bold">RM@redemption.PointsReward.DiscountAmount.ToString("F2")</span>
+                                            <small class="text-muted d-block">OFF your next order</small>
+                                        </div>
+                                    }
+                                    @if (redemption.PointsReward.DiscountPercentage > 0)
+                                    {
+                                        <div class="discount-value">
+                                            <span class="display-6 text-success fw-bold">@redemption.PointsReward.DiscountPercentage%</span>
+                                            <small class="text-muted d-block">OFF your next order</small>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Points Spent -->
+                                <div class="text-center mb-3">
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-coins me-1"></i>@redemption.PointsSpent points spent
+                                    </span>
+                                </div>
+
+                                <!-- Redemption Code -->
+                                <div class="redemption-code-section">
+                                    <label class="form-label small text-muted">Redemption Code:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control text-center fw-bold" value="@redemption.RedemptionCode" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyCode('@redemption.RedemptionCode')" title="Copy Code">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Show this code when making your order</small>
+                                </div>
+
+                                <!-- Usage Info -->
+                                @if (redemption.IsUsed && redemption.UsedAt.HasValue)
+                                {
+                                    <div class="mt-3 p-2 bg-light rounded">
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Used on @redemption.UsedAt.Value.ToString("MMMM dd, yyyy h:mm tt")
+                                        </small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="mt-3 p-2 bg-light rounded">
+                                        <small class="text-info">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Present this code during checkout to redeem your discount
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-footer text-center">
+                                @if (!redemption.IsUsed)
+                                {
+                                    <a asp-controller="Menu" asp-action="Index" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-utensils me-2"></i>Order Now
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-success">
+                                        <i class="fas fa-check me-1"></i>Successfully Used
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-gift fa-5x text-muted mb-4"></i>
+                        <h3>No Redemptions Yet</h3>
+                        <p class="text-muted lead">You haven't redeemed any rewards yet.</p>
+
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- How to Use Section -->
+        @if (Model.Any(r => !r.IsUsed))
+        {
+            <div class="row mt-5">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>How to Use Your Redemption Codes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 text-center mb-3">
+                                    <i class="fas fa-mobile-alt fa-3x text-primary mb-2"></i>
+                                    <h6>Step 1: Order</h6>
+                                    <p class="small">Place your order through our website or mobile app</p>
+                                </div>
+                                <div class="col-md-4 text-center mb-3">
+                                    <i class="fas fa-ticket-alt fa-3x text-success mb-2"></i>
+                                    <h6>Step 2: Show Code</h6>
+                                    <p class="small">Present your redemption code during checkout</p>
+                                </div>
+                                <div class="col-md-4 text-center mb-3">
+                                    <i class="fas fa-percentage fa-3x text-warning mb-2"></i>
+                                    <h6>Step 3: Save Money</h6>
+                                    <p class="small">Enjoy your discount on the final bill</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/my-redemptions.js" asp-append-version="true"></script>
+}

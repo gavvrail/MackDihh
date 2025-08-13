@@ -53,7 +53,7 @@ namespace FoodOrderingSystem.Controllers
         // POST: MenuItems/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,ImageUrl,Description,Price,CategoryId,IsAvailable,IsFeatured,PreparationTimeMinutes,Calories,Allergens")] MenuItem menuItem)
+        public async Task<IActionResult> Create([Bind("Id,Name,ImageUrl,Description,Price,CategoryId,IsAvailable,IsFeatured,PreparationTimeMinutes,Calories,Allergens,PointsPerItem")] MenuItem menuItem)
         {
             // Debug: Log the incoming data
             System.Diagnostics.Debug.WriteLine($"Creating menu item: Name={menuItem.Name}, Price={menuItem.Price}, CategoryId={menuItem.CategoryId}");
@@ -220,7 +220,7 @@ namespace FoodOrderingSystem.Controllers
         // POST: MenuItems/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ImageUrl,Description,Price,CategoryId,IsAvailable,IsFeatured,PreparationTimeMinutes,Calories,Allergens")] MenuItem menuItem)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ImageUrl,Description,Price,CategoryId,IsAvailable,IsFeatured,PreparationTimeMinutes,Calories,Allergens,PointsPerItem")] MenuItem menuItem)
         {
             if (id != menuItem?.Id) 
             {
@@ -264,6 +264,7 @@ namespace FoodOrderingSystem.Controllers
                     existingMenuItem.PreparationTimeMinutes = menuItem.PreparationTimeMinutes;
                     existingMenuItem.Calories = menuItem.Calories;
                     existingMenuItem.Allergens = menuItem.Allergens;
+                    existingMenuItem.PointsPerItem = menuItem.PointsPerItem;
 
                     _context.MenuItems.Update(existingMenuItem);
                     await _context.SaveChangesAsync();

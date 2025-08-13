@@ -9,7 +9,11 @@
 }
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script src="~/js/password-toggle.js" asp-append-version="true"></script>
+
+    <!-- 1. ADD THE RECAPTCHA SCRIPT HERE -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 }
 
 <div class="account-container">
@@ -39,6 +43,12 @@
                 <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
+
+            <!-- 2. ADD THE RECAPTCHA CHECKBOX WIDGET HERE -->
+            <div class="mb-3">
+                <div class="g-recaptcha" data-sitekey="@Model.RecaptchaSiteKey"></div>
+            </div>
+
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-account">Register</button>
         </form>
         <div class="text-center mt-4">

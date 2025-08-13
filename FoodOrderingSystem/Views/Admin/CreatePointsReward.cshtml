@@ -1,0 +1,197 @@
+@model FoodOrderingSystem.Models.PointsReward
+
+@{
+    ViewData["Title"] = "Create Points Reward";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-header">
+    <div class="container">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead mb-0">Create a new reward for customers to redeem with their points</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-gift me-2"></i>New Points Reward
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreatePointsReward" method="post">
+                        <div asp-validation-summary="All" class="alert alert-danger" style="display: none;"></div>
+
+                        <!-- Basic Information -->
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label asp-for="Title" class="form-label">Reward Title <span class="text-danger">*</span></label>
+                                    <input asp-for="Title" class="form-control" placeholder="e.g., RM10 OFF Your Next Order" />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="PointsRequired" class="form-label">Points Required <span class="text-danger">*</span></label>
+                                    <input asp-for="PointsRequired" class="form-control" type="number" min="1" />
+                                    <span asp-validation-for="PointsRequired" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe this reward and how customers can use it..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Discount Settings -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-tags me-2"></i>Discount Settings</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="DiscountAmount" class="form-label">Fixed Discount Amount (RM)</label>
+                                            <input asp-for="DiscountAmount" class="form-control" type="number" step="0.01" min="0" />
+                                            <span asp-validation-for="DiscountAmount" class="text-danger"></span>
+                                            <small class="form-text text-muted">Set to 0 if using percentage discount</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="DiscountPercentage" class="form-label">Percentage Discount (%)</label>
+                                            <input asp-for="DiscountPercentage" class="form-control" type="number" step="0.01" min="0" max="100" />
+                                            <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
+                                            <small class="form-text text-muted">Set to 0 if using fixed amount</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Availability Settings -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-calendar me-2"></i>Availability Settings</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="StartDate" class="form-label">Start Date <span class="text-danger">*</span></label>
+                                            <input asp-for="StartDate" class="form-control" type="datetime-local" />
+                                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="EndDate" class="form-label">End Date <span class="text-danger">*</span></label>
+                                            <input asp-for="EndDate" class="form-control" type="datetime-local" />
+                                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="MaxRedemptions" class="form-label">Maximum Redemptions</label>
+                                            <input asp-for="MaxRedemptions" class="form-control" type="number" min="-1" />
+                                            <span asp-validation-for="MaxRedemptions" class="text-danger"></span>
+                                            <small class="form-text text-muted">Set to -1 for unlimited redemptions</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="ImageUrl" class="form-label">Image URL</label>
+                                            <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                                            <small class="form-text text-muted">Optional: URL to reward image</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    <strong>Active</strong> - Enable this reward for redemption
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="PointsRewards" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Rewards
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Create Reward
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Set default dates
+        $(document).ready(function() {
+            var now = new Date();
+            var nowString = now.toISOString().slice(0, 16);
+            
+            var endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 3); // 3 months from now
+            var endDateString = endDate.toISOString().slice(0, 16);
+            
+            if (!document.getElementById('StartDate').value) {
+                document.getElementById('StartDate').value = nowString;
+            }
+            if (!document.getElementById('EndDate').value) {
+                document.getElementById('EndDate').value = endDateString;
+            }
+            
+            // Set default max redemptions
+            if (!document.getElementById('MaxRedemptions').value) {
+                document.getElementById('MaxRedemptions').value = -1;
+            }
+        });
+        
+        // Validation for discount settings
+        function validateDiscounts() {
+            var fixedAmount = parseFloat(document.getElementById('DiscountAmount').value) || 0;
+            var percentage = parseFloat(document.getElementById('DiscountPercentage').value) || 0;
+            
+            if (fixedAmount <= 0 && percentage <= 0) {
+                alert('Please set either a fixed discount amount or percentage discount.');
+                return false;
+            }
+            
+            if (fixedAmount > 0 && percentage > 0) {
+                alert('Please set either fixed amount OR percentage discount, not both.');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        $('form').on('submit', function(e) {
+            if (!validateDiscounts()) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}

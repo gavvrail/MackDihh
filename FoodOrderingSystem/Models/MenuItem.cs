@@ -44,5 +44,9 @@ namespace FoodOrderingSystem.Models
 
         [Display(Name = "Allergens")]
         public string? Allergens { get; set; }
+
+        [Display(Name = "Points Earned Per Item")]
+        [Range(0, 100, ErrorMessage = "Points must be between 0 and 100")]
+        public int PointsPerItem { get; set; } = 1;
     }
 }

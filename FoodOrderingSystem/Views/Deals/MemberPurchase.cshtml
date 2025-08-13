@@ -1,0 +1,214 @@
+@model FoodOrderingSystem.Controllers.MemberPurchaseViewModel
+
+@{
+    ViewData["Title"] = "Become a Member";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/deals.css" asp-append-version="true" />
+}
+
+<div class="member-purchase-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-4">
+                <i class="fas fa-crown text-warning me-3"></i>Become a Member
+            </h1>
+            <p class="lead">Unlock exclusive benefits and earn points on every purchase!</p>
+        </div>
+
+        @if (Model.IsMember)
+        {
+            <div class="alert alert-success text-center">
+                <i class="fas fa-check-circle fa-2x mb-3"></i>
+                <h4>You're Already a Member!</h4>
+                <p>Your membership is active until <strong>@Model.User.MemberExpiryDate?.ToString("MMMM dd, yyyy")</strong></p>
+                <p>Current Points: <strong>@Model.CurrentPoints</strong></p>
+                <a asp-action="Index" class="btn btn-outline-success">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Deals
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Membership Benefits -->
+            <div class="row mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h4 class="mb-0"><i class="fas fa-star me-2"></i>Member Benefits</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="benefit-item mb-3">
+                                        <i class="fas fa-coins text-warning fa-2x mb-2"></i>
+                                        <h6>Earn Points</h6>
+                                        <p>Get 1 point for every RM1 spent</p>
+                                    </div>
+                                    <div class="benefit-item mb-3">
+                                        <i class="fas fa-percentage text-success fa-2x mb-2"></i>
+                                        <h6>Exclusive Discounts</h6>
+                                        <p>Access to member-only deals and promotions</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="benefit-item mb-3">
+                                        <i class="fas fa-gift text-primary fa-2x mb-2"></i>
+                                        <h6>Free Rewards</h6>
+                                        <p>Redeem points for free food and discounts</p>
+                                    </div>
+                                    <div class="benefit-item mb-3">
+                                        <i class="fas fa-birthday-cake text-danger fa-2x mb-2"></i>
+                                        <h6>Birthday Treats</h6>
+                                        <p>Special birthday offers and free desserts</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Membership Plans -->
+            <div class="row mb-5">
+                <div class="col-lg-10 mx-auto">
+                    <h3 class="text-center mb-4">Choose Your Membership Plan</h3>
+                    <form asp-action="PurchaseMember" method="post">
+                        <div class="row">
+                            <!-- Monthly Plan -->
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="membership-plan-card">
+                                    <input type="radio" asp-for="SelectedPlan" value="@FoodOrderingSystem.Models.MemberPlan.Monthly" id="monthly" class="plan-radio" />
+                                    <label for="monthly" class="plan-label">
+                                        <div class="plan-header">
+                                            <h5>Monthly</h5>
+                                            <div class="plan-price">
+                                                <span class="currency">RM</span>
+                                                <span class="amount">29.99</span>
+                                                <span class="period">/month</span>
+                                            </div>
+                                        </div>
+                                        <div class="plan-features">
+                                            <ul>
+                                                <li><i class="fas fa-check text-success me-2"></i>1 month membership</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>All member benefits</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Points earning</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Exclusive deals</li>
+                                            </ul>
+                                        </div>
+                                        <div class="plan-savings">
+                                            <span class="badge bg-success">Save RM5/month</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Quarterly Plan -->
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="membership-plan-card popular">
+                                    <div class="popular-badge">MOST POPULAR</div>
+                                    <input type="radio" asp-for="SelectedPlan" value="@FoodOrderingSystem.Models.MemberPlan.Quarterly" id="quarterly" class="plan-radio" />
+                                    <label for="quarterly" class="plan-label">
+                                        <div class="plan-header">
+                                            <h5>Quarterly</h5>
+                                            <div class="plan-price">
+                                                <span class="currency">RM</span>
+                                                <span class="amount">79.99</span>
+                                                <span class="period">/3 months</span>
+                                            </div>
+                                        </div>
+                                        <div class="plan-features">
+                                            <ul>
+                                                <li><i class="fas fa-check text-success me-2"></i>3 months membership</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>All member benefits</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Points earning</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Exclusive deals</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Bonus 50 points</li>
+                                            </ul>
+                                        </div>
+                                        <div class="plan-savings">
+                                            <span class="badge bg-warning text-dark">Save RM10</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Yearly Plan -->
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="membership-plan-card">
+                                    <input type="radio" asp-for="SelectedPlan" value="@FoodOrderingSystem.Models.MemberPlan.Yearly" id="yearly" class="plan-radio" />
+                                    <label for="yearly" class="plan-label">
+                                        <div class="plan-header">
+                                            <h5>Yearly</h5>
+                                            <div class="plan-price">
+                                                <span class="currency">RM</span>
+                                                <span class="amount">299.99</span>
+                                                <span class="period">/year</span>
+                                            </div>
+                                        </div>
+                                        <div class="plan-features">
+                                            <ul>
+                                                <li><i class="fas fa-check text-success me-2"></i>12 months membership</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>All member benefits</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Points earning</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Exclusive deals</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Bonus 200 points</li>
+                                                <li><i class="fas fa-check text-success me-2"></i>Free birthday meal</li>
+                                            </ul>
+                                        </div>
+                                        <div class="plan-savings">
+                                            <span class="badge bg-danger">Save RM60</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Purchase Button -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-crown me-2"></i>Become a Member
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Current Points Display -->
+            @if (Model.CurrentPoints > 0)
+            {
+                <div class="row">
+                    <div class="col-lg-6 mx-auto">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5>Your Current Points</h5>
+                                <div class="points-display">
+                                    <span class="points-number">@Model.CurrentPoints</span>
+                                    <span class="points-label">Points</span>
+                                </div>
+                                <p class="text-muted">These points will be available after you become a member!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Plan selection functionality
+            $('.plan-radio').on('change', function() {
+                $('.membership-plan-card').removeClass('selected');
+                $(this).closest('.membership-plan-card').addClass('selected');
+            });
+
+            // Auto-select quarterly plan
+            $('#quarterly').prop('checked', true).trigger('change');
+        });
+    </script>
+} 
