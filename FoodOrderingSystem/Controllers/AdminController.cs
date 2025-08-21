@@ -38,7 +38,7 @@ namespace FoodOrderingSystem.Controllers
                 TotalUsers = await _context.Users.CountAsync(),
                 TotalMenuItems = await _context.MenuItems.CountAsync(),
                 TotalOrders = await _context.Orders.CountAsync(),
-                TotalSales = await _context.Orders.SumAsync(o => o.Total),
+                TotalSales = await _context.Orders.SumAsync(o => o.TotalAmount),
                 PendingOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Pending),
                 RecentOrders = await _context.Orders
                     .Include(o => o.User)
@@ -368,6 +368,72 @@ namespace FoodOrderingSystem.Controllers
             return _context.PointsRewards.Any(e => e.Id == id);
         }
 
+        // GET: /Admin/OrderCancellations
+        public async Task<IActionResult> OrderCancellations()
+        {
+            var cancellations = await _context.OrderCancellations
+                .Include(c => c.Order)
+                .Include(c => c.User)
+                .OrderByDescending(c => c.CancelledAt)
+                .ToListAsync();
+
+            return View(cancellations);
+        }
+
+        // POST: /Admin/MarkCancellationAsReviewed
+        [HttpPost]
+        public async Task<IActionResult> MarkCancellationAsReviewed([FromBody] int id)
+        {
+            try
+            {
+                var cancellation = await _context.OrderCancellations.FindAsync(id);
+                if (cancellation == null)
+                {
+                    return Json(new { success = false, message = "Cancellation not found" });
+                }
+
+                if (cancellation.IsReviewedByAdmin)
+                {
+                    return Json(new { success = false, message = "Cancellation already reviewed" });
+                }
+
+                cancellation.IsReviewedByAdmin = true;
+                cancellation.ReviewedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Cancellation marked as reviewed successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error updating cancellation: " + ex.Message });
+            }
+        }
+
+        // POST: /Admin/AddAdminNotes
+        [HttpPost]
+        public async Task<IActionResult> AddAdminNotes([FromBody] AdminNotesRequest request)
+        {
+            try
+            {
+                var cancellation = await _context.OrderCancellations.FindAsync(request.CancellationId);
+                if (cancellation == null)
+                {
+                    return Json(new { success = false, message = "Cancellation not found" });
+                }
+
+                cancellation.AdminNotes = request.Notes;
+                cancellation.IsReviewedByAdmin = true;
+                cancellation.ReviewedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Admin notes added successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error adding admin notes: " + ex.Message });
+            }
+        }
+
         // GET: /Admin/Users
         public async Task<IActionResult> Users()
         {
@@ -512,5 +578,11 @@ namespace FoodOrderingSystem.Controllers
         public string MenuItemName { get; set; } = "";
         public int TotalQuantity { get; set; }
         public decimal TotalRevenue { get; set; }
+    }
+
+    public class AdminNotesRequest
+    {
+        public int CancellationId { get; set; }
+        public string Notes { get; set; } = "";
     }
 }

@@ -30,7 +30,7 @@
                                 <div class="flex-grow-1">
                                     <span class="order-date fw-bold">@order.OrderDate.ToString("MMMM dd, yyyy")</span>
                                     <br>
-                                    <span class="order-number text-muted">Order #@order.OrderNumber</span>
+                                    <span class="order-number text-muted">Order #@order.Id</span>
                                 </div>
                                 <div class="text-center me-3">
                                     <span class="badge bg-@(order.Status switch {
@@ -47,7 +47,7 @@
                                     </span>
                                 </div>
                                 <div class="text-end">
-                                    <span class="order-total fw-bold fs-5">RM @order.Total.ToString("F2")</span>
+                                    <span class="order-total fw-bold fs-5">RM @order.TotalAmount.ToString("F2")</span>
                                     <br>
                                     <small class="text-muted">@order.OrderItems.Count item@(order.OrderItems.Count != 1 ? "s" : "")</small>
                                 </div>
@@ -60,14 +60,8 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <h6><i class="fas fa-map-marker-alt me-2"></i>Delivery Information</h6>
-                                    @if (!string.IsNullOrEmpty(order.DeliveryAddress))
-                                    {
-                                        <p class="mb-1"><strong>Address:</strong> @order.DeliveryAddress</p>
-                                    }
-                                    @if (!string.IsNullOrEmpty(order.CustomerPhone))
-                                    {
-                                        <p class="mb-1"><strong>Phone:</strong> @order.CustomerPhone</p>
-                                    }
+                                    <p class="mb-1"><strong>Address:</strong> @order.DeliveryAddress</p>
+                                    <p class="mb-1"><strong>Phone:</strong> @order.PhoneNumber</p>
                                     @if (order.EstimatedDeliveryTime.HasValue)
                                     {
                                         <p class="mb-1"><strong>Estimated Delivery:</strong> @order.EstimatedDeliveryTime.Value.ToString("h:mm tt")</p>
@@ -79,58 +73,78 @@
                                 </div>
                                 <div class="col-md-6">
                                     <h6><i class="fas fa-info-circle me-2"></i>Order Summary</h6>
-                                    <p class="mb-1"><strong>Subtotal:</strong> RM @order.Subtotal.ToString("F2")</p>
-                                    <p class="mb-1"><strong>Tax (6%):</strong> RM @order.Tax.ToString("F2")</p>
-                                    <p class="mb-1"><strong>Delivery Fee:</strong> @(order.DeliveryFee == 0 ? "FREE" : $"RM {order.DeliveryFee:F2}")</p>
-                                    <hr class="my-2">
-                                    <p class="mb-1 fw-bold"><strong>Total:</strong> RM @order.Total.ToString("F2")</p>
+                                    <p class="mb-1"><strong>Total Amount:</strong> RM @order.TotalAmount.ToString("F2")</p>
+                                    @if (order.PointsUsed > 0)
+                                    {
+                                        <p class="mb-1"><strong>Points Used:</strong> @order.PointsUsed points</p>
+                                    }
+                                    @if (order.DiscountAmount > 0)
+                                    {
+                                        <p class="mb-1"><strong>Discount:</strong> RM @order.DiscountAmount.ToString("F2")</p>
+                                    }
+                                    @if (!string.IsNullOrEmpty(order.SpecialInstructions))
+                                    {
+                                        <p class="mb-1"><strong>Special Instructions:</strong> @order.SpecialInstructions</p>
+                                    }
                                 </div>
                             </div>
 
-                            <!-- Order Items -->
-                            <h6><i class="fas fa-utensils me-2"></i>Order Items</h6>
-                            <ul class="list-group list-group-flush">
-                                @foreach (var item in order.OrderItems)
-                                {
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <span class="fw-bold">@item.MenuItem.Name</span>
-                                            <small class="text-muted d-block">@item.Quantity x RM@item.Price.ToString("F2") each</small>
-                                        </div>
-                                        <span class="fw-bold">RM@((item.Quantity * item.Price).ToString("F2"))</span>
-                                    </li>
-                                }
-                            </ul>
+                                                         <!-- Order Items -->
+                             <h6><i class="fas fa-utensils me-2"></i>Order Items</h6>
+                             <ul class="list-group list-group-flush">
+                                 @foreach (var item in order.OrderItems)
+                                 {
+                                     <li class="list-group-item d-flex justify-content-between align-items-center">
+                                         <div>
+                                             <span class="fw-bold">@item.MenuItem.Name</span>
+                                             <small class="text-muted d-block">@item.Quantity x RM@item.UnitPrice.ToString("F2") each</small>
+                                         </div>
+                                         <span class="fw-bold">RM@((item.Quantity * item.UnitPrice).ToString("F2"))</span>
+                                     </li>
+                                 }
+                             </ul>
 
-                            @if (!string.IsNullOrEmpty(order.Notes))
-                            {
-                                <div class="mt-3">
-                                    <h6><i class="fas fa-sticky-note me-2"></i>Order Notes</h6>
-                                    <div class="alert alert-info">
-                                        @order.Notes
-                                    </div>
-                                </div>
-                            }
+                                                         @if (!string.IsNullOrEmpty(order.SpecialInstructions))
+                             {
+                                 <div class="mt-3">
+                                     <h6><i class="fas fa-sticky-note me-2"></i>Special Instructions</h6>
+                                     <div class="alert alert-info">
+                                         @order.SpecialInstructions
+                                     </div>
+                                 </div>
+                             }
 
-                            @if (!string.IsNullOrEmpty(order.DeliveryInstructions))
-                            {
-                                <div class="mt-3">
-                                    <h6><i class="fas fa-truck me-2"></i>Delivery Instructions</h6>
-                                    <div class="alert alert-warning">
-                                        @order.DeliveryInstructions
-                                    </div>
-                                </div>
-                            }
+                             @if (order.CancelledAt.HasValue)
+                             {
+                                 <div class="mt-3">
+                                     <h6><i class="fas fa-times-circle me-2 text-danger"></i>Cancellation Details</h6>
+                                     <div class="alert alert-danger">
+                                         <p><strong>Cancelled:</strong> @order.CancelledAt.Value.ToString("MMMM dd, yyyy h:mm tt")</p>
+                                         <p><strong>By:</strong> @order.CancelledBy</p>
+                                         @if (!string.IsNullOrEmpty(order.CancellationReason))
+                                         {
+                                             <p><strong>Reason:</strong> @order.CancellationReason</p>
+                                         }
+                                     </div>
+                                 </div>
+                             }
 
-                            <!-- Action Buttons for Active Orders -->
-                            @if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.Cancelled)
-                            {
-                                <div class="mt-3 text-center">
-                                    <a asp-controller="Checkout" asp-action="Confirmation" asp-route-orderId="@order.Id" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-eye me-2"></i>Track Order Status
-                                    </a>
-                                </div>
-                            }
+                                                         <!-- Action Buttons for Active Orders -->
+                             @if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.Cancelled)
+                             {
+                                 <div class="mt-3 text-center">
+                                     <a asp-controller="Checkout" asp-action="Confirmation" asp-route-orderId="@order.Id" class="btn btn-primary btn-sm me-2">
+                                         <i class="fas fa-eye me-1"></i>Track Order Status
+                                     </a>
+                                     
+                                     @if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Confirmed)
+                                     {
+                                         <a asp-action="Cancel" asp-route-id="@order.Id" class="btn btn-danger btn-sm">
+                                             <i class="fas fa-times me-1"></i>Cancel Order
+                                         </a>
+                                     }
+                                 </div>
+                             }
                         </div>
                     </div>
                 </div>

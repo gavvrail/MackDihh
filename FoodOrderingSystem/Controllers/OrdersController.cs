@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FoodOrderingSystem.Data;
+using FoodOrderingSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -34,5 +35,110 @@ namespace FoodOrderingSystem.Controllers
 
             return View(orders);
         }
+
+        // GET: /Orders/Cancel/{id}
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            // Check if order can be cancelled (only pending or confirmed orders)
+            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Confirmed)
+            {
+                TempData["ErrorMessage"] = "This order cannot be cancelled as it has already been processed.";
+                return RedirectToAction(nameof(History));
+            }
+
+            var viewModel = new OrderCancellationViewModel
+            {
+                Order = order,
+                CancellationReasons = GetCancellationReasons()
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: /Orders/Cancel/{id}
+        [HttpPost]
+        public async Task<IActionResult> Cancel(int id, OrderCancellationViewModel model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Order = order;
+                model.CancellationReasons = GetCancellationReasons();
+                return View(model);
+            }
+
+            // Check if order can be cancelled
+            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Confirmed)
+            {
+                TempData["ErrorMessage"] = "This order cannot be cancelled as it has already been processed.";
+                return RedirectToAction(nameof(History));
+            }
+
+            // Update order status
+            order.Status = OrderStatus.Cancelled;
+            order.CancelledAt = DateTime.UtcNow;
+            order.CancelledBy = "Customer";
+
+            // Create cancellation record
+            var cancellation = new OrderCancellation
+            {
+                OrderId = order.Id,
+                UserId = userId ?? string.Empty,
+                ReasonType = model.SelectedReason,
+                AdditionalDetails = model.AdditionalDetails,
+                CancelledAt = DateTime.UtcNow
+            };
+
+            // Refund points if any were used
+            if (order.PointsUsed > 0)
+            {
+                var user = await _context.Users.FindAsync(userId);
+                if (user != null)
+                {
+                    user.Points += order.PointsUsed;
+                    user.TotalPointsRedeemed -= order.PointsUsed;
+                }
+            }
+
+            _context.OrderCancellations.Add(cancellation);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Order cancelled successfully. We're sorry to see you go!";
+            return RedirectToAction(nameof(History));
+        }
+
+        private List<CancellationReasonType> GetCancellationReasons()
+        {
+            return Enum.GetValues<CancellationReasonType>().ToList();
+        }
+    }
+
+    public class OrderCancellationViewModel
+    {
+        public Order Order { get; set; } = null!;
+        public CancellationReasonType SelectedReason { get; set; }
+        public string? AdditionalDetails { get; set; }
+        public List<CancellationReasonType> CancellationReasons { get; set; } = new();
     }
 }

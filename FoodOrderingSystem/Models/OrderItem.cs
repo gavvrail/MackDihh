@@ -9,6 +9,9 @@ namespace FoodOrderingSystem.Models
 
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Price { get; set; } // Price at the time of purchase
+        
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal UnitPrice { get; set; } // Unit price at the time of purchase
 
         // Foreign key to link to the Order
         public int OrderId { get; set; }

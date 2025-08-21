@@ -1,0 +1,71 @@
+@model IEnumerable<FoodOrderingSystem.Models.OrderCancellation>
+
+@{
+    ViewData["Title"] = "Order Cancellations";
+}
+
+<div class="container-fluid">
+    <h2>Order Cancellations</h2>
+    
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Reason</th>
+                        <th>Details</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cancellation in Model)
+                    {
+                        <tr>
+                            <td>#@cancellation.OrderId</td>
+                            <td>@cancellation.User.UserName</td>
+                            <td>@cancellation.ReasonType</td>
+                            <td>@cancellation.AdditionalDetails</td>
+                            <td>
+                                @if (cancellation.IsReviewedByAdmin)
+                                {
+                                    <span class="badge bg-success">Reviewed</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="markAsReviewed(@cancellation.Id)">Mark Reviewed</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p>No cancellations found.</p>
+    }
+</div>
+
+<script>
+function markAsReviewed(cancellationId) {
+    fetch('/Admin/MarkCancellationAsReviewed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cancellationId)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>

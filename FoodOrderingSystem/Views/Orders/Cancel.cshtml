@@ -1,0 +1,156 @@
+@model FoodOrderingSystem.Controllers.OrderCancellationViewModel
+
+@{
+    ViewData["Title"] = "Cancel Order";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/orders.css" asp-append-version="true" />
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-times-circle me-2"></i>Cancel Order
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Order Summary -->
+                    <div class="order-summary mb-4">
+                        <h5>Order Summary</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Order ID:</strong> #@Model.Order.Id</p>
+                                <p><strong>Order Date:</strong> @Model.Order.OrderDate.ToString("MMM dd, yyyy HH:mm")</p>
+                                <p><strong>Total Amount:</strong> RM @Model.Order.TotalAmount.ToString("F2")</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Status:</strong> 
+                                    <span class="badge bg-@(Model.Order.Status == OrderStatus.Pending ? "warning" : "info")">
+                                        @Model.Order.Status
+                                    </span>
+                                </p>
+                                <p><strong>Delivery Address:</strong> @Model.Order.DeliveryAddress</p>
+                                @if (Model.Order.PointsUsed > 0)
+                                {
+                                    <p><strong>Points Used:</strong> @Model.Order.PointsUsed points</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="order-items mb-4">
+                        <h6>Order Items:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Order.OrderItems)
+                                    {
+                                        <tr>
+                                            <td>@item.MenuItem.Name</td>
+                                            <td>@item.Quantity</td>
+                                            <td>RM @item.UnitPrice.ToString("F2")</td>
+                                            <td>RM @((item.UnitPrice * item.Quantity).ToString("F2"))</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Cancellation Form -->
+                    <form asp-action="Cancel" method="post">
+                        <input type="hidden" name="id" value="@Model.Order.Id" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>Why are you cancelling this order?</strong>
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="SelectedReason" class="form-select" required>
+                                <option value="">-- Select a reason --</option>
+                                @foreach (var reason in Model.CancellationReasons)
+                                {
+                                    <option value="@reason">@GetReasonDisplayName(reason)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="SelectedReason" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>Additional Details (Optional)</strong>
+                            </label>
+                            <textarea asp-for="AdditionalDetails" class="form-control" rows="3" 
+                                      placeholder="Please provide any additional details about your cancellation..."></textarea>
+                            <span asp-validation-for="AdditionalDetails" class="text-danger"></span>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Important:</strong> Once you cancel this order, it cannot be undone. 
+                            @if (Model.Order.PointsUsed > 0)
+                            {
+                                <span>Your @Model.Order.PointsUsed points will be refunded to your account.</span>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="History" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Orders
+                            </a>
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this order?')">
+                                <i class="fas fa-times me-1"></i>Cancel Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetReasonDisplayName(CancellationReasonType reason)
+    {
+        return reason switch
+        {
+            CancellationReasonType.WrongDeliveryAddress => "Wrong delivery address",
+            CancellationReasonType.WantToAddMoreItems => "Want to add more items",
+            CancellationReasonType.ChangedMind => "Changed my mind",
+            CancellationReasonType.FoundBetterDeal => "Found a better deal elsewhere",
+            CancellationReasonType.DeliveryTimeTooLong => "Delivery time is too long",
+            CancellationReasonType.PaymentIssues => "Payment issues",
+            CancellationReasonType.ItemOutOfStock => "Item is out of stock",
+            CancellationReasonType.Emergency => "Emergency situation",
+            CancellationReasonType.Other => "Other reason",
+            _ => reason.ToString()
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-resize textarea
+            $('textarea').on('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        });
+    </script>
+}

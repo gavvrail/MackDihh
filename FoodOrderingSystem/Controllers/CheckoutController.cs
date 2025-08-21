@@ -156,7 +156,7 @@ namespace FoodOrderingSystem.Controllers
                 // Create order
                 var order = new Order
                 {
-                    UserId = userId,
+                    UserId = userId ?? string.Empty,
                     OrderDate = DateTime.UtcNow,
                     EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(45), // 45 minutes delivery time
                     Subtotal = subtotal,
@@ -164,9 +164,9 @@ namespace FoodOrderingSystem.Controllers
                     DeliveryFee = deliveryFee,
                     Total = total,
                     Status = OrderStatus.Pending,
-                    DeliveryAddress = model.DeliveryAddress?.Trim(),
+                    DeliveryAddress = model.DeliveryAddress.Trim(),
                     DeliveryInstructions = model.DeliveryInstructions?.Trim(),
-                    CustomerPhone = model.CustomerPhone?.Trim(),
+                    CustomerPhone = model.CustomerPhone.Trim(),
                     Notes = model.Notes?.Trim()
                 };
 
@@ -214,7 +214,7 @@ namespace FoodOrderingSystem.Controllers
                         // Create points transaction record
                         var pointsTransaction = new UserPointsTransaction
                         {
-                            UserId = userId,
+                            UserId = userId ?? string.Empty,
                             Points = totalPointsEarned,
                             Type = PointsTransactionType.Earned,
                             Description = $"Order #{order.OrderNumber} - {totalPointsEarned} points earned",

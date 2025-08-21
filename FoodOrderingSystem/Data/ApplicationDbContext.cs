@@ -26,6 +26,9 @@ namespace FoodOrderingSystem.Data
         public DbSet<UserPointsTransaction> UserPointsTransactions { get; set; }
         public DbSet<MemberSubscription> MemberSubscriptions { get; set; }
         public DbSet<UserRedemption> UserRedemptions { get; set; }
+        
+        // Order Cancellation
+        public DbSet<OrderCancellation> OrderCancellations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

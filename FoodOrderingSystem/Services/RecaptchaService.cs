@@ -10,7 +10,7 @@ namespace FoodOrderingSystem.Services
         public RecaptchaService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            _secretKey = configuration["RecaptchaSettings:SecretKey"];
+            _secretKey = configuration["RecaptchaSettings:SecretKey"] ?? string.Empty;
         }
 
         public virtual async Task<bool> Validate(string token)
