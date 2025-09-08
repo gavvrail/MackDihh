@@ -38,13 +38,33 @@ namespace FoodOrderingSystem.Controllers
                 .ThenBy(m => m.Name)
                 .ToListAsync();
 
+            // Get user's available promo codes (not used and within usage limits)
+            var availablePromoCodes = new List<Deal>();
+            if (user != null)
+            {
+                var userPromoCodes = await _context.UserPromoCodes
+                    .Where(upc => upc.UserId == userId && !upc.IsUsed && upc.IsActive)
+                    .ToListAsync();
+
+                var promoCodeDeals = deals.Where(d => d.Type == DealType.PromoCode).ToList();
+                
+                foreach (var deal in promoCodeDeals)
+                {
+                    var userPromoCode = userPromoCodes.FirstOrDefault(upc => upc.DealId == deal.Id);
+                    if (userPromoCode != null && userPromoCode.CurrentUses < userPromoCode.MaxUses)
+                    {
+                        availablePromoCodes.Add(deal);
+                    }
+                }
+            }
+
             var viewModel = new DealsViewModel
             {
                 CurrentDeals = deals.Where(d => d.Type == DealType.LimitedTimeOffer).ToList(),
                 FlashSales = deals.Where(d => d.IsFlashSale).ToList(),
                 BundleOffers = deals.Where(d => d.Type == DealType.BundleOffer).ToList(),
                 SeasonalDiscounts = deals.Where(d => d.IsSeasonal).ToList(),
-                PromoCodes = deals.Where(d => d.Type == DealType.PromoCode).ToList(),
+                PromoCodes = availablePromoCodes, // Only show available promo codes for the user
                 MemberDeals = deals.Where(d => d.RequiresMember).ToList(),
                 StudentDiscounts = deals.Where(d => d.RequiresStudentVerification).ToList(),
                 ReferralBonus = deals.FirstOrDefault(d => d.Type == DealType.ReferralBonus),
@@ -122,9 +142,25 @@ namespace FoodOrderingSystem.Controllers
             user.LastMemberPurchaseDate = startDate;
             user.MemberPurchaseCount++;
 
+            // Add bonus points based on plan
+            int bonusPoints = model.SelectedPlan switch
+            {
+                MemberPlan.Monthly => 0,
+                MemberPlan.Quarterly => 50,
+                MemberPlan.Yearly => 200,
+                _ => 0
+            };
+
+            if (bonusPoints > 0)
+            {
+                user.Points += bonusPoints;
+                user.TotalPointsEarned += bonusPoints;
+            }
+
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = $"Congratulations! You are now a member until {endDate:MMMM dd, yyyy}. You'll earn points on every purchase!";
+            var bonusMessage = bonusPoints > 0 ? $" You also received {bonusPoints} bonus points!" : "";
+            TempData["SuccessMessage"] = $"Congratulations! You are now a member until {endDate:MMMM dd, yyyy}. You'll earn points on every purchase!{bonusMessage}";
             return RedirectToAction(nameof(Index));
         }
 
@@ -251,6 +287,77 @@ namespace FoodOrderingSystem.Controllers
             };
         }
 
+        [Authorize]
+        public async Task<IActionResult> ClaimBirthdayBenefit()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            var user = await _context.Users.FindAsync(userId);
+            
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Check if user is a member
+            bool isMember = user.IsMember && user.MemberExpiryDate > DateTime.UtcNow;
+            if (!isMember)
+            {
+                TempData["ErrorMessage"] = "You must be a member to claim birthday benefits!";
+                return RedirectToAction("MemberPurchase");
+            }
+
+            // Check if user has birthday set
+            if (!user.DateOfBirth.HasValue)
+            {
+                TempData["ErrorMessage"] = "Please add your birthday to your profile to claim birthday benefits!";
+                return RedirectToAction("Index", "Profile");
+            }
+
+            // Check if it's the user's birthday (within the current month)
+            var today = DateTime.UtcNow;
+            var birthday = user.DateOfBirth.Value;
+            var isBirthdayMonth = today.Month == birthday.Month && today.Year == birthday.Year;
+
+            if (!isBirthdayMonth)
+            {
+                TempData["ErrorMessage"] = "Birthday benefits are only available during your birthday month!";
+                return RedirectToAction("Index");
+            }
+
+            // Check if user already claimed birthday benefit this year
+            var lastBirthdayClaim = await _context.UserPointsTransactions
+                .Where(t => t.UserId == userId && 
+                           t.Description.Contains("Birthday Benefit") && 
+                           t.CreatedAt.Year == today.Year)
+                .FirstOrDefaultAsync();
+
+            if (lastBirthdayClaim != null)
+            {
+                TempData["ErrorMessage"] = "You have already claimed your birthday benefit for this year!";
+                return RedirectToAction("Index");
+            }
+
+            // Give birthday benefits
+            int birthdayPoints = 100; // 100 bonus points
+            user.Points += birthdayPoints;
+            user.TotalPointsEarned += birthdayPoints;
+
+            // Create points transaction record
+            var pointsTransaction = new UserPointsTransaction
+            {
+                UserId = userId,
+                Points = birthdayPoints,
+                Type = PointsTransactionType.Earned,
+                Description = $"Birthday Benefit - Happy Birthday! {birthdayPoints} bonus points"
+            };
+
+            _context.UserPointsTransactions.Add(pointsTransaction);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Happy Birthday! You've received {birthdayPoints} bonus points as a birthday gift! 🎂🎉";
+            return RedirectToAction("Index");
+        }
+
         private string GenerateReferralCode()
         {
             var random = new Random();
@@ -258,6 +365,75 @@ namespace FoodOrderingSystem.Controllers
             return new string(Enumerable.Repeat(chars, 8)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+
+        // POST: /Deals/AssignPromoCode (Admin only)
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignPromoCode(string userId, int dealId, int maxUses = 1)
+        {
+            try
+            {
+                // Get the deal
+                var deal = await _context.Deals.FindAsync(dealId);
+                if (deal == null)
+                {
+                    return Json(new { success = false, message = "Promo code not found" });
+                }
+
+                // Get the user
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "User not found" });
+                }
+
+                // Check if user already has this promo code
+                var existingUserPromoCode = await _context.UserPromoCodes
+                    .FirstOrDefaultAsync(upc => upc.UserId == userId && upc.DealId == dealId);
+
+                if (existingUserPromoCode != null)
+                {
+                    // Update existing promo code usage limit
+                    existingUserPromoCode.MaxUses = maxUses;
+                    existingUserPromoCode.IsActive = true;
+                }
+                else
+                {
+                    // Create new UserPromoCode
+                    var userPromoCode = new UserPromoCode
+                    {
+                        UserId = userId,
+                        DealId = dealId,
+                        PromoCode = deal.PromoCode ?? "",
+                        Title = deal.Title,
+                        Description = deal.Description,
+                        DiscountPercentage = deal.DiscountPercentage,
+                        DiscountedPrice = deal.DiscountedPrice,
+                        MinimumOrderAmount = deal.MinimumOrderAmount,
+                        StartDate = deal.StartDate,
+                        EndDate = deal.EndDate,
+                        MaxUses = maxUses,
+                        CurrentUses = 0,
+                        IsActive = true,
+                        SavedAt = DateTime.UtcNow,
+                        IsUsed = false
+                    };
+
+                    _context.UserPromoCodes.Add(userPromoCode);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = $"Promo code '{deal.PromoCode}' assigned to user successfully!" });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error assigning promo code: {ex.Message}");
+                return Json(new { success = false, message = "An error occurred while assigning the promo code" });
+            }
+        }
+
     }
 
     public class DealsViewModel

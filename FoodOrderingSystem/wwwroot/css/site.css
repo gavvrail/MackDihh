@@ -1,20 +1,36 @@
-/* --- General & Body --- */
-html, body {
-    height: 100%;
-}
+/* ===== CLEAN STICKY FOOTER LAYOUT ===== */
 
-.body-wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+html {
+    height: 100%;
 }
 
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f8f9fa;
+    margin: 0;
+    display: flex; /* Use body as the main flex container */
+    flex-direction: column;
+    min-height: 100vh; /* <--- THIS IS THE CORRECTED LINE */
 }
 
-/* --- Navbar Logo Style --- */
+/* The body-wrapper is the main content area */
+.body-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto; /* This makes the wrapper grow and shrink properly */
+}
+
+    /* Main content should grow to fill available space */
+    .body-wrapper > main {
+        flex-grow: 1;
+    }
+
+    /* Footer should not shrink */
+    .body-wrapper > footer {
+        flex-shrink: 0;
+    }
+
+/* ===== NAVBAR STYLES ===== */
 .navbar-logo {
     height: 32px;
     width: auto;
@@ -22,10 +38,12 @@ body {
     vertical-align: middle;
 }
 
-/* --- Navbar Custom Styles --- */
 header.sticky-top {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     z-index: 1030;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
 }
 
 .navbar {
@@ -44,16 +62,6 @@ header.sticky-top {
         color: #D83028;
     }
 
-.navbar-nav.flex-grow-1 .nav-link:hover::after {
-    content: '';
-    position: absolute;
-    bottom: 10px;
-    left: 1rem;
-    right: 1rem;
-    height: 3px;
-    background-color: #FFC72C;
-    border-radius: 2px;
-}
 
 .navbar-collapse {
     justify-content: space-between;
@@ -85,19 +93,152 @@ header.sticky-top {
     font-size: 1.2rem;
 }
 
-/* --- Main Content --- */
-main {
-    flex-grow: 1;
+/* User Dropdown Styles */
+.navbar-nav .nav-item.dropdown .nav-link {
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+    min-width: 0;
 }
 
-/* --- Footer --- */
+.navbar-nav .nav-item.dropdown .dropdown-toggle::after {
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+.navbar-nav .nav-item.dropdown .nav-link img {
+    flex-shrink: 0;
+}
+
+.navbar-nav .nav-item.dropdown .nav-link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+}
+
+/* ===== MAIN CONTENT ===== */
+main {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+    main > * {
+        width: 100%;
+    }
+
+    /* Ensure the main content area takes full height */
+    main .container,
+    main .container-fluid {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+/* Fix for homepage layout */
+.home-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure sections don't interfere with layout */
+section {
+    width: 100%;
+}
+
+/* ===== ENHANCED FOOTER STYLES ===== */
+
+/* This rule removes the unwanted gap above the footer */
+.body-wrapper > main > *:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 .footer {
     background-color: #272727 !important;
     color: rgba(255, 255, 255, 0.8);
-    padding: 0;
+    /* New padding for better spacing */
+    padding: 4rem 0 0;
+    border-top: 1px solid #3a3a3a;
+    flex-shrink: 0;
 }
 
-/* --- Add to Cart Notification --- */
+.footer-logo {
+    height: 24px;
+    width: auto;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.footer h6 {
+    color: #FFC72C;
+    font-weight: 700;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Fix for the "messy" paragraph */
+.footer .col-md-4:first-child p {
+    font-size: 0.9rem;
+    line-height: 1.7; /* Improves readability */
+    color: rgba(255, 255, 255, 0.6); /* Softer color */
+    max-width: 350px; /* Prevents lines from being too wide */
+}
+
+.footer p {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.footer a.text-reset {
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+    .footer a.text-reset:hover {
+        color: #FFC72C !important;
+        text-decoration: none;
+    }
+
+/* Improved alignment and size for contact icons */
+.footer .fas {
+    color: #FFC72C;
+    width: 25px; /* Ensures text aligns neatly */
+    text-align: center;
+    font-size: 1rem;
+}
+
+/* Styling for the copyright section at the very bottom */
+.footer .text-center.p-4 {
+    background-color: rgba(0, 0, 0, 0.2) !important; /* Blends better */
+    margin-top: 3rem;
+    padding: 1.5rem !important;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* ===== CART BADGE & NOTIFICATION ===== */
+.cart-icon-container {
+    position: relative;
+    display: inline-block;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background-color: #D83028;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
 .add-to-cart-notification {
     position: fixed;
     top: 20px;
@@ -117,13 +258,13 @@ main {
     word-wrap: break-word;
 }
 
-.add-to-cart-notification.show {
-    transform: translateX(0);
-}
+    .add-to-cart-notification.show {
+        transform: translateX(0);
+    }
 
-.add-to-cart-notification.error {
-    background: #dc3545;
-}
+    .add-to-cart-notification.error {
+        background: #dc3545;
+    }
 
 /* Responsive design for notifications */
 @media (max-width: 768px) {
@@ -137,59 +278,9 @@ main {
     }
 }
 
-.footer-logo {
-    height: 24px;
-    width: auto;
-    margin-right: 8px;
-    vertical-align: middle;
-}
-
-.footer h6 {
-    color: #FFC72C;
-    font-weight: 700;
-}
-
-.footer p {
-    font-size: 0.9rem;
-}
-
-.footer a.text-reset {
-    text-decoration: none;
-    transition: color 0.2s ease-in-out;
-}
-
-    .footer a.text-reset:hover {
-        color: #FFC72C !important;
-        text-decoration: underline;
-    }
-
-.footer .fa-home,
-.footer .fa-envelope,
-.footer .fa-phone {
-    color: #FFC72C;
-}
-
-/* --- Cart Badge & Notification --- */
-.cart-icon-container {
-    position: relative;
-    display: inline-block;
-}
-
-.cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -10px;
-    background-color: #D83028;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 0.7rem;
-    font-weight: bold;
-}
-
-/* === Admin Dropdown Styles === */
+/* ===== ADMIN DROPDOWN STYLES ===== */
 .admin-dropdown-toggle {
-    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+    background: #dc3545;
     color: white !important;
     border-radius: 8px;
     padding: 8px 16px !important;
@@ -201,24 +292,94 @@ main {
     align-items: center !important;
     height: auto !important;
     line-height: 1.5 !important;
+    text-decoration: none !important;
 }
 
+    .admin-dropdown-toggle:hover {
+        background: #b02a37 !important;
+        color: white !important;
+        border-color: rgba(255, 255, 255, 0.2);
+        text-decoration: none !important;
+    }
+
+    .admin-dropdown-toggle:focus {
+        color: white !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        text-decoration: none !important;
+    }
+
+    .admin-dropdown-toggle:active {
+        color: white !important;
+        text-decoration: none !important;
+    }
+
+    .admin-dropdown-toggle .admin-label {
+        font-weight: 600;
+        font-size: 14px;
+        color: white !important;
+    }
+
+    .admin-dropdown-toggle:hover .admin-label {
+        color: white !important;
+    }
+
+    .admin-dropdown-toggle i {
+        color: white !important;
+    }
+
+    .admin-dropdown-toggle:hover i {
+        color: white !important;
+    }
+
+/* Override Bootstrap nav-link styles for admin button */
+.nav-link.admin-dropdown-toggle {
+    color: white !important;
+}
+
+.nav-link.admin-dropdown-toggle:hover {
+    color: white !important;
+}
+
+.nav-link.admin-dropdown-toggle:focus {
+    color: white !important;
+}
+
+.nav-link.admin-dropdown-toggle:active {
+    color: white !important;
+}
+
+/* Ensure all text elements are white */
+.nav-link.admin-dropdown-toggle * {
+    color: white !important;
+}
+
+.nav-link.admin-dropdown-toggle:hover * {
+    color: white !important;
+}
+
+/* Force text visibility on hover */
+.admin-dropdown-toggle:hover .admin-label {
+    color: white !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.admin-dropdown-toggle:hover i {
+    color: white !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Prevent any white background from hiding text */
 .admin-dropdown-toggle:hover {
-    background: linear-gradient(135deg, #b02a37 0%, #8e212e 100%);
+    background: #b02a37 !important;
     color: white !important;
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-    /* Removed transform to prevent misalignment */
 }
 
-.admin-dropdown-toggle:focus {
+/* Ensure dropdown arrow is visible */
+.admin-dropdown-toggle:hover::after {
     color: white !important;
-    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-}
-
-.admin-dropdown-toggle .admin-label {
-    font-weight: 600;
-    font-size: 14px;
+    opacity: 1 !important;
 }
 
 .admin-dropdown-menu {
@@ -230,62 +391,62 @@ main {
     margin-top: 8px;
 }
 
-.admin-dropdown-menu .dropdown-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    color: #495057;
-    font-weight: 700;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 12px 20px 8px 20px;
-    margin: 0;
-    border: none;
-    display: flex;
-    align-items: center;
-}
+    .admin-dropdown-menu .dropdown-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #495057;
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 12px 20px 8px 20px;
+        margin: 0;
+        border: none;
+        display: flex;
+        align-items: center;
+    }
 
-.admin-dropdown-menu .dropdown-header:first-child {
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-}
+        .admin-dropdown-menu .dropdown-header:first-child {
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
 
-.admin-dropdown-menu .dropdown-item {
-    padding: 12px 20px;
-    font-weight: 500;
-    color: #495057;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    border: none;
-    font-size: 14px;
-}
+    .admin-dropdown-menu .dropdown-item {
+        padding: 12px 20px;
+        font-weight: 500;
+        color: #495057;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        border: none;
+        font-size: 14px;
+    }
 
-.admin-dropdown-menu .dropdown-item:hover {
-    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
-    color: white;
-    padding-left: 24px;
-    transform: scale(1.02);
-}
+        .admin-dropdown-menu .dropdown-item:hover {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+            color: white;
+            padding-left: 24px;
+            transform: scale(1.02);
+        }
 
-.admin-dropdown-menu .dropdown-item:active {
-    background: linear-gradient(135deg, #b02a37 0%, #8e212e 100%);
-    color: white;
-}
+        .admin-dropdown-menu .dropdown-item:active {
+            background: linear-gradient(135deg, #b02a37 0%, #8e212e 100%);
+            color: white;
+        }
 
-.admin-dropdown-menu .dropdown-item i {
-    width: 18px;
-    text-align: center;
-    opacity: 0.8;
-}
+        .admin-dropdown-menu .dropdown-item i {
+            width: 18px;
+            text-align: center;
+            opacity: 0.8;
+        }
 
-.admin-dropdown-menu .dropdown-item:hover i {
-    opacity: 1;
-}
+        .admin-dropdown-menu .dropdown-item:hover i {
+            opacity: 1;
+        }
 
-.admin-dropdown-menu .dropdown-divider {
-    margin: 4px 0;
-    border-top: 1px solid #e9ecef;
-}
+    .admin-dropdown-menu .dropdown-divider {
+        margin: 4px 0;
+        border-top: 1px solid #e9ecef;
+    }
 
 /* Admin dropdown navbar alignment */
 .navbar-nav .nav-item .admin-dropdown-toggle {
@@ -306,15 +467,235 @@ main {
     .admin-dropdown-toggle .admin-label {
         display: none;
     }
-    
+
     .admin-dropdown-menu {
         min-width: 250px;
     }
-    
-    .admin-dropdown-menu .dropdown-item {
-        font-size: 13px;
-        padding: 10px 16px;
-    }
+
+        .admin-dropdown-menu .dropdown-item {
+            font-size: 13px;
+            padding: 10px 16px;
+        }
 }
 
+/* ===== FLOATING SUPPORT CHAT STYLES ===== */
+.support-chat-icon {
+    position: fixed !important;
+    bottom: 30px !important;
+    right: 30px !important;
+    width: 60px !important;
+    height: 60px !important;
+    background: linear-gradient(135deg, #D83028 0%, #b02a37 100%) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 8px 25px rgba(216, 48, 40, 0.3) !important;
+    transition: all 0.3s ease !important;
+    z-index: 9999 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
 
+    .support-chat-icon:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 12px 35px rgba(216, 48, 40, 0.4) !important;
+    }
+
+    .support-chat-icon i {
+        color: white !important;
+        font-size: 24px !important;
+    }
+
+/* Pulse animation removed - no longer needed */
+
+.support-chat-popup {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    display: none;
+    flex-direction: column;
+    z-index: 10000;
+    border: 1px solid #e9ecef;
+}
+
+.support-chat-header {
+    background: linear-gradient(135deg, #D83028 0%, #b02a37 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .support-chat-header h5 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .support-chat-header .btn-close {
+        color: white;
+        background: none;
+        border: none;
+        font-size: 18px;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+        .support-chat-header .btn-close:hover {
+            opacity: 1;
+        }
+
+.support-chat-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.support-chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 350px;
+}
+
+.support-message {
+    margin-bottom: 15px;
+}
+
+.support-message-content {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 15px;
+    border-bottom-left-radius: 5px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #495057;
+}
+
+.support-message.user-message .support-message-content {
+    background: linear-gradient(135deg, #D83028 0%, #b02a37 100%);
+    color: white;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 5px;
+    margin-left: 20px;
+}
+
+.support-chat-input {
+    padding: 15px 20px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+    .support-chat-input input {
+        flex: 1;
+        border: 1px solid #dee2e6;
+        border-radius: 25px;
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+        .support-chat-input input:focus {
+            outline: none;
+            border-color: #D83028;
+            box-shadow: 0 0 0 0.2rem rgba(216, 48, 40, 0.25);
+        }
+
+    .support-chat-input button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(135deg, #D83028 0%, #b02a37 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .support-chat-input button:hover {
+            transform: scale(1.1);
+        }
+
+/* Support Chat Authentication Prompt */
+.support-chat-auth-prompt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+}
+
+    .support-chat-auth-prompt .text-center {
+        max-width: 280px;
+    }
+
+    .support-chat-auth-prompt .btn {
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .support-chat-auth-prompt .btn-primary {
+        background: linear-gradient(135deg, #D83028 0%, #b02a37 100%);
+        border: none;
+    }
+
+        .support-chat-auth-prompt .btn-primary:hover {
+            background: linear-gradient(135deg, #b02a37 0%, #8e212e 100%);
+            transform: translateY(-2px);
+        }
+
+    .support-chat-auth-prompt .btn-outline-primary {
+        border-color: #D83028;
+        color: #D83028;
+    }
+
+        .support-chat-auth-prompt .btn-outline-primary:hover {
+            background-color: #D83028;
+            border-color: #D83028;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .support-chat-popup {
+        width: 90vw;
+        height: 60vh;
+        right: 5vw;
+        bottom: 80px;
+    }
+
+    .support-chat-icon {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+    }
+
+        .support-chat-icon i {
+            font-size: 20px;
+        }
+
+    .support-chat-auth-prompt {
+        padding: 15px;
+    }
+
+        .support-chat-auth-prompt .text-center {
+            max-width: 250px;
+        }
+}

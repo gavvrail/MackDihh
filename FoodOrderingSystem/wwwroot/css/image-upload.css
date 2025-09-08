@@ -1,0 +1,381 @@
+/* Image Upload Styles */
+.image-upload-area {
+    margin: 20px 0;
+}
+
+/* Hide upload area when hideUploadArea option is used */
+.profile-image-section .image-upload-area {
+    display: none !important;
+}
+
+.upload-zone {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.upload-zone:hover {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.upload-zone.dragover {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.upload-content {
+    pointer-events: none;
+}
+
+.upload-zone:hover .upload-content {
+    pointer-events: auto;
+}
+
+.upload-zone h5 {
+    margin: 10px 0 5px 0;
+    color: #495057;
+}
+
+.upload-zone p {
+    margin: 0;
+    color: #6c757d;
+}
+
+/* Crop Container Styles */
+.crop-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.crop-preview {
+    position: relative;
+    max-height: 400px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.crop-preview img {
+    max-width: 100%;
+    max-height: 400px;
+    display: block;
+}
+
+.crop-controls {
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.crop-controls .btn {
+    min-width: 120px;
+}
+
+/* Cropper.js Customization */
+.cropper-container {
+    font-family: inherit;
+}
+
+.cropper-view-box,
+.cropper-face {
+    border-radius: 0;
+}
+
+.cropper-line,
+.cropper-point {
+    background-color: #007bff;
+}
+
+.cropper-bg {
+    background-image: 
+        linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* Profile Image Section */
+.profile-image-section {
+    margin: 20px 0;
+}
+
+.profile-image {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-image img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* New Profile Image Container with Hover Edit */
+.profile-image-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.profile-image-container:hover {
+    /* Removed scale transform to prevent jumping */
+}
+
+.profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.profile-edit-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.profile-image-container:hover .profile-edit-overlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.profile-edit-overlay i {
+    color: white;
+    font-size: 24px;
+    background: rgba(0, 123, 255, 0.8);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Menu Item Image Section */
+.menu-item-image-section {
+    margin: 15px 0;
+}
+
+.menu-item-image {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.menu-item-image img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #dee2e6;
+}
+
+/* Loading States */
+.upload-zone.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.upload-zone.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error States */
+.upload-zone.error {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.upload-zone.error h5 {
+    color: #721c24;
+}
+
+.upload-zone.error p {
+    color: #721c24;
+}
+
+/* Success States */
+.upload-zone.success {
+    border-color: #28a745;
+    background-color: #d4edda;
+}
+
+.upload-zone.success h5 {
+    color: #155724;
+}
+
+.upload-zone.success p {
+    color: #155724;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .upload-zone {
+        padding: 30px 15px;
+    }
+    
+    .profile-photo {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .profile-edit-overlay i {
+        font-size: 20px;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+/* File Input Styling */
+input[type="file"] {
+    display: none;
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.toast {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin-bottom: 10px;
+    padding: 15px 20px;
+    min-width: 300px;
+    border-left: 4px solid #007bff;
+    animation: slideIn 0.3s ease;
+}
+
+.toast.success {
+    border-left-color: #28a745;
+}
+
+.toast.error {
+    border-left-color: #dc3545;
+}
+
+.toast.warning {
+    border-left-color: #ffc107;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Progress Bar */
+.upload-progress {
+    width: 100%;
+    height: 4px;
+    background-color: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.upload-progress-bar {
+    height: 100%;
+    background-color: #007bff;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Drag and Drop Visual Feedback */
+.upload-zone.drag-over {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+    box-shadow: 0 4px 20px rgba(0,123,255,0.3);
+}
+
+.upload-zone.drag-over .upload-content {
+    /* Removed scale transform to prevent jumping */
+}
+
+/* Accessibility */
+.upload-zone:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.upload-zone:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .upload-zone {
+        border-width: 3px;
+    }
+    
+    .crop-controls .btn {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .upload-zone,
+    .upload-content,
+    .upload-progress-bar {
+        transition: none;
+    }
+    
+    .toast {
+        animation: none;
+    }
+}

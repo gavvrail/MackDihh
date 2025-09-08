@@ -68,8 +68,11 @@ namespace FoodOrderingSystem.Models
         public string UserId { get; set; } = "";
         public ApplicationUser User { get; set; } = null!;
         
-        public int PointsRewardId { get; set; }
-        public PointsReward PointsReward { get; set; } = null!;
+        public int? PointsRewardId { get; set; }
+        public PointsReward? PointsReward { get; set; }
+        
+        public int? MenuItemId { get; set; }
+        public MenuItem? MenuItem { get; set; }
         
         public int PointsSpent { get; set; }
         public DateTime RedeemedAt { get; set; } = DateTime.UtcNow;

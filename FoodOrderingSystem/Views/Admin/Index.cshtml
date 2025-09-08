@@ -24,6 +24,9 @@
                 <div class="card-body text-center">
                     <h3 class="text-primary">@Model.TotalUsers</h3>
                     <p class="mb-0">Total Users</p>
+                    <a href="@Url.Action("Users", "Admin")" class="btn btn-sm btn-primary mt-2 admin-stat-btn">
+                        <i class="fas fa-users me-1"></i>Manage Users
+                    </a>
                 </div>
             </div>
         </div>
@@ -32,6 +35,9 @@
                 <div class="card-body text-center">
                     <h3 class="text-success">@Model.TotalMenuItems</h3>
                     <p class="mb-0">Menu Items</p>
+                    <a href="@Url.Action("Index", "MenuItems")" class="btn btn-sm btn-primary mt-2 admin-stat-btn">
+                        <i class="fas fa-utensils me-1"></i>Manage Menu
+                    </a>
                 </div>
             </div>
         </div>
@@ -40,7 +46,7 @@
                 <div class="card-body text-center">
                     <h3 class="text-info">@Model.TotalOrders</h3>
                     <p class="mb-0">Total Orders</p>
-                    <a href="@Url.Action("Orders", "Admin")" class="btn btn-sm btn-info mt-2">
+                    <a href="@Url.Action("Orders", "Admin")" class="btn btn-sm btn-primary mt-2 admin-stat-btn">
                         <i class="fas fa-list me-1"></i>Manage Orders
                     </a>
                 </div>
@@ -53,8 +59,14 @@
                     <p class="mb-0">Pending Orders</p>
                     @if (Model.PendingOrders > 0)
                     {
-                        <a href="@Url.Action("Orders", "Admin", new { status = "Pending" })" class="btn btn-sm btn-warning mt-2">
+                        <a href="@Url.Action("Orders", "Admin", new { status = "Pending" })" class="btn btn-sm btn-primary mt-2 admin-stat-btn">
                             <i class="fas fa-eye me-1"></i>View Pending
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Orders", "Admin")" class="btn btn-sm btn-primary mt-2 admin-stat-btn">
+                            <i class="fas fa-eye me-1"></i>View Orders
                         </a>
                     }
                 </div>
@@ -144,7 +156,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>Reports & Analytics
+                        <i class="fas fa-tools me-2"></i>Tools
                     </h5>
                 </div>
                 <div class="card-body">
@@ -155,7 +167,7 @@
                                     <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
                                     <h6>Sales Analytics</h6>
                                     <p class="text-muted small">View detailed sales reports and trends</p>
-                                    <a href="@Url.Action("Reports", "Admin")" class="btn btn-sm btn-outline-primary">View Sales Reports</a>
+                                    <a href="@Url.Action("Reports", "Admin")" class="btn btn-sm btn-outline-primary admin-tool-btn">View Sales Reports</a>
                                 </div>
                             </div>
                         </div>
@@ -165,7 +177,7 @@
                                     <i class="fas fa-users fa-2x text-info mb-2"></i>
                                     <h6>User Analytics</h6>
                                     <p class="text-muted small">Track user activity and engagement</p>
-                                    <a href="@Url.Action("Users", "Admin")" class="btn btn-sm btn-outline-info">View User Reports</a>
+                                    <a href="@Url.Action("Users", "Admin")" class="btn btn-sm btn-outline-primary admin-tool-btn">View User Reports</a>
                                 </div>
                             </div>
                         </div>
@@ -175,7 +187,27 @@
                                     <i class="fas fa-utensils fa-2x text-success mb-2"></i>
                                     <h6>Menu Analytics</h6>
                                     <p class="text-muted small">Analyze menu performance and popularity</p>
-                                    <a href="@Url.Action("Index", "MenuItems")" class="btn btn-sm btn-outline-success">View Menu Reports</a>
+                                    <a href="@Url.Action("Index", "MenuItems")" class="btn btn-sm btn-outline-primary admin-tool-btn">View Menu Reports</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-headset fa-2x text-warning mb-2"></i>
+                                    <h6>Customer Support</h6>
+                                    <p class="text-muted small">Manage customer support chats and inquiries</p>
+                                    <a href="@Url.Action("Index", "AdminSupport")" class="btn btn-sm btn-outline-primary admin-tool-btn">View Support</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-robot fa-2x text-info mb-2"></i>
+                                    <h6>Auto-Responses</h6>
+                                    <p class="text-muted small">Manage keyword-based auto-response rules</p>
+                                    <a href="@Url.Action("AutoResponses", "Admin")" class="btn btn-sm btn-outline-primary admin-tool-btn">Manage Rules</a>
                                 </div>
                             </div>
                         </div>
@@ -185,7 +217,7 @@
                                     <i class="fas fa-tags fa-2x text-warning mb-2"></i>
                                     <h6>Categories</h6>
                                     <p class="text-muted small">Manage menu categories and organization</p>
-                                    <a href="@Url.Action("Index", "Categories")" class="btn btn-sm btn-outline-warning">Manage Categories</a>
+                                    <a href="@Url.Action("Index", "Categories")" class="btn btn-sm btn-outline-primary admin-tool-btn">Manage Categories</a>
                                 </div>
                             </div>
                         </div>
@@ -195,7 +227,17 @@
                                     <i class="fas fa-gift fa-2x text-danger mb-2"></i>
                                     <h6>Points Rewards</h6>
                                     <p class="text-muted small">Create and manage customer reward programs</p>
-                                    <a href="@Url.Action("PointsRewards", "Admin")" class="btn btn-sm btn-outline-danger">Manage Rewards</a>
+                                    <a href="@Url.Action("PointsRewards", "Admin")" class="btn btn-sm btn-outline-primary admin-tool-btn">Manage Rewards</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-tags fa-2x text-primary mb-2"></i>
+                                    <h6>Promo Codes</h6>
+                                    <p class="text-muted small">Create and manage discount promo codes</p>
+                                    <a href="@Url.Action("PromoCodes", "Admin")" class="btn btn-sm btn-outline-primary admin-tool-btn">Manage Promo Codes</a>
                                 </div>
                             </div>
                         </div>
@@ -205,10 +247,11 @@
                                     <i class="fas fa-history fa-2x text-secondary mb-2"></i>
                                     <h6>Redemption History</h6>
                                     <p class="text-muted small">Track customer reward redemptions</p>
-                                    <a href="@Url.Action("RedemptionHistory", "Admin")" class="btn btn-sm btn-outline-secondary">View History</a>
+                                    <a href="@Url.Action("RedemptionHistory", "Admin")" class="btn btn-sm btn-outline-primary admin-tool-btn">View History</a>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>

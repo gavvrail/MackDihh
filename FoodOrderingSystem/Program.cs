@@ -1,9 +1,9 @@
-using FoodOrderingSystem.Data;
-using FoodOrderingSystem.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using FoodOrderingSystem.Data;
+using FoodOrderingSystem.Models;
 using FoodOrderingSystem.Services;
+using FoodOrderingSystem.Hubs;
 
 // --- BUILDER CREATION ---
 var builder = WebApplication.CreateBuilder(args);
@@ -13,17 +13,58 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => 
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+        // Password settings
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequiredUniqueChars = 1;
+        
+        // Lockout settings
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.AllowedForNewUsers = true;
+        
+        // User settings
+        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        options.User.RequireUniqueEmail = true;
+    })
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddTokenProvider<CustomSmsTokenProvider<ApplicationUser>>("Phone");
 
-// Register custom services
-builder.Services.AddTransient<IEmailSender, EmailSender>();
-builder.Services.AddHttpContextAccessor();
+// Configure authentication cookies for Remember Me functionality
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Cookie settings
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30); // Remember me duration
+    options.LoginPath = "/Identity/Account/Login";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.SlidingExpiration = true; // Reset expiration on activity
+    
+    // Security settings - Fixed for development
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
+        ? CookieSecurePolicy.None 
+        : CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+// Add custom services
+builder.Services.AddScoped<LoginSecurityService>();
+builder.Services.AddScoped<SmsService>();
+builder.Services.AddScoped<FileUploadService>();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<RecaptchaService>();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddHttpContextAccessor();
 
-// --- MERGE THE RECAPTCHA SERVICE REGISTRATION HERE ---
-builder.Services.AddHttpClient<RecaptchaService>();
+// Configure SignalR for real-time chat
+builder.Services.AddSignalR();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -39,6 +80,11 @@ using (var scope = app.Services.CreateScope())
     {
         SeedData.Initialize(services);
         IdentityDataSeeder.Initialize(services).Wait();
+        
+        // Seed auto-responses
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        await AutoResponseSeeder.SeedAutoResponsesAsync(context, userManager);
     }
     catch (Exception ex)
     {
@@ -56,13 +102,31 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Add security headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+    if (context.Request.IsHttps)
+    {
+        context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
+    }
+    await next();
+});
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Map SignalR hub
+app.MapHub<ChatHub>("/chatHub");
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.MapRazorPages();
 
 app.Run();

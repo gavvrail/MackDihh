@@ -1,0 +1,147 @@
+@model FoodOrderingSystem.Controllers.CreateReviewViewModel
+
+@{
+    ViewData["Title"] = $"Write Review - {Model.MenuItem.Name}";
+}
+
+@Html.AntiForgeryToken()
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/reviews.css" asp-append-version="true" />
+}
+
+<div class="reviews-container">
+    <div class="container">
+        <!-- Product Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <img src="@Url.Content(Model.MenuItem.ImageUrl ?? "/images/placeholder.png")" 
+                                     class="img-fluid rounded" 
+                                     alt="@Model.MenuItem.Name"
+                                     style="height: 150px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-6">
+                                <h2 class="mb-2">@Model.MenuItem.Name</h2>
+                                <p class="text-muted mb-2">@Model.MenuItem.Category?.Name</p>
+                                <p class="mb-3">@Model.MenuItem.Description</p>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <h3 class="text-danger mb-3">RM@Model.MenuItem.Price.ToString("F2")</h3>
+                                <a asp-controller="Reviews" asp-action="Product" asp-route-menuItemId="@Model.MenuItem.Id" class="btn btn-outline-primary">
+                                    <i class="fas fa-arrow-left me-1"></i>Back to Reviews
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Form -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="mb-4">Write Your Review</h3>
+                        
+                        <form asp-action="Create" method="post">
+                            <input type="hidden" asp-for="MenuItemId" />
+                            
+                            <!-- Rating -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Rating *</label>
+                                <div class="rating-input">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <input type="radio" asp-for="Rating" value="@i" id="rating@i" class="rating-radio" />
+                                        <label for="rating@i" class="rating-star">
+                                            <i class="fas fa-star"></i>
+                                        </label>
+                                    }
+                                </div>
+                                <span asp-validation-for="Rating" class="text-danger"></span>
+                            </div>
+
+                            <!-- Comment -->
+                            <div class="mb-4">
+                                <label asp-for="Comment" class="form-label fw-bold">Review Comment</label>
+                                <textarea asp-for="Comment" class="form-control" rows="5" 
+                                          placeholder="Share your experience with this product..."></textarea>
+                                <span asp-validation-for="Comment" class="text-danger"></span>
+                                <div class="form-text">Maximum 1000 characters</div>
+                            </div>
+
+                            <!-- Anonymous Option -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input asp-for="IsAnonymous" class="form-check-input" type="checkbox" id="isAnonymous" />
+                                    <label class="form-check-label" for="isAnonymous">
+                                        Post this review anonymously
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Anonymous Name -->
+                            <div class="mb-4" id="anonymousNameSection" style="display: none;">
+                                <label asp-for="AnonymousName" class="form-label fw-bold">Display Name</label>
+                                <input asp-for="AnonymousName" class="form-control" 
+                                       placeholder="Enter a display name for your anonymous review" />
+                                <span asp-validation-for="AnonymousName" class="text-danger"></span>
+                                <div class="form-text">This name will be shown instead of your username</div>
+                            </div>
+
+                            <!-- Submit Buttons -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-1"></i>Submit Review
+                                </button>
+                                <a asp-controller="Reviews" asp-action="Product" asp-route-menuItemId="@Model.MenuItem.Id" class="btn btn-outline-secondary">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle anonymous checkbox
+            const anonymousCheckbox = document.getElementById('isAnonymous');
+            const anonymousNameSection = document.getElementById('anonymousNameSection');
+            
+            anonymousCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    anonymousNameSection.style.display = 'block';
+                } else {
+                    anonymousNameSection.style.display = 'none';
+                }
+            });
+
+            // Handle rating stars
+            const ratingRadios = document.querySelectorAll('.rating-radio');
+            const ratingStars = document.querySelectorAll('.rating-star');
+            
+            ratingRadios.forEach((radio, index) => {
+                radio.addEventListener('change', function() {
+                    // Update star display
+                    ratingStars.forEach((star, starIndex) => {
+                        if (starIndex < index + 1) {
+                            star.classList.add('active');
+                        } else {
+                            star.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

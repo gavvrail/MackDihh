@@ -1,173 +1,270 @@
-﻿@using FoodOrderingSystem.ViewModels
-@model ReportViewModel
+﻿@model FoodOrderingSystem.Controllers.ReportsViewModel
 
 @{
-    ViewData["Title"] = "Reports Dashboard";
+    ViewData["Title"] = "Analytics & Reports";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
-    <style>
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin-bottom: 2rem;
-        }
-        .chart-card {
-            border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            border-radius: 0.75rem;
-        }
-        .chart-card .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 0.75rem 0.75rem 0 0;
-            font-weight: 600;
-        }
-        .stat-card {
-            border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            border-radius: 0.75rem;
-            transition: transform 0.2s;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-    </style>
 }
 
-<div class="admin-header">
-    <div class="container">
-        <h1>@ViewData["Title"]</h1>
-        <p class="lead mb-0">An overview of your application's activity.</p>
-    </div>
-</div>
-
-<div class="container">
-    <!-- Statistics Cards -->
-    <div class="row mb-5">
-        <!-- Total Sales Card -->
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body text-center">
-                    <div class="stat-icon text-success">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                    <h6 class="card-subtitle mb-2 text-muted">Total Sales</h6>
-                    <h2 class="card-title fw-bolder text-success">RM @Model.TotalSales.ToString("F2")</h2>
-                    <small class="text-muted">All time revenue</small>
-                </div>
-            </div>
-        </div>
-        <!-- Total Orders Card -->
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body text-center">
-                    <div class="stat-icon text-info">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <h6 class="card-subtitle mb-2 text-muted">Total Orders</h6>
-                    <h2 class="card-title fw-bolder text-info">@Model.TotalOrders</h2>
-                    <small class="text-muted">Orders placed</small>
-                </div>
-            </div>
-        </div>
-        <!-- Total Users Card -->
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body text-center">
-                    <div class="stat-icon text-primary">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h6 class="card-subtitle mb-2 text-muted">Total Users</h6>
-                    <h2 class="card-title fw-bolder text-primary">@Model.TotalUsers</h2>
-                    <small class="text-muted">Registered customers</small>
-                </div>
-            </div>
-        </div>
-        <!-- Total Menu Items Card -->
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body text-center">
-                    <div class="stat-icon text-warning">
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                    <h6 class="card-subtitle mb-2 text-muted">Menu Items</h6>
-                    <h2 class="card-title fw-bolder text-warning">@Model.TotalMenuItems</h2>
-                    <small class="text-muted">Available dishes</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Section -->
-    <div class="row">
-        <!-- Monthly Sales Trend Chart -->
-        <div class="col-lg-8 mb-4">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-line me-2"></i>Monthly Sales Trend
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="monthlySalesChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Order Status Breakdown -->
-        <div class="col-lg-4 mb-4">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-pie me-2"></i>Order Status
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="orderStatusChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Top Categories Chart -->
-        <div class="col-lg-6 mb-4">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>Top Categories
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="topCategoriesChart"></canvas>
+<div class="reports-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-chart-line me-2"></i>Analytics & Reports</h2>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" onclick="exportReport('pdf')">
+                            <i class="fas fa-file-pdf me-1"></i>Export PDF
+                        </button>
+                        <button class="btn btn-outline-success" onclick="exportReport('excel')">
+                            <i class="fas fa-file-excel me-1"></i>Export Excel
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Daily Orders Trend -->
-        <div class="col-lg-6 mb-4">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-area me-2"></i>Daily Orders (Last 7 Days)
-                    </h5>
+        <!-- Key Metrics Row -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0">RM@Model.TotalSales.ToString("F2")</h4>
+                                <p class="mb-0">Total Sales</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-dollar-sign fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="dailyOrdersChart"></canvas>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0">@Model.TotalOrders</h4>
+                                <p class="mb-0">Total Orders</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-shopping-cart fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0">RM@Model.AverageOrderValue.ToString("F2")</h4>
+                                <p class="mb-0">Avg Order Value</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-calculator fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0">@Model.TotalCustomers</h4>
+                                <p class="mb-0">Total Customers</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Performance Row -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Recent Performance (30 Days)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-primary">RM@Model.RecentSales.ToString("F2")</h3>
+                                    <p class="text-muted">Recent Sales</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-success">@Model.RecentOrders</h3>
+                                    <p class="text-muted">Recent Orders</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Customer Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-info">@Model.ActiveCustomers</h3>
+                                    <p class="text-muted">Active Customers</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-warning">@((Model.TotalCustomers > 0 ? (double)Model.ActiveCustomers / Model.TotalCustomers * 100 : 0).ToString("F1"))%</h3>
+                                    <p class="text-muted">Activity Rate</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-lg-8 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Monthly Revenue Trend</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="revenueChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Order Status Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Selling Items -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Top Selling Items</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Item Name</th>
+                                        <th>Quantity Sold</th>
+                                        <th>Revenue</th>
+                                        <th>Performance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.TopSellingItems != null && Model.TopSellingItems.Count > 0)
+                                    {
+                                        @for (int i = 0; i < Model.TopSellingItems.Count; i++)
+                                        {
+                                            var item = Model.TopSellingItems[i];
+                                            var percentage = Model.TopSellingItems.Count > 0 ? (double)item.TotalQuantity / Model.TopSellingItems[0].TotalQuantity * 100 : 0;
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-@(i < 3 ? "warning" : "secondary")">#@(i + 1)</span>
+                                                </td>
+                                                <td>@item.MenuItemName</td>
+                                                <td>@item.TotalQuantity</td>
+                                                <td>RM@item.TotalRevenue.ToString("F2")</td>
+                                                <td>
+                                                    <div class="progress" style="height: 20px;">
+                                                        <div class="progress-bar" role="progressbar" style="width: @percentage.ToString("F1")%">
+                                                            @percentage.ToString("F1")%
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">
+                                                <i class="fas fa-info-circle me-2"></i>No sales data available yet
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Revenue Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-table me-2"></i>Monthly Revenue Breakdown</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Revenue</th>
+                                        <th>Orders</th>
+                                        <th>Avg Order Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.MonthlyRevenue != null && Model.MonthlyRevenue.Count > 0)
+                                    {
+                                        @foreach (var month in Model.MonthlyRevenue)
+                                        {
+                                            <tr>
+                                                <td>@month.MonthName</td>
+                                                <td>RM@month.Revenue.ToString("F2")</td>
+                                                <td>@month.OrderCount</td>
+                                                <td>RM@(month.OrderCount > 0 ? (month.Revenue / month.OrderCount).ToString("F2") : "0.00")</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">
+                                                <i class="fas fa-info-circle me-2"></i>No monthly revenue data available yet
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -178,21 +275,76 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Pass data to the external JavaScript file
-        window.reportData = {
-            monthlySales: {
-                labels: @Html.Raw(Json.Serialize(Model.MonthlySales.Select(m => System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m.Month)))),
-                data: @Html.Raw(Json.Serialize(Model.MonthlySales.Select(m => m.Sales)))
-            },
-            orderStatus: {
-                labels: @Html.Raw(Json.Serialize(Model.OrderStatusBreakdown.Select(o => o.Status.ToString()))),
-                data: @Html.Raw(Json.Serialize(Model.OrderStatusBreakdown.Select(o => o.Count)))
-            },
-            topCategories: {
-                labels: @Html.Raw(Json.Serialize(Model.TopCategories.Select(c => c.CategoryName))),
-                data: @Html.Raw(Json.Serialize(Model.TopCategories.Select(c => c.TotalSales)))
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart');
+        if (revenueCtx) {
+            const revenueData = @Html.Raw(Json.Serialize(Model.MonthlyRevenue?.Select(m => new { Month = m.MonthName, Revenue = m.Revenue }) ?? Enumerable.Empty<object>()));
+            console.log('Revenue Data:', revenueData);
+            
+            if (revenueData && revenueData.length > 0) {
+                new Chart(revenueCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: revenueData.map(d => d.Month),
+                        datasets: [{
+                            label: 'Revenue (RM)',
+                            data: revenueData.map(d => d.Revenue),
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } else {
+                revenueCtx.getContext('2d').fillText('No revenue data available', 10, 50);
             }
-        };
+        }
+
+        // Status Chart
+        const statusCtx = document.getElementById('statusChart');
+        if (statusCtx) {
+            const statusData = @Html.Raw(Json.Serialize(Model.OrderStatusDistribution.Select(s => new { Status = s.Status.ToString(), Count = s.Count })));
+            console.log('Status Data:', statusData);
+            
+            if (statusData && statusData.length > 0) {
+                new Chart(statusCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusData.map(d => d.Status),
+                        datasets: [{
+                            data: statusData.map(d => d.Count),
+                            backgroundColor: [
+                                '#FF6384',
+                                '#36A2EB',
+                                '#FFCE56',
+                                '#4BC0C0',
+                                '#9966FF',
+                                '#FF9F40'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            } else {
+                statusCtx.getContext('2d').fillText('No status data available', 10, 50);
+            }
+        }
+
+        function exportReport(format) {
+            // Placeholder for export functionality
+            alert(`Exporting report as ${format.toUpperCase()}...`);
+        }
     </script>
-    <script src="~/js/admin-reports.js" asp-append-version="true"></script>
 }

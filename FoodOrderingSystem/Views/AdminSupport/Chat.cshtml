@@ -1,0 +1,90 @@
+@{
+    ViewData["Title"] = "Support Chat";
+    var session = ViewBag.Session as FoodOrderingSystem.Models.ChatSession;
+    var messages = ViewBag.Messages as List<FoodOrderingSystem.Models.ChatMessage>;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-support.css" asp-append-version="true" />
+}
+
+<div class="admin-chat-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">
+                                    <i class="fas fa-comments me-2"></i>Chat with @(session?.CustomerName ?? "Unknown Customer")
+                                </h5>
+                                <small>Session ID: @(session?.Id ?? 0)</small>
+                            </div>
+                            <div>
+                                <a href="@Url.Action("Index", "AdminSupport")" class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="chat-container">
+                            <div class="chat-messages" id="chatMessages">
+                                @if (messages != null && messages.Any())
+                                {
+                                    foreach (var message in messages)
+                                    {
+                                        <div class="message @(message.IsFromCustomer ? "customer" : "admin")">
+                                            <div class="message-content">
+                                                <div class="message-header">
+                                                    <strong>@message.SenderName</strong>
+                                                    <small class="text-muted">@message.Timestamp.ToString("MMM dd, yyyy HH:mm")</small>
+                                                </div>
+                                                <div class="message-text">@message.Message</div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-center text-muted py-4">
+                                        <i class="fas fa-comments fa-3x mb-3"></i>
+                                        <p>No messages in this conversation yet.</p>
+                                    </div>
+                                }
+                            </div>
+                            
+                            <div class="chat-input">
+                                <div class="input-group">
+                                    <input type="text" id="messageInput" class="form-control" placeholder="Type your reply..." maxlength="500">
+                                    <button class="btn btn-primary" id="sendButton" type="button">
+                                        <i class="fas fa-paper-plane"></i> Send
+                                    </button>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <small class="text-muted">Press Enter to send</small>
+                                    <div>
+                                        <button class="btn btn-sm btn-success" id="resolveButton" type="button">
+                                            <i class="fas fa-check"></i> Resolve
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary" id="closeButton" type="button">
+                                            <i class="fas fa-times"></i> Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const sessionId = '@(session?.Id ?? 0)';
+    </script>
+    <script src="~/js/admin-support.js" asp-append-version="true"></script>
+}

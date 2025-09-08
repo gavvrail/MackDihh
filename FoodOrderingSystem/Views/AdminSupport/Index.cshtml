@@ -1,0 +1,242 @@
+@model List<FoodOrderingSystem.Models.ChatSession>
+
+@{
+    ViewData["Title"] = "Customer Support Dashboard";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-support.css" asp-append-version="true" />
+}
+
+<div class="admin-support-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-0">
+                                    <i class="fas fa-headset me-2"></i>Customer Support Dashboard
+                                </h4>
+                                <small>Manage customer support conversations</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-light btn-sm" onclick="filterSessions('all')" id="filterAll">
+                                    <i class="fas fa-list me-1"></i>All
+                                </button>
+                                <button class="btn btn-outline-light btn-sm" onclick="filterSessions('active')" id="filterActive">
+                                    <i class="fas fa-clock me-1"></i>Ongoing
+                                </button>
+                                <button class="btn btn-outline-light btn-sm" onclick="filterSessions('resolved')" id="filterResolved">
+                                    <i class="fas fa-check-circle me-1"></i>Completed
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @Html.AntiForgeryToken()
+                        @if (Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Last Message</th>
+                                            <th>Status</th>
+                                            <th>Messages</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var session in Model)
+                                        {
+                                            var lastMessage = session.Messages.FirstOrDefault();
+                                            var statusClass = session.Status switch
+                                            {
+                                                ChatSessionStatus.Active => "badge bg-success",
+                                                ChatSessionStatus.Resolved => "badge bg-info",
+                                                ChatSessionStatus.Closed => "badge bg-secondary",
+                                                _ => "badge bg-secondary"
+                                            };
+                                            
+                                            <tr class="@(session.UnreadCount > 0 ? "table-warning" : "")" data-status="@session.Status.ToString().ToLower()">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar me-3">
+                                                            @if (!string.IsNullOrEmpty(session.Customer?.ProfilePhotoUrl))
+                                                            {
+                                                                <img src="@session.Customer.ProfilePhotoUrl" 
+                                                                     alt="@session.CustomerName" 
+                                                                     class="rounded-circle customer-avatar"
+                                                                     style="width: 40px; height: 40px; object-fit: cover;"
+                                                                     onerror="this.onerror=null;this.src='/images/default-profile.png';" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <img src="/images/default-profile.png" 
+                                                                     alt="@session.CustomerName" 
+                                                                     class="rounded-circle customer-avatar"
+                                                                     style="width: 40px; height: 40px; object-fit: cover;" />
+                                                            }
+                                                        </div>
+                                                        <div>
+                                                            <strong>@session.CustomerName</strong>
+                                                            @if (!string.IsNullOrEmpty(session.Customer?.Email))
+                                                            {
+                                                                <br><small class="text-muted">@session.Customer.Email</small>
+                                                            }
+                                                            @if (session.UnreadCount > 0)
+                                                            {
+                                                                <br><span class="badge bg-danger">@session.UnreadCount new</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if (lastMessage != null)
+                                                    {
+                                                        <div>
+                                                            <small class="text-muted">@lastMessage.Timestamp.ToString("MMM dd, yyyy HH:mm")</small>
+                                                            <div class="text-truncate" style="max-width: 200px;">
+                                                                @lastMessage.Message
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No messages</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <span class="@statusClass">@session.Status</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark">@session.MessageCount</span>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">@session.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-1">
+                                                        <a href="@Url.Action("Chat", "AdminSupport", new { sessionId = session.Id })" 
+                                                           class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-comments"></i> Chat
+                                                        </a>
+                                                        @if (session.Status == ChatSessionStatus.Active)
+                                                        {
+                                                            <button class="btn btn-sm btn-success" 
+                                                                    onclick="completeChat(@session.Id, '@session.CustomerName')"
+                                                                    title="Mark as completed">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        }
+                                                        <button class="btn btn-sm btn-danger" 
+                                                                onclick="deleteChat(@session.Id, '@session.CustomerName')"
+                                                                title="Delete chat session">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">No support sessions found</h5>
+                                <p class="text-muted">When customers send support messages, they will appear here.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Filter sessions by status
+        function filterSessions(status) {
+            const rows = document.querySelectorAll('tbody tr');
+            const buttons = document.querySelectorAll('[id^="filter"]');
+            
+            // Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById('filter' + status.charAt(0).toUpperCase() + status.slice(1)).classList.add('active');
+            
+            // Show/hide rows based on status
+            rows.forEach(row => {
+                if (status === 'all' || row.getAttribute('data-status') === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Complete chat session
+        function completeChat(sessionId, customerName) {
+            if (confirm(`Are you sure you want to mark the chat with ${customerName} as completed?`)) {
+                fetch('@Url.Action("ResolveSession", "AdminSupport")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `sessionId=${sessionId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error completing chat: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while completing the chat.');
+                });
+            }
+        }
+        
+        // Delete chat session
+        function deleteChat(sessionId, customerName) {
+            if (confirm(`Are you sure you want to permanently delete the chat with ${customerName}? This action cannot be undone.`)) {
+                fetch('@Url.Action("DeleteSession", "AdminSupport")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `sessionId=${sessionId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error deleting chat: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the chat.');
+                });
+            }
+        }
+        
+        // Initialize with 'all' filter active
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('filterAll').classList.add('active');
+        });
+    </script>
+}

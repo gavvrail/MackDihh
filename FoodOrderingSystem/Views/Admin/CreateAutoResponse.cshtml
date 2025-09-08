@@ -1,0 +1,102 @@
+@model FoodOrderingSystem.Models.AutoResponse
+
+@{
+    ViewData["Title"] = "Create Auto-Response";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-0">Create Auto-Response</h1>
+                        <p class="text-muted">Create a new keyword-based auto-response rule</p>
+                    </div>
+                    <a asp-action="AutoResponses" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                </div>
+
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plus me-2"></i>Auto-Response Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="CreateAutoResponse" method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                            
+                            <div class="mb-3">
+                                <label asp-for="Name" class="form-label">Rule Name</label>
+                                <input asp-for="Name" class="form-control" placeholder="e.g., Greeting Response" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                                <div class="form-text">A descriptive name for this auto-response rule</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Keywords" class="form-label">Keywords</label>
+                                <input asp-for="Keywords" class="form-control" placeholder="e.g., hello, hi, hey, good morning" />
+                                <span asp-validation-for="Keywords" class="text-danger"></span>
+                                <div class="form-text">Comma-separated keywords that will trigger this response</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Response" class="form-label">Response Message</label>
+                                <textarea asp-for="Response" class="form-control" rows="4" 
+                                          placeholder="Enter the auto-response message..."></textarea>
+                                <span asp-validation-for="Response" class="text-danger"></span>
+                                <div class="form-text">The message that will be sent automatically when keywords are detected</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                    <label asp-for="IsActive" class="form-check-label">
+                                        Active
+                                    </label>
+                                </div>
+                                <div class="form-text">Uncheck to disable this auto-response rule</div>
+                            </div>
+
+                            <div class="d-flex gap-2 align-items-center">
+                                <button type="submit" class="btn btn-primary rounded-pill">
+                                    <i class="fas fa-save me-2"></i>Create Auto-Response
+                                </button>
+                                <a asp-action="AutoResponses" class="btn btn-secondary rounded-pill d-flex align-items-center">
+                                    <i class="fas fa-times me-2"></i>CANCEL
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Tips for Creating Auto-Responses
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li><strong>Keywords:</strong> Use common variations of words (e.g., "hello, hi, hey")</li>
+                            <li><strong>Response:</strong> Keep messages friendly and helpful</li>
+                            <li><strong>Testing:</strong> Test your keywords in the customer support chat</li>
+                            <li><strong>Priority:</strong> More specific keywords should be created first</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

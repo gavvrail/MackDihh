@@ -6,15 +6,19 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/image-upload.css" asp-append-version="true" />
 }
 
-<div class="profile-container">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
+<div class="profile-full-width">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="fas fa-user me-2"></i>My Profile</h4>
+                    <div class="card-header @(ViewBag.IsAdmin ? "bg-danger" : "bg-primary") text-white">
+                        <h4 class="mb-0">
+                            <i class="fas @(ViewBag.IsAdmin ? "fa-user-shield" : "fa-user") me-2"></i>
+                            Your Profile
+                        </h4>
                     </div>
                     <div class="card-body">
                         @if (TempData["SuccessMessage"] != null)
@@ -33,12 +37,158 @@
                             </div>
                         }
 
+                        <!-- Profile Image Section -->
+                        <div class="profile-image-section text-center mb-4">
+                            <div class="profile-image-container">
+                                <img id="profile-photo" 
+                                     src="@(string.IsNullOrEmpty(ViewBag.ProfilePhotoUrl) ? "/images/default-profile.png" : ViewBag.ProfilePhotoUrl)" 
+                                     alt="Profile Photo" 
+                                     class="rounded-circle profile-photo"
+                                     onerror="this.src='/images/default-profile.png';">
+                                <div class="profile-edit-overlay">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </div>
+                                <input type="file" id="profile-photo-input" accept="image/*" style="display: none;">
+                            </div>
+                            
+                            <!-- Crop Interface (Hidden by default) -->
+                            <div class="crop-interface" id="cropInterface" style="display: none;">
+                                <div class="crop-preview-container">
+                                    <img id="cropImage" src="" alt="Crop Preview" style="max-width: 100%; max-height: 300px;">
+                                </div>
+                                <div class="crop-controls mt-3">
+                                    <button type="button" class="btn btn-success me-2" id="saveCropBtn">
+                                        <i class="fas fa-check me-1"></i>Save
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="cancelCropBtn">
+                                        <i class="fas fa-times me-1"></i>Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!ViewBag.IsAdmin)
+                        {
+                            <!-- Points Section (Only for regular users) -->
+                            <div class="points-section mb-4">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card bg-primary text-white">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-coins fa-2x mb-2"></i>
+                                                <h5 class="card-title">Current Points</h5>
+                                                <h3 class="mb-0">@Model.Points</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-success text-white">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-arrow-up fa-2x mb-2"></i>
+                                                <h5 class="card-title">Total Earned</h5>
+                                                <h3 class="mb-0">@Model.TotalPointsEarned</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-warning text-white">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-arrow-down fa-2x mb-2"></i>
+                                                <h5 class="card-title">Total Redeemed</h5>
+                                                <h3 class="mb-0">@Model.TotalPointsRedeemed</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a asp-controller="Deals" asp-action="Index" class="btn btn-outline-primary">
+                                        <i class="fas fa-gift me-2"></i>Redeem Points
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Admin Quick Actions (Below Profile Picture) -->
+                            <div class="admin-quick-actions mb-4">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Administrative Actions
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-danger w-100">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-danger w-100">
+                                            <i class="fas fa-users me-2"></i>Manage Users
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="Admin" asp-action="Orders" class="btn btn-outline-info w-100">
+                                            <i class="fas fa-shopping-cart me-2"></i>Manage Orders
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="Admin" asp-action="Reports" class="btn btn-outline-success w-100">
+                                            <i class="fas fa-chart-line me-2"></i>Sales Reports
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="Admin" asp-action="PromoCodes" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-tags me-2"></i>Promo Codes
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="Admin" asp-action="PointsRewards" class="btn btn-outline-danger w-100">
+                                            <i class="fas fa-gift me-2"></i>Points Rewards
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="Admin" asp-action="RedemptionHistory" class="btn btn-outline-secondary w-100">
+                                            <i class="fas fa-history me-2"></i>Redemption History
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="AdminSupport" asp-action="Index" class="btn btn-outline-warning w-100">
+                                            <i class="fas fa-headset me-2"></i>Customer Support
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="Categories" asp-action="Index" class="btn btn-outline-warning w-100">
+                                            <i class="fas fa-tags me-2"></i>Categories
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="MenuItems" asp-action="Index" class="btn btn-outline-success w-100">
+                                            <i class="fas fa-utensils me-2"></i>Menu Items
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-controller="Admin" asp-action="OrderCancellations" class="btn btn-outline-info w-100">
+                                            <i class="fas fa-times-circle me-2"></i>Order Cancellations
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <a asp-action="Security" class="btn btn-outline-secondary w-100">
+                                            <i class="fas fa-user-shield me-2"></i>My Security
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
                         <form asp-action="Update" method="post">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label asp-for="UserName" class="form-label">Username *</label>
-                                        <input asp-for="UserName" class="form-control" />
+                                        <label class="form-label fw-bold">Current Username</label>
+                                        <div class="form-control-plaintext border rounded p-2 bg-light mb-2">
+                                            @Model.UserName
+                                        </div>
+                                        <label asp-for="UserName" class="form-label">Update Username *</label>
+                                        <input asp-for="UserName" class="form-control" placeholder="Enter new username" />
                                         <span asp-validation-for="UserName" class="text-danger"></span>
                                     </div>
 
@@ -78,9 +228,14 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
-                                        <input asp-for="PhoneNumber" class="form-control" />
+                                        <label class="form-label fw-bold">Current Phone Number</label>
+                                        <div class="form-control-plaintext border rounded p-2 bg-light mb-2">
+                                            @(string.IsNullOrEmpty(Model.PhoneNumber) ? "No phone number set" : Model.PhoneNumber)
+                                        </div>
+                                        <label asp-for="PhoneNumber" class="form-label">Update Phone Number</label>
+                                        <input asp-for="PhoneNumber" class="form-control" placeholder="Enter new phone number" maxlength="11" pattern="[0-9]{10,11}" title="Please enter a valid Malaysian phone number (10-11 digits)" />
                                         <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                        <small class="form-text text-muted">Enter a valid Malaysian phone number (10-11 digits)</small>
                                     </div>
                                 </div>
 
@@ -102,6 +257,13 @@
                                         <textarea asp-for="Address" class="form-control" rows="3"></textarea>
                                         <span asp-validation-for="Address" class="text-danger"></span>
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="DateOfBirth" class="form-label">Date of Birth</label>
+                                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                        <small class="form-text text-muted">Add your birthday to receive special offers and free desserts (members only)</small>
+                                    </div>
                                 </div>
                             </div>
 
@@ -110,33 +272,45 @@
                                     <i class="fas fa-key me-2"></i>Change Password
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-2"></i>Update Profile
+                                    <i class="fas fa-save me-2"></i>
+                                    <span id="save-button-text">Update Profile</span>
+                                    <span id="unsaved-indicator" class="ms-2" style="display: none;">
+                                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                                    </span>
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="card shadow-sm mt-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Quick Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <a asp-controller="Orders" asp-action="History" class="btn btn-outline-info w-100">
-                                    <i class="fas fa-history me-2"></i>View Order History
-                                </a>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-success w-100">
-                                    <i class="fas fa-utensils me-2"></i>Browse Menu
-                                </a>
+                @if (!ViewBag.IsAdmin)
+                {
+                    <!-- Quick Actions (Only for regular users) -->
+                    <div class="card shadow-sm mt-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <a asp-controller="Orders" asp-action="History" class="btn btn-outline-info w-100">
+                                        <i class="fas fa-history me-2"></i>View Order History
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-success w-100">
+                                        <i class="fas fa-utensils me-2"></i>Browse Menu
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a asp-action="Security" class="btn btn-outline-warning w-100">
+                                        <i class="fas fa-shield-alt me-2"></i>Security Dashboard
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
     </div>
@@ -144,4 +318,118 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/image-upload.js" asp-append-version="true"></script>
+    <script>
+        // Initialize profile image uploader
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.querySelector('.profile-image-section')) {
+                // Check if ImageUploader is already initialized to prevent duplicate initialization
+                if (!window.profileImageUploaderInitialized) {
+                    new ImageUploader({
+                        target: '.profile-image-section',
+                        uploadUrl: '/Profile/UploadProfilePicture',
+                        croppedUploadUrl: '/Profile/UploadCroppedProfilePicture',
+                        hideUploadArea: true // Hide the drag-and-drop area
+                    });
+                    window.profileImageUploaderInitialized = true;
+                }
+            }
+        });
+
+        // Track form changes and warn before leaving
+        let hasUnsavedChanges = false;
+        let originalValues = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store original values
+            const usernameInput = document.querySelector('input[name="UserName"]');
+            const phoneNumberInput = document.querySelector('input[name="PhoneNumber"]');
+            
+            if (usernameInput) {
+                originalValues.username = usernameInput.value || '';
+            }
+            if (phoneNumberInput) {
+                originalValues.phoneNumber = phoneNumberInput.value || '';
+            }
+
+            // Add change listeners
+            if (usernameInput) {
+                usernameInput.addEventListener('input', checkForChanges);
+            }
+            if (phoneNumberInput) {
+                phoneNumberInput.addEventListener('input', checkForChanges);
+                
+                // Restrict to numbers only and limit to 11 digits
+                phoneNumberInput.addEventListener('input', function(e) {
+                    // Remove any non-numeric characters
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    
+                    // Limit to 11 digits
+                    if (this.value.length > 11) {
+                        this.value = this.value.substring(0, 11);
+                    }
+                });
+                
+                // Prevent non-numeric input on keypress
+                phoneNumberInput.addEventListener('keypress', function(e) {
+                    // Allow backspace, delete, tab, escape, enter
+                    if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                        // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                        (e.keyCode === 65 && e.ctrlKey === true) ||
+                        (e.keyCode === 67 && e.ctrlKey === true) ||
+                        (e.keyCode === 86 && e.ctrlKey === true) ||
+                        (e.keyCode === 88 && e.ctrlKey === true)) {
+                        return;
+                    }
+                    // Ensure that it is a number and stop the keypress
+                    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            // Add beforeunload warning
+            window.addEventListener('beforeunload', function(e) {
+                if (hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes to your profile. Are you sure you want to leave?';
+                    return e.returnValue;
+                }
+            });
+
+            // Clear unsaved changes flag when form is submitted
+            const form = document.querySelector('form[asp-action="Update"]');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    hasUnsavedChanges = false;
+                });
+            }
+        });
+
+        function checkForChanges() {
+            const usernameInput = document.querySelector('input[name="UserName"]');
+            const phoneNumberInput = document.querySelector('input[name="PhoneNumber"]');
+            
+            let currentUsername = usernameInput ? (usernameInput.value || '') : '';
+            let currentPhoneNumber = phoneNumberInput ? (phoneNumberInput.value || '') : '';
+            
+            // Check if any values have changed
+            hasUnsavedChanges = (
+                currentUsername !== originalValues.username ||
+                currentPhoneNumber !== originalValues.phoneNumber
+            );
+
+            // Update visual indicator
+            const unsavedIndicator = document.getElementById('unsaved-indicator');
+            const saveButtonText = document.getElementById('save-button-text');
+            
+            if (hasUnsavedChanges) {
+                if (unsavedIndicator) unsavedIndicator.style.display = 'inline';
+                if (saveButtonText) saveButtonText.textContent = 'Update Profile (Unsaved Changes)';
+            } else {
+                if (unsavedIndicator) unsavedIndicator.style.display = 'none';
+                if (saveButtonText) saveButtonText.textContent = 'Update Profile';
+            }
+        }
+    </script>
 } 

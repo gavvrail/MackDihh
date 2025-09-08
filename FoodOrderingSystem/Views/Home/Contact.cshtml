@@ -3,7 +3,7 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/contact.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/contact.css?v=@DateTime.Now.Ticks" asp-append-version="true" />
 }
 
 @section Scripts {
@@ -33,13 +33,13 @@
         <div class="col-lg-4 mb-5">
             <h2 class="section-title mb-4">Contact Information</h2>
             
-            <div class="contact-info-item mb-4">
-                <div class="contact-icon">
+            <div class="contact-info-item mb-4" style="display: flex !important; align-items: flex-start !important;">
+                <div class="contact-icon" style="flex-shrink: 0 !important; margin-right: 1.5rem !important;">
                     <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
                 </div>
-                <div class="contact-details">
+                <div class="contact-details" style="flex: 1 !important; min-width: 0 !important;">
                     <h5>Address</h5>
-                    <p>No.1, Jalan Alamesra,<br>Alamesra, 88450,<br>Kota Kinabalu, Sabah</p>
+                    <p class="contact-address">Kota Kinabalu, Sabah</p>
                 </div>
             </div>
 
@@ -95,7 +95,11 @@
                     </div>
                     <div class="mb-3">
                         <label for="phone" class="form-label">Phone Number</label>
-                        <input type="tel" class="form-control" id="phone">
+                        <input type="tel" class="form-control" id="phone" 
+                               pattern="[0-9+\-\s\(\)]{10,11}" 
+                               title="Phone number must be between 10 and 11 digits"
+                               placeholder="Enter your phone number (optional)">
+                        <small class="form-text text-muted">Enter a valid Malaysian phone number (10-11 digits)</small>
                     </div>
                     <div class="mb-3">
                         <label for="subject" class="form-label">Subject</label>
@@ -148,7 +152,7 @@
                                 <i class="fas fa-map-marker-alt text-primary"></i>
                                 <div>
                                     <h6 class="mb-1">Our Location</h6>
-                                    <p class="mb-0">No.1, Jalan Alamesra, Alamesra, 88450 Kota Kinabalu, Sabah</p>
+                                    <p class="mb-0">Jalan Alamesra, Kota Kinabalu, Sabah</p>
                                 </div>
                             </div>
                         </div>

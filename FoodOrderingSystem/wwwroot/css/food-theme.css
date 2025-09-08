@@ -1,0 +1,599 @@
+/* Global Food Ordering System Theme - MackDihh Logo Colors */
+
+/* Root Variables for Food Theme - Flat Colors Matching Logo */
+:root {
+    --food-primary: #ff0000;        /* Bright Red from logo */
+    --food-secondary: #ffd700;      /* Golden Yellow from logo */
+    --food-accent: #32cd32;         /* Bright Green from logo */
+    --food-warm: #ffd700;           /* Yellow accent */
+    --food-gold: #ffd700;           /* Golden yellow */
+    --food-dark: #8b4513;           /* Brown from logo */
+    --food-light: #fff8dc;          /* Light cream */
+    --food-orange: #ff8c00;         /* Orange accent */
+    --food-white: #ffffff;          /* Pure white */
+    --food-black: #000000;          /* Pure black */
+    --food-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    --food-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Global Body Styling - Flat Red Background Matching Logo */
+body {
+    background: var(--food-primary);
+    background-attachment: fixed;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="food-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23food-pattern)"/></svg>');
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Navigation Bar Styling - Flat Yellow Background */
+.navbar {
+    background: var(--food-secondary) !important;
+    box-shadow: var(--food-shadow);
+    border: none;
+    padding: 0.5rem 0;
+}
+
+.navbar-brand {
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--food-black) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand img {
+    border-radius: 10px;
+    margin-right: 0.5rem;
+}
+
+/* Cart Icon Styling */
+.navbar-nav .nav-link .fa-shopping-cart {
+    position: relative;
+    font-size: 1.2rem;
+    vertical-align: middle;
+    line-height: 1;
+}
+
+.navbar-nav .nav-link .badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 50%;
+    background: var(--food-primary);
+    color: var(--food-white);
+}
+
+.navbar-nav .nav-link {
+    color: var(--food-black) !important;
+    font-weight: 600;
+    margin: 0 0.3rem;
+    padding: 0.3rem 0.8rem !important;
+    border-radius: 25px;
+    font-size: 0.9rem;
+}
+
+.navbar-nav .nav-link:hover {
+    background: var(--food-white);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Override for admin dropdown button */
+.navbar-nav .nav-link.admin-dropdown-toggle {
+    background: #dc3545 !important;
+    color: white !important;
+}
+
+.navbar-nav .nav-link.admin-dropdown-toggle:hover {
+    background: #b02a37 !important;
+    color: white !important;
+}
+
+.navbar-nav .nav-link.admin-dropdown-toggle * {
+    color: white !important;
+}
+
+.navbar-nav .nav-link.admin-dropdown-toggle:hover * {
+    color: white !important;
+}
+
+/* Center the navigation items */
+.navbar-nav.flex-grow-1 {
+    justify-content: center;
+}
+
+/* Ensure cart widget alignment */
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-toggler {
+    border-radius: 10px;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Main Content Container */
+.main-content {
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+    padding: 2rem 0;
+    min-height: 80vh;
+    position: relative;
+    z-index: 1;
+}
+
+/* Full-width page containers */
+.home-full-width,
+.menu-full-width,
+.deals-full-width,
+.cart-full-width,
+.profile-full-width,
+.checkout-full-width {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Override min-height for deals page when user is not logged in */
+.deals-full-width.deals-login-required {
+    min-height: auto;
+}
+
+/* Card Styling - Flat Colors */
+.card {
+    border-radius: 20px;
+    box-shadow: var(--food-shadow);
+    overflow: hidden;
+    background: var(--food-white);
+}
+
+.card:hover {
+    box-shadow: var(--food-shadow-hover);
+}
+
+.card-header {
+    background: var(--food-secondary);
+    color: var(--food-black);
+    border: none;
+    padding: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-body {
+    padding: 2rem;
+    background: var(--food-white);
+}
+
+/* Override for colored cards to preserve Bootstrap colors */
+.card.bg-primary .card-body,
+.card.bg-success .card-body,
+.card.bg-warning .card-body,
+.card.bg-danger .card-body,
+.card.bg-info .card-body {
+    background: inherit !important;
+}
+
+/* Ensure text colors are preserved in colored cards */
+.card.bg-primary .card-title,
+.card.bg-success .card-title,
+.card.bg-warning .card-title,
+.card.bg-danger .card-title,
+.card.bg-info .card-title,
+.card.bg-primary h3,
+.card.bg-success h3,
+.card.bg-warning h3,
+.card.bg-danger h3,
+.card.bg-info h3,
+.card.bg-primary h5,
+.card.bg-success h5,
+.card.bg-warning h5,
+.card.bg-danger h5,
+.card.bg-info h5 {
+    color: inherit !important;
+}
+
+/* Button Styling - Flat Colors */
+.btn-primary {
+    background: var(--food-primary);
+    border-radius: 25px;
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--food-shadow);
+    color: var(--food-white);
+    position: relative;
+}
+
+.btn-primary:hover {
+    background: var(--food-primary);
+    color: var(--food-white);
+}
+
+.btn-success {
+    background: var(--food-accent);
+    border-radius: 25px;
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    color: var(--food-white);
+}
+
+.btn-danger {
+    background: var(--food-primary);
+    border-radius: 25px;
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    color: var(--food-white);
+}
+
+.btn-warning {
+    background: var(--food-secondary);
+    border-radius: 25px;
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    color: var(--food-black);
+}
+
+.btn-outline-primary {
+    color: var(--food-black) !important;
+    border-radius: 25px;
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    background: var(--food-white);
+}
+
+.btn-outline-primary:hover {
+    background: var(--food-primary);
+    border-color: var(--food-primary);
+    color: var(--food-white);
+}
+
+
+/* Form Styling - Flat Colors */
+.form-control {
+    border-radius: 15px;
+    padding: 0.8rem 1rem;
+    background: var(--food-white);
+    box-shadow: var(--food-shadow);
+}
+
+.form-control:focus {
+    border-color: var(--food-primary);
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+    background: var(--food-white);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--food-black);
+    margin-bottom: 0.5rem;
+}
+
+/* Table Styling - Flat Colors */
+.table {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--food-shadow);
+}
+
+.table thead th {
+    background: var(--food-secondary);
+    color: var(--food-black);
+    border: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem;
+}
+
+.table tbody tr:hover {
+    background: var(--food-light);
+}
+
+/* Alert Styling - Flat Colors */
+.alert {
+    border-radius: 15px;
+    padding: 1.5rem;
+    font-weight: 500;
+    box-shadow: var(--food-shadow);
+}
+
+.alert-success {
+    background: var(--food-accent);
+    color: var(--food-white);
+}
+
+.alert-danger {
+    background: var(--food-primary);
+    color: var(--food-white);
+}
+
+.alert-warning {
+    background: var(--food-secondary);
+    color: var(--food-black);
+}
+
+.alert-info {
+    background: var(--food-orange);
+    color: var(--food-white);
+}
+
+/* Badge Styling - Flat Colors */
+.badge {
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background: var(--food-primary);
+    color: var(--food-white);
+}
+
+.badge-success {
+    background: var(--food-accent);
+    color: var(--food-white);
+}
+
+.badge-warning {
+    background: var(--food-secondary);
+    color: var(--food-black);
+}
+
+.badge-danger {
+    background: var(--food-primary);
+    color: var(--food-white);
+}
+
+/* Footer Styling - Flat Colors */
+.footer {
+    background: var(--food-secondary);
+    color: var(--food-black);
+    padding: 3rem 0;
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.footer h5 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.footer p {
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+/* Food-themed Icons */
+.food-icon {
+    color: var(--food-primary);
+    margin-right: 0.5rem;
+}
+
+.food-icon-large {
+    font-size: 2rem;
+    color: var(--food-primary);
+    margin-right: 1rem;
+}
+
+/* Special Food Sections - Flat Colors */
+.food-hero {
+    background: var(--food-secondary);
+    color: var(--food-black);
+    padding: 4rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.food-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+.food-hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.food-hero p {
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hero Logo Styling */
+.hero-logo {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-logo-img {
+    max-width: 400px;
+    height: auto;
+    border-radius: 30px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.hero-logo-img:hover {
+    opacity: 0.9;
+}
+
+/* Food Menu Cards - Flat Colors */
+.food-menu-card {
+    background: var(--food-white);
+    border-radius: 20px;
+    box-shadow: var(--food-shadow);
+    overflow: hidden;
+}
+
+.food-menu-card:hover {
+    box-shadow: var(--food-shadow-hover);
+}
+
+.food-menu-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+.food-menu-card .card-body {
+    padding: 1.5rem;
+    background: var(--food-white);
+}
+
+.food-menu-card .card-title {
+    color: var(--food-black);
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.food-menu-card .card-text {
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+.food-menu-card .price {
+    color: var(--food-primary);
+    font-weight: 800;
+    font-size: 1.5rem;
+}
+
+/* Cart Styling - Flat Colors */
+.cart-item-card {
+    background: var(--food-white);
+    border-radius: 15px;
+    box-shadow: var(--food-shadow);
+    margin-bottom: 1rem;
+    padding: 1.5rem;
+    border-left: 5px solid var(--food-primary);
+}
+
+.cart-item-card:hover {
+    box-shadow: var(--food-shadow-hover);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        margin: 1rem;
+        padding: 1.5rem;
+        border-radius: 20px;
+    }
+    
+    .food-hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .food-hero p {
+        font-size: 1.1rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .hero-logo-img {
+        max-width: 250px;
+        margin-top: 2rem;
+        border-radius: 25px;
+    }
+    
+    .hero-content {
+        text-align: center !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content {
+        margin: 0.5rem;
+        padding: 1rem;
+        border-radius: 15px;
+    }
+    
+    .food-hero {
+        padding: 2rem 0;
+    }
+    
+    .food-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-logo-img {
+        max-width: 180px;
+        margin-top: 1.5rem;
+        border-radius: 20px;
+    }
+    
+    .navbar-brand {
+        font-size: 1rem;
+    }
+}
+
+/* Animation Keyframes */
+@keyframes shimmer {
+    0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+    50% { transform: translateX(100%) translateY(100%) rotate(30deg); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Loading States */
+.loading {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Food-themed Utilities */
+.text-food-primary { color: var(--food-primary) !important; }
+.text-food-secondary { color: var(--food-secondary) !important; }
+.text-food-dark { color: var(--food-dark) !important; }
+.bg-food-primary { background: var(--food-primary) !important; }
+.bg-food-gradient { background: var(--food-gradient) !important; }
+.bg-food-light { background: var(--food-gradient-light) !important; }
+.border-food { border-color: var(--food-primary) !important; }
+.shadow-food { box-shadow: var(--food-shadow) !important; }

@@ -167,6 +167,134 @@ namespace FoodOrderingSystem.Data
                     context.PointsRewards.AddRange(rewards);
                     context.SaveChanges();
                 }
+
+                // --- Seed Deals with Promo Codes ---
+                if (!context.Deals.Any())
+                {
+                    var deals = new[]
+                    {
+                        new Deal
+                        {
+                            Title = "Welcome Discount",
+                            Description = "Get 10% off your first order! Perfect for new customers.",
+                            Type = DealType.PromoCode,
+                            PromoCode = "WELCOME10",
+                            DiscountPercentage = 10.0m,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(6),
+                            IsActive = true,
+                            MaxUses = 1000,
+                            MinimumOrderAmount = 0,
+                            BadgeText = "New Customer",
+                            BadgeColor = "success",
+                            TermsAndConditions = "Valid for first-time customers only. Cannot be combined with other offers."
+                        },
+                        new Deal
+                        {
+                            Title = "Student Special",
+                            Description = "Students get 15% off any order over RM20!",
+                            Type = DealType.StudentDiscount,
+                            PromoCode = "STUDENT15",
+                            DiscountPercentage = 15.0m,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(12),
+                            IsActive = true,
+                            MaxUses = -1, // Unlimited
+                            MinimumOrderAmount = 20.0m,
+                            RequiresStudentVerification = true,
+                            BadgeText = "Student Only",
+                            BadgeColor = "primary",
+                            TermsAndConditions = "Valid student ID required. Minimum order RM20."
+                        },
+                        new Deal
+                        {
+                            Title = "Family Feast Deal",
+                            Description = "Save RM15 on orders over RM50! Perfect for family meals.",
+                            Type = DealType.BundleOffer,
+                            PromoCode = "FAMILY15",
+                            DiscountPercentage = 0,
+                            DiscountedPrice = 15.0m, // Fixed discount amount
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(3),
+                            IsActive = true,
+                            MaxUses = 500,
+                            MinimumOrderAmount = 50.0m,
+                            BadgeText = "Family Deal",
+                            BadgeColor = "warning",
+                            TermsAndConditions = "Minimum order RM50. Valid for 3 months."
+                        },
+                        new Deal
+                        {
+                            Title = "Flash Sale - 20% Off",
+                            Description = "Limited time! Get 20% off everything for the next 24 hours!",
+                            Type = DealType.FlashSale,
+                            PromoCode = "FLASH20",
+                            DiscountPercentage = 20.0m,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddDays(1),
+                            IsActive = true,
+                            MaxUses = 200,
+                            IsFlashSale = true,
+                            BadgeText = "Flash Sale",
+                            BadgeColor = "danger",
+                            TermsAndConditions = "Limited time offer. Valid for 24 hours only."
+                        },
+                        new Deal
+                        {
+                            Title = "Member Exclusive",
+                            Description = "Members get 25% off any order! Join our loyalty program.",
+                            Type = DealType.MemberDeal,
+                            PromoCode = "MEMBER25",
+                            DiscountPercentage = 25.0m,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(6),
+                            IsActive = true,
+                            MaxUses = -1,
+                            RequiresMember = true,
+                            BadgeText = "Member Only",
+                            BadgeColor = "info",
+                            TermsAndConditions = "Valid for registered members only."
+                        },
+                        new Deal
+                        {
+                            Title = "Weekend Special",
+                            Description = "Enjoy 12% off on weekends! Friday to Sunday only.",
+                            Type = DealType.SeasonalDiscount,
+                            PromoCode = "WEEKEND12",
+                            DiscountPercentage = 12.0m,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(2),
+                            IsActive = true,
+                            MaxUses = -1,
+                            IsSeasonal = true,
+                            BadgeText = "Weekend Only",
+                            BadgeColor = "secondary",
+                            TermsAndConditions = "Valid Friday to Sunday only."
+                        }
+                    };
+
+                    context.Deals.AddRange(deals);
+                    context.SaveChanges();
+                }
+                
+                // Update PointsPerItem for existing menu items based on their prices
+                UpdateMenuItemsPoints(context);
+            }
+        }
+        
+        private static void UpdateMenuItemsPoints(ApplicationDbContext context)
+        {
+            var menuItems = context.MenuItems.Where(m => m.PointsPerItem == 0).ToList();
+            
+            foreach (var item in menuItems)
+            {
+                // Set PointsPerItem based on price (1 point = RM 1.00, rounded up)
+                item.PointsPerItem = (int)Math.Ceiling(item.Price);
+            }
+            
+            if (menuItems.Any())
+            {
+                context.SaveChanges();
             }
         }
     }

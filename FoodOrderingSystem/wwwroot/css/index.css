@@ -1,9 +1,17 @@
 ﻿/* --- Homepage Specific Styles --- */
 
+/* Full-width home layout */
+.home-full-width {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
 /* Hero Section */
 .hero-section {
     position: relative;
-    height: 60vh;
+    min-height: 60vh;
     color: white;
     background-image: url('/images/background.png');
     background-repeat: no-repeat;
@@ -76,7 +84,6 @@
 }
 
     .product-card:hover {
-        transform: translateY(-10px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.12);
     }
 
@@ -151,6 +158,12 @@
     border: none;
 }
 
+/* Make announcement section image edges much smoother */
+.announcement-section img {
+    border-radius: 25px !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
     .announcement-btn:hover {
         background-color: #a60c24;
         color: white !important;
@@ -172,7 +185,6 @@
 }
 
 .feature-card:hover {
-    transform: translateY(-10px);
     box-shadow: 0 15px 35px rgba(0,0,0,0.15);
 }
 
@@ -208,7 +220,6 @@
 }
 
 .review-card:hover {
-    transform: translateY(-5px);
     box-shadow: 0 15px 35px rgba(0,0,0,0.15);
 }
 
@@ -231,11 +242,19 @@
 .review-author {
     margin-top: 1.5rem;
     line-height: 1.4; /* Controls the spacing between the name and title */
+    text-align: center;
 }
 
 .review-author strong {
     color: #2c3e50;
     font-weight: 700;
+    text-align: center;
+    display: block;
+}
+
+.review-author small {
+    text-align: center;
+    display: block;
 }
 
 /* Call to Action Section */
@@ -278,6 +297,10 @@
     padding: 0.75rem 2rem;
     font-weight: 600;
     transition: all 0.3s ease;
+    display: inline-block;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
 }
 
 .cta-buttons .btn-primary {
@@ -287,21 +310,18 @@
 }
 
 .cta-buttons .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 188, 13, 0.4);
     color: #2c3e50;
 }
 
 .cta-buttons .btn-outline-primary {
-    border-color: white;
-    color: white;
-    border-width: 2px;
+    border: 2px solid white;
+    color: #2c3e50;
+    background: white;
 }
 
 .cta-buttons .btn-outline-primary:hover {
     background: white;
     color: #2c3e50;
-    transform: translateY(-2px);
 }
 
 /* Responsive adjustments for new sections */

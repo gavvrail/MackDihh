@@ -1,5 +1,9 @@
-﻿$(function () {
-    // Use event delegation to handle clicks on buttons that might be added dynamically
+﻿// Using jQuery's document ready function for safety
+$(function () {
+    console.log('cart.js loaded.');
+
+    // Use event delegation for quantity buttons and remove buttons
+    // This ensures they work even if the cart content is updated via AJAX
     $(document).on('click', '.btn-update-quantity', function () {
         var button = $(this);
         var cartItemId = button.data('itemid');
@@ -23,27 +27,26 @@
         removeItem(cartItemId);
     });
 
+    // Checkout button is now a direct link, no JavaScript needed
+    // The button will navigate directly to /Checkout via the href attribute
+
+
+    // --- Helper Functions Below ---
+
     function updateQuantity(cartItemId, quantity) {
         var token = $('input[name="__RequestVerificationToken"]').val();
         $.post('/Cart/UpdateQuantity', { cartItemId: cartItemId, quantity: quantity, __RequestVerificationToken: token })
             .done(function (response) {
                 if (response.success) {
-                    // Update cart count
-                    updateCartCount(response.newCount);
-                    
-                    // Update subtotal
-                    updateSubtotal(response.subtotal);
-                    
-                    // Update the specific item's total
-                    var itemCard = $('[data-itemid="' + cartItemId + '"]').closest('.cart-item-card');
-                    var totalElement = itemCard.find('.card-text.fw-bold');
-                    var pricePerItem = parseFloat(itemCard.find('.card-text small').text().replace('RM', ''));
-                    var newTotal = (pricePerItem * quantity).toFixed(2);
-                    totalElement.text('RM' + newTotal);
-                    
-                    // Update quantity input
-                    itemCard.find('.quantity-input').val(quantity);
+                    // Reload the page to ensure all totals and item states are correct.
+                    // This is simpler and more reliable than updating parts of the page manually.
+                    location.reload();
+                } else {
+                    alert("There was an error updating your cart. Please try again.");
                 }
+            })
+            .fail(function () {
+                alert("A server error occurred. Please try again.");
             });
     }
 
@@ -52,45 +55,18 @@
         $.post('/Cart/RemoveItem', { cartItemId: cartItemId, __RequestVerificationToken: token })
             .done(function (response) {
                 if (response.success) {
-                    // Update cart count
-                    updateCartCount(response.newCount);
-                    
-                    // Update subtotal
-                    updateSubtotal(response.subtotal);
-                    
-                    // Remove the item card with animation
+                    // Find the card for the removed item and fade it out
                     var itemCard = $('[data-itemid="' + cartItemId + '"]').closest('.cart-item-card');
-                    itemCard.fadeOut(300, function() {
-                        itemCard.remove();
-                        
-                        // Check if cart is empty
-                        if ($('.cart-item-card').length === 0) {
-                            location.reload(); // Reload to show empty cart message
-                        }
+                    itemCard.fadeOut(400, function () {
+                        // After fading out, reload the page to update summary and cart state
+                        location.reload();
                     });
+                } else {
+                    alert("There was an error removing the item. Please try again.");
                 }
+            })
+            .fail(function () {
+                alert("A server error occurred. Please try again.");
             });
-    }
-
-    function updateCartCount(newCount) {
-        var cartBadge = $('#cart-count');
-        if (cartBadge.length) {
-            if (newCount > 0) {
-                cartBadge.text(newCount).show();
-            } else {
-                cartBadge.text('0').hide();
-            }
-        }
-    }
-
-    function updateSubtotal(subtotal) {
-        $('.summary-card .d-flex.justify-content-between span:last-child').each(function() {
-            if ($(this).prev().text().trim() === 'Subtotal') {
-                $(this).text(subtotal);
-            }
-        });
-        
-        // Update total as well
-        $('.summary-card .d-flex.justify-content-between.fw-bold.h5 span:last-child').text(subtotal);
     }
 });

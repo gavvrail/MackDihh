@@ -13,6 +13,34 @@
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/password-toggle.js" asp-append-version="true"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const rememberMeCheckbox = document.getElementById('rememberMeCheckbox');
+            const rememberMeLabel = document.querySelector('label[for="rememberMeCheckbox"]');
+            
+            if (rememberMeCheckbox && rememberMeLabel) {
+                // Add visual feedback when Remember Me is toggled
+                rememberMeCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        rememberMeLabel.style.color = '#28a745';
+                        rememberMeLabel.innerHTML = '<i class="fas fa-user-clock me-1"></i>Remember Me <i class="fas fa-check-circle text-success ms-1"></i>';
+                    } else {
+                        rememberMeLabel.style.color = '';
+                        rememberMeLabel.innerHTML = '<i class="fas fa-user-clock me-1"></i>Remember Me';
+                    }
+                });
+                
+                // Save Remember Me preference (optional - can be removed if not needed)
+                rememberMeCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        localStorage.setItem('rememberMeChecked', 'true');
+                    } else {
+                        localStorage.removeItem('rememberMeChecked');
+                    }
+                });
+            }
+        });
+    </script>
 }
 
 <div class="account-container">
@@ -35,9 +63,9 @@
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="form-check">
-                        <input class="form-check-input" asp-for="Input.RememberMe" />
-                        <label asp-for="Input.RememberMe" class="form-label">
-                            Remember me
+                        <input class="form-check-input" asp-for="Input.RememberMe" id="rememberMeCheckbox" />
+                        <label asp-for="Input.RememberMe" class="form-label" for="rememberMeCheckbox">
+                            <i class="fas fa-user-clock me-1"></i>Remember Me
                         </label>
                     </div>
                 </div>

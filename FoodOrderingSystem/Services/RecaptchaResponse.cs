@@ -11,15 +11,15 @@ namespace FoodOrderingSystem.Services
         public double Score { get; set; }
 
         [JsonPropertyName("action")]
-        public required string Action { get; set; }
+        public string? Action { get; set; }
 
         [JsonPropertyName("challenge_ts")]
-        public DateTime ChallengeTs { get; set; }
+        public DateTime? ChallengeTs { get; set; }
 
         [JsonPropertyName("hostname")]
-        public required string Hostname { get; set; }
+        public string? Hostname { get; set; }
 
         [JsonPropertyName("error-codes")]
-        public required List<string> ErrorCodes { get; set; }
+        public List<string>? ErrorCodes { get; set; }
     }
 }

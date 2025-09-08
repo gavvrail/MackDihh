@@ -9,51 +9,235 @@
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
 }
 
-<div class="admin-header">
+<div class="admin-users-header">
     <div class="container">
-        <h1>@ViewData["Title"]</h1>
-        <p class="lead mb-0">View all registered users and their assigned roles.</p>
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="admin-users-title">
+                    <i class="fas fa-users me-3"></i>@ViewData["Title"]
+                </h1>
+                <p class="admin-users-subtitle">Manage user accounts, roles, and permissions</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="admin-users-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">@Model.Count()</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">@Model.Count(u => u.Roles.Contains("Admin"))</div>
+                        <div class="stat-label">Admins</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="container">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <table class="table table-hover align-middle admin-table">
+    @Html.AntiForgeryToken()
+    <div class="admin-users-card">
+        <div class="admin-users-card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>User Management
+                </h5>
+                <div class="admin-users-actions">
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshUsers()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="admin-users-card-body">
+            <div class="table-responsive">
+                <table class="table admin-users-table">
                 <thead>
                     <tr>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Roles</th>
-                        <th>Actions</th>
+                        <th class="user-column" style="width: 150px;">
+                            <i class="fas fa-user me-1"></i>User
+                        </th>
+                        <th class="email-column" style="width: 180px;">
+                            <i class="fas fa-envelope me-1"></i>Email
+                        </th>
+                        <th class="phone-column" style="width: 100px;">
+                            <i class="fas fa-phone me-1"></i>Phone
+                        </th>
+                        <th class="points-column" style="width: 80px;">
+                            <i class="fas fa-coins me-1"></i>Points
+                        </th>
+                        <th class="role-column" style="width: 80px;">
+                            <i class="fas fa-user-tag me-1"></i>Role
+                        </th>
+                        <th class="status-column" style="width: 80px;">
+                            <i class="fas fa-circle me-1"></i>Status
+                        </th>
+                        <th class="login-column" style="width: 100px;">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </th>
+                        <th class="actions-column" style="width: 120px;">
+                            <i class="fas fa-cogs me-1"></i>Actions
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var user in Model)
                     {
-                        <tr>
-                            <td>@user.UserName</td>
-                            <td>@user.Email</td>
+                        <tr class="admin-user-row @(user.IsBlocked ? "user-blocked" : "")">
+                            <td class="user-cell">
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        <img src="@Url.Content(string.IsNullOrEmpty(user.ProfilePhotoUrl) ? "/images/default-profile.png" : user.ProfilePhotoUrl)"
+                                             alt="@user.UserName"
+                                             class="user-avatar-img"
+                                             onerror="this.onerror=null;this.src='/images/default-profile.png';" />
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name">@user.UserName</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="email-cell" title="@user.Email">
+                                <span class="email-text">@user.Email</span>
+                            </td>
                             <td>
-                                @if (user.Roles.Any())
+                                @if (!string.IsNullOrEmpty(user.PhoneNumber))
                                 {
-                                    @string.Join(", ", user.Roles)
+                                    @user.PhoneNumber
                                 }
                                 else
                                 {
-                                    <span class="text-muted">No roles assigned</span>
+                                    <text>-</text>
                                 }
                             </td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-primary btn-action" 
-                                        onclick="manageRoles('@user.UserId', '@user.UserName')">
-                                    Manage Roles
-                                </button>
+                            <td class="points-cell">
+                                <div class="points-badge">
+                                    <i class="fas fa-coins"></i>
+                                    <span class="points-value">@user.Points</span>
+                                </div>
+                            </td>
+                            <td class="role-cell">
+                                @if (user.Roles.Any())
+                                {
+                                    @foreach (var role in user.Roles)
+                                    {
+                                        <span class="role-badge @(role == "Admin" ? "role-admin" : "role-user")">
+                                            <i class="fas @(role == "Admin" ? "fa-crown" : "fa-user") me-1"></i>@role
+                                        </span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="role-badge role-none">
+                                        <i class="fas fa-question-circle me-1"></i>No Role
+                                    </span>
+                                }
+                            </td>
+                            <td class="status-cell">
+                                @if (user.IsBlocked)
+                                {
+                                    <div class="status-badge status-blocked">
+                                        <i class="fas fa-ban"></i>
+                                        <span>Blocked</span>
+                                    </div>
+                                    @if (user.BlockedUntil.HasValue)
+                                    {
+                                        <div class="status-details">
+                                            <small>Until: @user.BlockedUntil.Value.ToString("MMM dd, HH:mm")</small>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(user.BlockReason))
+                                    {
+                                        <div class="status-details">
+                                            <small>@user.BlockReason</small>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="status-badge status-active">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Active</span>
+                                    </div>
+                                }
+                            </td>
+                            <td class="login-cell">
+                                <div class="login-info">
+                                    <div class="login-attempts">
+                                        <i class="fas fa-exclamation-triangle @(user.LoginAttempts > 2 ? "text-warning" : "text-muted")"></i>
+                                        <span>@user.LoginAttempts/5</span>
+                                    </div>
+                                    @if (user.LastLoginDate.HasValue)
+                                    {
+                                        <div class="login-time">
+                                            <i class="fas fa-clock text-muted"></i>
+                                            <span>@user.LastLoginDate.Value.ToString("MMM dd, HH:mm")</span>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                            <td class="actions-cell">
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-edit" 
+                                            onclick="editUser('@user.UserId', '@user.UserName', '@user.Email', '@user.PhoneNumber')"
+                                            title="Edit User Information">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    
+                                    <button class="action-btn btn-points" 
+                                            onclick="editPoints('@user.UserId', '@user.UserName', @user.Points)"
+                                            title="Manage Points">
+                                        <i class="fas fa-coins"></i>
+                                    </button>
+                                    
+                                    @if (!user.Roles.Contains("Admin"))
+                                    {
+                                        <button class="action-btn btn-roles" 
+                                                onclick="manageRoles('@user.UserId', '@user.UserName')"
+                                                title="Manage Roles">
+                                            <i class="fas fa-user-tag"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="action-btn btn-admin" disabled 
+                                                title="Admin roles cannot be changed">
+                                            <i class="fas fa-crown"></i>
+                                        </button>
+                                    }
+                                    
+                                    @if (!user.Roles.Contains("Admin"))
+                                    {
+                                        <button class="action-btn btn-password" 
+                                                onclick="changePassword('@user.UserId', '@user.UserName')"
+                                                title="Change Password">
+                                            <i class="fas fa-key"></i>
+                                        </button>
+                                    }
+                                    
+                                    @if (!user.IsBlocked && !user.Roles.Contains("Admin"))
+                                    {
+                                        <button class="action-btn btn-block" 
+                                                onclick="blockUser('@user.UserId', '@user.UserName')"
+                                                title="Block User">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    }
+                                    else if (user.IsBlocked)
+                                    {
+                                        <button class="action-btn btn-unblock" 
+                                                onclick="unblockUser('@user.UserId', '@user.UserName')"
+                                                title="Unblock User">
+                                            <i class="fas fa-unlock"></i>
+                                        </button>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }
                 </tbody>
-            </table>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -94,6 +278,162 @@
     </div>
 </div>
 
+<!-- Block User Modal -->
+<div class="modal fade" id="blockModal" tabindex="-1" aria-labelledby="blockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blockModalLabel">Block User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="blockForm" asp-action="BlockUser" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="blockUserId" name="userId" />
+                    <p>Block user: <strong id="blockUserName"></strong></p>
+                    
+                    <div class="mb-3">
+                        <label for="blockReason" class="form-label">Reason for blocking</label>
+                        <textarea class="form-control" id="blockReason" name="reason" rows="3" required 
+                                  placeholder="Enter the reason for blocking this user..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="blockDuration" class="form-label">Block Duration (hours)</label>
+                        <select class="form-select" id="blockDuration" name="blockDurationHours">
+                            <option value="1">1 hour</option>
+                            <option value="6">6 hours</option>
+                            <option value="12">12 hours</option>
+                            <option value="24" selected>24 hours</option>
+                            <option value="48">48 hours</option>
+                            <option value="168">1 week</option>
+                            <option value="720">1 month</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Block User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordModalLabel">Change User Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="passwordForm" asp-action="ChangeUserPassword" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="passwordUserId" name="userId" />
+                    <p>Change password for user: <strong id="passwordUserName"></strong></p>
+                    
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required 
+                               minlength="6" placeholder="Enter new password...">
+                        <div class="form-text">Password must be at least 6 characters long</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required 
+                               minlength="6" placeholder="Confirm new password...">
+                        <div class="form-text">Re-enter the password to confirm</div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action will immediately change the user's password. 
+                        The user will need to use the new password for their next login.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit User Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editForm" asp-action="UpdateUserInfo" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="editUserId" name="userId" />
+                    <p>Edit information for user: <strong id="editUserName"></strong></p>
+                    
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="editEmail" name="email" required 
+                               placeholder="Enter email address...">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editPhoneNumber" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="editPhoneNumber" name="phoneNumber" 
+                               placeholder="Enter phone number...">
+                        <div class="form-text">Phone number is optional</div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> Username cannot be changed for security reasons. 
+                        Only email and phone number can be updated.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-secondary">Update Information</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Points Modal -->
+<div class="modal fade" id="pointsModal" tabindex="-1" aria-labelledby="pointsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pointsModalLabel">Edit User Points</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="pointsForm" asp-action="UpdateUserPoints" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="pointsUserId" name="userId" />
+                    <p>Edit points for user: <strong id="pointsUserName"></strong></p>
+                    <div class="mb-3">
+                        <label for="pointsAmount" class="form-label">Points Amount</label>
+                        <input type="number" class="form-control" id="pointsAmount" name="points" required 
+                               min="0" placeholder="Enter points amount...">
+                        <div class="form-text">Set the number of points for this user</div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> This will set the user's total points. Use positive numbers to add points or set a specific amount.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Update Points</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         function manageRoles(userId, userName) {
@@ -105,7 +445,101 @@
             modal.show();
         }
         
-        // Handle form submission
+        function blockUser(userId, userName) {
+            document.getElementById('blockUserId').value = userId;
+            document.getElementById('blockUserName').textContent = userName;
+            
+            // Show the modal
+            var modal = new bootstrap.Modal(document.getElementById('blockModal'));
+            modal.show();
+        }
+        
+        function changePassword(userId, userName) {
+            document.getElementById('passwordUserId').value = userId;
+            document.getElementById('passwordUserName').textContent = userName;
+            
+            // Clear previous form data
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Show the modal
+            var modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+            modal.show();
+        }
+        
+        function editUser(userId, userName, email, phoneNumber) {
+            console.log('editUser called with:', { userId, userName, email, phoneNumber });
+            
+            // Populate form fields
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUserName').textContent = userName;
+            document.getElementById('editEmail').value = email || '';
+            document.getElementById('editPhoneNumber').value = phoneNumber || '';
+            
+            // Show the modal
+            var modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }
+        
+        function editPoints(userId, userName, currentPoints) {
+            document.getElementById('pointsUserId').value = userId;
+            document.getElementById('pointsUserName').textContent = userName;
+            document.getElementById('pointsAmount').value = currentPoints;
+            
+            // Show the modal
+            var modal = new bootstrap.Modal(document.getElementById('pointsModal'));
+            modal.show();
+        }
+        
+        function unblockUser(userId, userName) {
+            if (confirm(`Are you sure you want to unblock ${userName}? This will immediately restore their access to the system.`)) {
+                fetch('@Url.Action("UnblockUser", "Admin")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('User unblocked successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error unblocking user: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while unblocking the user.');
+                });
+            }
+        }
+        
+        // Function to close all modals and remove backdrop
+        function closeAllModals() {
+            var modals = document.querySelectorAll('.modal');
+            modals.forEach(function(modal) {
+                var bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) {
+                    bsModal.hide();
+                }
+            });
+            
+            // Remove any remaining backdrop
+            var backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(function(backdrop) {
+                backdrop.remove();
+            });
+            
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+        
+        // Handle role form submission
         document.getElementById('roleForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -125,6 +559,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    closeAllModals();
                     location.reload();
                 } else {
                     alert('Error updating user role: ' + data.message);
@@ -133,7 +568,197 @@
             .catch(error => {
                 console.error('Error:', error);
                 alert('An error occurred while updating the user role.');
+                closeAllModals();
             });
         });
+        
+        // Handle block form submission
+        document.getElementById('blockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = new FormData(this);
+            var userId = formData.get('userId');
+            var reason = formData.get('reason');
+            var blockDurationHours = formData.get('blockDurationHours');
+            
+            fetch('@Url.Action("BlockUser", "Admin")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: `userId=${userId}&reason=${encodeURIComponent(reason)}&blockDurationHours=${blockDurationHours}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeAllModals();
+                    location.reload();
+                } else {
+                    alert('Error blocking user: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while blocking the user.');
+                closeAllModals();
+            });
+        });
+        
+        // Handle password form submission
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = new FormData(this);
+            var userId = formData.get('userId');
+            var newPassword = formData.get('newPassword');
+            var confirmPassword = formData.get('confirmPassword');
+            
+            // Client-side validation
+            if (newPassword.length < 6) {
+                alert('Password must be at least 6 characters long');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            // Confirm the action
+            if (!confirm('Are you sure you want to change this user\'s password? This action cannot be undone.')) {
+                return;
+            }
+            
+            fetch('@Url.Action("ChangeUserPassword", "Admin")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: `userId=${userId}&newPassword=${encodeURIComponent(newPassword)}&confirmPassword=${encodeURIComponent(confirmPassword)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Password changed successfully!');
+                    closeAllModals();
+                    location.reload();
+                } else {
+                    alert('Error changing password: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while changing the password.');
+                closeAllModals();
+            });
+        });
+        
+        // Handle edit form submission
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = new FormData(this);
+            var userId = formData.get('userId');
+            var email = formData.get('email');
+            var phoneNumber = formData.get('phoneNumber');
+            
+            // Client-side validation
+            if (!email || email.trim() === '') {
+                alert('Email address is required');
+                return;
+            }
+            
+            // Email format validation
+            var emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            // Confirm the action
+            if (!confirm('Are you sure you want to update this user\'s information?')) {
+                return;
+            }
+            
+            var token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (!token) {
+                alert('Security token not found. Please refresh the page and try again.');
+                return;
+            }
+            
+            fetch('@Url.Action("UpdateUserInfo", "Admin")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token.value
+                },
+                body: `userId=${userId}&email=${encodeURIComponent(email)}&phoneNumber=${encodeURIComponent(phoneNumber || '')}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('User information updated successfully!');
+                    closeAllModals();
+                    location.reload();
+                } else {
+                    alert('Error updating user information: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the user information.');
+                closeAllModals();
+            });
+        });
+        
+        // Add event listeners for modal cleanup
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle modal hidden events to clean up
+            var modals = document.querySelectorAll('.modal');
+            modals.forEach(function(modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    // Remove any remaining backdrop
+                    var backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach(function(backdrop) {
+                        backdrop.remove();
+                    });
+                    
+                    // Clean up body classes
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                });
+            });
+            
+            // Handle escape key to close modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeAllModals();
+                }
+            });
+            
+            // Handle clicks outside modal to close
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal-backdrop')) {
+                    closeAllModals();
+                }
+            });
+        });
+        
+        // Refresh users function
+        function refreshUsers() {
+            const refreshBtn = document.querySelector('button[onclick="refreshUsers()"]');
+            if (refreshBtn) {
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
+                refreshBtn.disabled = true;
+            }
+            
+            // Simulate refresh delay
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
     </script>
 } 

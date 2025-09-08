@@ -1,0 +1,145 @@
+/* Wishlist Popup Notifications */
+.wishlist-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    max-width: 400px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    border-left: 4px solid #007bff;
+}
+
+.wishlist-popup.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.wishlist-popup-success {
+    border-left-color: #28a745;
+}
+
+.wishlist-popup-error {
+    border-left-color: #dc3545;
+}
+
+.wishlist-popup-info {
+    border-left-color: #17a2b8;
+}
+
+.popup-content {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    position: relative;
+}
+
+.popup-icon {
+    margin-right: 12px;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.wishlist-popup-success .popup-icon {
+    color: #28a745;
+}
+
+.wishlist-popup-error .popup-icon {
+    color: #dc3545;
+}
+
+.wishlist-popup-info .popup-icon {
+    color: #17a2b8;
+}
+
+.popup-message {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.4;
+}
+
+.popup-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 12px;
+}
+
+.popup-close:hover {
+    background: #f8f9fa;
+    color: #666;
+}
+
+/* Animation for wishlist item removal */
+.wishlist-item-card {
+    transition: all 0.3s ease;
+}
+
+.wishlist-item-card.removing {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+/* Button loading states */
+.btn-wishlist .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .wishlist-popup {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+    }
+    
+    .popup-content {
+        padding: 12px;
+    }
+    
+    .popup-message {
+        font-size: 13px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .wishlist-popup {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .popup-message {
+        color: #e2e8f0;
+    }
+    
+    .popup-close {
+        color: #a0aec0;
+    }
+    
+    .popup-close:hover {
+        background: #4a5568;
+        color: #e2e8f0;
+    }
+}

@@ -8,23 +8,25 @@
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <style>
         .admin-table {
-            font-size: 1rem;
+            font-size: 0.9rem;
             min-width: 1400px;
         }
         .admin-table td {
-            padding: 1.5rem 1rem !important;
+            padding: 1rem 0.75rem !important;
             vertical-align: middle;
             white-space: nowrap;
+            font-size: 0.9rem;
         }
         .admin-table th {
-            padding: 1.5rem 1rem !important;
+            padding: 1rem 0.75rem !important;
             font-weight: 600;
             border-bottom: 2px solid #dee2e6;
-            font-size: 1.1rem;
+            font-size: 1rem;
             background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
             color: white;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
             border: none;
+            white-space: nowrap;
         }
         .admin-table th i {
             opacity: 0.9;
@@ -63,7 +65,20 @@
             margin-bottom: 2rem;
         }
         .card-body {
-            padding: 2rem;
+            padding: 1.5rem;
+        }
+        .order-number-cell {
+            max-width: 200px;
+            word-wrap: break-word;
+        }
+        .customer-name-cell {
+            max-width: 150px;
+            word-wrap: break-word;
+        }
+        .address-cell {
+            max-width: 200px;
+            word-wrap: break-word;
+            white-space: normal;
         }
         @@media (max-width: 1400px) {
             .admin-table {
@@ -154,14 +169,14 @@
                             @foreach (var order in Model)
                             {
                                 <tr class="order-row">
-                                    <td>
+                                    <td class="order-number-cell">
                                         <strong>@order.OrderNumber</strong>
                                         @if (!string.IsNullOrEmpty(order.DeliveryAddress))
                                         {
-                                            <br><small class="text-muted">@order.DeliveryAddress</small>
+                                            <br><small class="text-muted address-cell">@order.DeliveryAddress</small>
                                         }
                                     </td>
-                                    <td>@order.User?.UserName</td>
+                                    <td class="customer-name-cell">@order.User?.UserName</td>
                                     <td>@order.OrderDate.ToString("MMM dd, yyyy HH:mm")</td>
                                     <td>
                                         <span class="badge bg-@(order.Status switch {
@@ -184,66 +199,45 @@
                                         </small>
                                     </td>
                                     <td>
-                                        <div class="d-flex gap-2 flex-wrap">
+                                        <div class="d-flex gap-1 flex-wrap">
                                             <!-- View Details Button -->
                                             <button type="button" class="btn btn-sm btn-outline-info" 
-                                                    onclick="viewOrderDetails('@order.Id')" title="View Details">
-                                                <i class="fas fa-eye"></i>
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#orderDetailsModal" 
+                                                    data-order-id="@order.Id">
+                                                <i class="fas fa-eye me-1"></i>View
                                             </button>
                                             
-                                            <!-- Quick Status Buttons -->
-                                            @if (order.Status == OrderStatus.Pending)
-                                            {
-                                                <button type="button" class="btn btn-sm btn-outline-success" 
-                                                        onclick="updateOrderStatus('@order.Id', 'Confirmed')" title="Confirm Order">
-                                                    <i class="fas fa-check"></i> Confirm
+                                            <!-- Status Update Dropdown -->
+                                            <div class="dropdown d-inline-block">
+                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" 
+                                                        type="button" 
+                                                        data-bs-toggle="dropdown" 
+                                                        aria-expanded="false">
+                                                    <i class="fas fa-edit me-1"></i>Update
                                                 </button>
-                                            }
-                                            else if (order.Status == OrderStatus.Confirmed)
-                                            {
-                                                <button type="button" class="btn btn-sm btn-outline-warning" 
-                                                        onclick="updateOrderStatus('@order.Id', 'Preparing')" title="Start Preparing">
-                                                    <i class="fas fa-utensils"></i> Preparing
-                                                </button>
-                                            }
-                                            else if (order.Status == OrderStatus.Preparing)
-                                            {
-                                                <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                        onclick="updateOrderStatus('@order.Id', 'Delivering')" title="Out for Delivery">
-                                                    <i class="fas fa-motorcycle"></i> Delivering
-                                                </button>
-                                            }
-                                            else if (order.Status == OrderStatus.Ready || order.Status == OrderStatus.Delivering)
-                                            {
-                                                <button type="button" class="btn btn-sm btn-outline-success" 
-                                                        onclick="updateOrderStatus('@order.Id', 'Delivered')" title="Mark as Delivered">
-                                                    <i class="fas fa-check-circle"></i> Delivered
-                                                </button>
-                                            }
-                                            
-                                            <!-- Dropdown for More Actions -->
-                                            <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" 
-                                                        data-bs-toggle="dropdown" aria-expanded="false" title="More Actions">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end" style="min-width: 200px;">
-                                                    <li><h6 class="dropdown-header">Status Actions</h6></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Pending')">
-                                                        <i class="fas fa-clock text-warning me-2"></i>Mark as Pending</a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Confirmed')">
-                                                        <i class="fas fa-check text-info me-2"></i>Mark as Confirmed</a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Preparing')">
-                                                        <i class="fas fa-utensils text-warning me-2"></i>Mark as Preparing</a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Ready')">
-                                                        <i class="fas fa-bell text-success me-2"></i>Mark as Ready</a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Delivering')">
-                                                        <i class="fas fa-motorcycle text-primary me-2"></i>Mark as Delivering</a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus('@order.Id', 'Delivered')">
-                                                        <i class="fas fa-check-circle text-success me-2"></i>Mark as Delivered</a></li>
+                                                <ul class="dropdown-menu">
+                                                    <li><h6 class="dropdown-header">Update Order Status</h6></li>
                                                     <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item text-danger" href="#" onclick="updateOrderStatus('@order.Id', 'Cancelled')">
-                                                        <i class="fas fa-times text-danger me-2"></i>Cancel Order</a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Confirmed')">
+                                                        <i class="fas fa-check-circle text-info me-2"></i>Confirm Order
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Preparing')">
+                                                        <i class="fas fa-utensils text-primary me-2"></i>Start Preparing
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Ready')">
+                                                        <i class="fas fa-check text-success me-2"></i>Mark Ready
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Delivering')">
+                                                        <i class="fas fa-truck text-info me-2"></i>Start Delivery
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Delivered')">
+                                                        <i class="fas fa-home text-secondary me-2"></i>Mark Delivered
+                                                    </a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#" onclick="updateOrderStatus(@order.Id, 'Cancelled')">
+                                                        <i class="fas fa-times-circle me-2"></i>Cancel Order
+                                                    </a></li>
                                                 </ul>
                                             </div>
                                         </div>

@@ -1,5 +1,6 @@
 ﻿// This using statement is now correct
 using FoodOrderingSystem.Data;
+using FoodOrderingSystem.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
@@ -17,13 +18,62 @@ namespace FoodOrderingSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortBy = "name")
         {
-            var categories = await _context.Categories
-                                           .Include(c => c.MenuItems)
-                                           .ToListAsync();
+            var query = _context.MenuItems
+                .Include(m => m.Category)
+                .Where(m => m.IsAvailable);
 
-            return View(categories);
+            // Apply sorting
+            switch (sortBy.ToLower())
+            {
+                case "price-low":
+                    query = query.OrderBy(m => m.Price);
+                    break;
+                case "price-high":
+                    query = query.OrderByDescending(m => m.Price);
+                    break;
+                case "rating":
+                    query = query.OrderByDescending(m => m.AverageRating);
+                    break;
+                case "popular":
+                    query = query.OrderByDescending(m => m.TotalReviews);
+                    break;
+                case "newest":
+                    query = query.OrderByDescending(m => m.CreatedDate);
+                    break;
+                case "name":
+                default:
+                    query = query.OrderBy(m => m.Name);
+                    break;
+            }
+
+            var menuItems = await query.ToListAsync();
+            var categories = await _context.Categories.ToListAsync();
+
+            // Get user's wishlist items if authenticated
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var wishlistItemIds = new HashSet<int>();
+            
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var wishlistIds = await _context.WishListItems
+                    .Where(w => w.UserId == userId)
+                    .Select(w => w.MenuItemId)
+                    .ToListAsync();
+                wishlistItemIds = wishlistIds.ToHashSet();
+            }
+
+            var viewModel = new MenuViewModel
+            {
+                MenuItems = menuItems,
+                Categories = categories,
+                SelectedSortBy = sortBy,
+                SelectedCategory = "",
+                WishlistItemIds = wishlistItemIds
+            };
+
+            return View(viewModel);
         }
 
         [Authorize]
@@ -42,6 +92,14 @@ namespace FoodOrderingSystem.Controllers
             if (user == null || menuItem == null)
             {
                 return NotFound();
+            }
+
+            // Check if user is a member
+            bool isMember = user.IsMember && user.MemberExpiryDate > DateTime.UtcNow;
+            if (!isMember)
+            {
+                TempData["ErrorMessage"] = "You must be a member to redeem points. Become a member to unlock this feature!";
+                return RedirectToAction("MemberPurchase", "Deals");
             }
 
             // Calculate points required based on PointsPerItem field
@@ -71,7 +129,7 @@ namespace FoodOrderingSystem.Controllers
             var userRedemption = new UserRedemption
             {
                 UserId = userId,
-                PointsRewardId = 0, // We'll use 0 for direct menu item redemptions
+                MenuItemId = menuItemId, // Link to the specific menu item
                 PointsSpent = pointsRequired,
                 RedeemedAt = DateTime.UtcNow,
                 RedemptionCode = redemptionCode

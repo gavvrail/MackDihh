@@ -1,0 +1,183 @@
+@model FoodOrderingSystem.Models.Order
+
+@{
+    ViewData["Title"] = "Track Order";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/orders.css" asp-append-version="true" />
+}
+
+<div class="tracking-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-truck me-2"></i>Track Your Order</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Order Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Order Details</h5>
+                                <p><strong>Order Number:</strong> @Model.OrderNumber</p>
+                                <p><strong>Order Date:</strong> @Model.OrderDate.ToString("MMM dd, yyyy HH:mm")</p>
+                                <p><strong>Total Amount:</strong> RM@Model.Total.ToString("F2")</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Delivery Information</h5>
+                                <p><strong>Address:</strong> @Model.DeliveryAddress</p>
+                                <p><strong>Phone:</strong> @Model.PhoneNumber</p>
+                                @if (!string.IsNullOrEmpty(Model.DeliveryInstructions))
+                                {
+                                    <p><strong>Instructions:</strong> @Model.DeliveryInstructions</p>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Order Status Timeline -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Order Status</h5>
+                                <div class="timeline">
+                                    <div class="timeline-item @(Model.Status >= OrderStatus.Pending ? "completed" : "")">
+                                        <div class="timeline-marker">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <h6>Order Placed</h6>
+                                            <p>Your order has been received and is being processed.</p>
+                                            <small class="text-muted">@Model.OrderDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="timeline-item @(Model.Status >= OrderStatus.Confirmed ? "completed" : "")">
+                                        <div class="timeline-marker">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <h6>Order Confirmed</h6>
+                                            <p>Your order has been confirmed and is being prepared.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="timeline-item @(Model.Status >= OrderStatus.Preparing ? "completed" : "")">
+                                        <div class="timeline-marker">
+                                            <i class="fas fa-utensils"></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <h6>Preparing</h6>
+                                            <p>Our chefs are preparing your delicious meal.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="timeline-item @(Model.Status >= OrderStatus.Ready ? "completed" : "")">
+                                        <div class="timeline-marker">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <h6>Ready for Delivery</h6>
+                                            <p>Your order is ready and waiting for pickup.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="timeline-item @(Model.Status >= OrderStatus.OutForDelivery ? "completed" : "")">
+                                        <div class="timeline-marker">
+                                            <i class="fas fa-truck"></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <h6>Out for Delivery</h6>
+                                            <p>Your order is on its way to you!</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="timeline-item @(Model.Status >= OrderStatus.Delivered ? "completed" : "")">
+                                        <div class="timeline-marker">
+                                            <i class="fas fa-home"></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <h6>Delivered</h6>
+                                            <p>Your order has been delivered successfully.</p>
+                                            @if (Model.ActualDeliveryTime.HasValue)
+                                            {
+                                                <small class="text-muted">@Model.ActualDeliveryTime.Value.ToString("MMM dd, yyyy HH:mm")</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estimated Delivery Time -->
+                        @if (Model.EstimatedDeliveryTime.HasValue)
+                        {
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-clock me-2"></i>
+                                        <strong>Estimated Delivery Time:</strong> @Model.EstimatedDeliveryTime.Value.ToString("MMM dd, yyyy HH:mm")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Delivery Map (Placeholder) -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Delivery Location</h5>
+                                <div class="map-container">
+                                    <div id="deliveryMap" style="height: 300px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="text-center text-muted">
+                                            <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+                                            <p>Delivery Map</p>
+                                            <small>Interactive map would be displayed here</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6>Need Help?</h6>
+                                        <p class="mb-2">If you have any questions about your order, please contact us:</p>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <a href="tel:+60123456789" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-phone me-1"></i>Call Us
+                                                </a>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button class="btn btn-outline-success btn-sm" onclick="toggleSupportChat()">
+                                                    <i class="fas fa-comments me-1"></i>Live Chat
+                                                </button>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <a asp-controller="Orders" asp-action="History" class="btn btn-outline-info btn-sm">
+                                                    <i class="fas fa-history me-1"></i>Order History
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh order status every 30 seconds
+        setInterval(function() {
+            location.reload();
+        }, 30000);
+    </script>
+}

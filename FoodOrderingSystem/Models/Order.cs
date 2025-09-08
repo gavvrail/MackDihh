@@ -79,6 +79,9 @@ namespace FoodOrderingSystem.Models
         [StringLength(1000)]
         public string? Notes { get; set; }
         
+        [StringLength(50)]
+        public string? PromoCode { get; set; }
+        
         // Navigation Properties
         public List<OrderItem> OrderItems { get; set; } = new();
     }

@@ -27,6 +27,7 @@ namespace FoodOrderingSystem.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
                 .ThenInclude(ci => ci.MenuItem)
@@ -182,23 +183,7 @@ namespace FoodOrderingSystem.Controllers
             return await GetCartSummary();
         }
 
-        // GET: /Cart/Checkout
-        public async Task<IActionResult> Checkout()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var cart = await _context.Carts
-                .Include(c => c.CartItems)
-                .ThenInclude(ci => ci.MenuItem)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
 
-            if (cart == null || !cart.CartItems.Any())
-            {
-                TempData["ErrorMessage"] = "Your cart is empty.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            return RedirectToAction("Index", "Checkout");
-        }
 
         private async Task<JsonResult> GetCartSummary()
         {
@@ -211,7 +196,7 @@ namespace FoodOrderingSystem.Controllers
             decimal subtotal = cart?.CartItems.Sum(item => item.Quantity * item.MenuItem.Price) ?? 0;
             int newCount = await _cartService.GetCartItemCountAsync();
 
-            return Json(new { success = true, subtotal = subtotal.ToString("C"), newCount });
+            return Json(new { success = true, subtotal = "RM " + subtotal.ToString("F2"), newCount });
         }
     }
 }

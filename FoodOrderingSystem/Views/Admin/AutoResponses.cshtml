@@ -1,0 +1,176 @@
+@model IEnumerable<FoodOrderingSystem.Models.AutoResponse>
+
+@{
+    ViewData["Title"] = "Auto-Response Management";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-0">Auto-Response Management</h1>
+                        <p class="text-muted">Manage keyword-based auto-responses for customer support</p>
+                    </div>
+                    <a asp-action="CreateAutoResponse" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create New Auto-Response
+                    </a>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-robot me-2"></i>Auto-Response Rules
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Keywords</th>
+                                            <th>Response</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var autoResponse in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <strong>@autoResponse.Name</strong>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark">@autoResponse.Keywords</span>
+                                                </td>
+                                                <td>
+                                                    <div class="text-truncate" style="max-width: 300px;" title="@autoResponse.Response">
+                                                        @autoResponse.Response
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge @(autoResponse.IsActive ? "bg-success" : "bg-secondary")">
+                                                        @(autoResponse.IsActive ? "Active" : "Inactive")
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        @autoResponse.CreatedAt.ToString("MMM dd, yyyy")
+                                                        @if (autoResponse.Creator != null)
+                                                        {
+                                                            <text><br />by @autoResponse.Creator.UserName</text>
+                                                        }
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-1">
+                                                        <a asp-action="EditAutoResponse" asp-route-id="@autoResponse.Id" 
+                                                           class="btn btn-sm btn-outline-primary" title="Edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <button class="btn btn-sm @(autoResponse.IsActive ? "btn-outline-warning" : "btn-outline-success")" 
+                                                                onclick="toggleStatus(@autoResponse.Id, @autoResponse.IsActive.ToString().ToLower())"
+                                                                title="@(autoResponse.IsActive ? "Deactivate" : "Activate")">
+                                                            <i class="fas @(autoResponse.IsActive ? "fa-pause" : "fa-play")"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger" 
+                                                                onclick="deleteAutoResponse(@autoResponse.Id, '@autoResponse.Name')"
+                                                                title="Delete">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-robot fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">No auto-responses found</h5>
+                                <p class="text-muted">Create your first auto-response rule to get started.</p>
+                                <a asp-action="CreateAutoResponse" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Create Auto-Response
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleStatus(id, isActive) {
+            const action = isActive ? 'deactivate' : 'activate';
+            if (confirm(`Are you sure you want to ${action} this auto-response?`)) {
+                fetch('@Url.Action("ToggleAutoResponseStatus", "Admin")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `id=${id}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error updating auto-response status: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the auto-response status.');
+                });
+            }
+        }
+
+        function deleteAutoResponse(id, name) {
+            if (confirm(`Are you sure you want to delete the auto-response "${name}"? This action cannot be undone.`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("DeleteAutoResponse", "Admin")';
+                
+                const token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = '__RequestVerificationToken';
+                token.value = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = id;
+                
+                form.appendChild(token);
+                form.appendChild(idInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+}

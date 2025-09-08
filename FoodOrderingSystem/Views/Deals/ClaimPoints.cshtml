@@ -1,0 +1,204 @@
+@{
+    ViewData["Title"] = "Claim Points & Rewards";
+}
+
+@section Styles {
+    <style>
+        .reward-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .reward-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-color: #007bff;
+        }
+        .reward-card.claimed {
+            opacity: 0.7;
+            background-color: #f8f9fa;
+        }
+        .points-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+        .cart-status {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+    </style>
+}
+
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 text-primary">🎁 Claim Points & Rewards</h1>
+        <p class="lead text-muted">Redeem your points for exclusive rewards and discounts</p>
+    </div>
+
+    <!-- Cart Status Check -->
+    <div class="cart-status text-center">
+        <h4><i class="fas fa-shopping-cart me-2"></i>Cart Status</h4>
+        <p class="mb-0">
+            @if (ViewBag.CartItemCount > 0)
+            {
+                <span class="badge bg-success fs-6">✅ Active Cart</span>
+                <span class="ms-3">Items in cart: <strong>@ViewBag.CartItemCount</strong></span>
+            }
+            else
+            {
+                <span class="badge bg-danger fs-6">❌ Empty Cart</span>
+                <span class="ms-3">Add items to your cart to claim rewards</span>
+            }
+        </p>
+    </div>
+
+    @if (ViewBag.CartItemCount > 0)
+    {
+        <!-- Available Rewards -->
+        <div class="row">
+            <div class="col-12">
+                <h3 class="mb-4"><i class="fas fa-gift me-2"></i>Available Rewards</h3>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            @if (ViewBag.AvailableRewards != null && ViewBag.AvailableRewards.Count > 0)
+            {
+                @foreach (var reward in ViewBag.AvailableRewards)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card reward-card h-100">
+                            <div class="card-body text-center">
+                                <div class="points-badge mb-3">
+                                    <i class="fas fa-star me-1"></i>@reward.PointsRequired Points
+                                </div>
+                                <h5 class="card-title">@reward.Title</h5>
+                                <p class="card-text text-muted">@reward.Description</p>
+                                
+                                @if (reward.DiscountPercentage > 0)
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-percentage me-1"></i>
+                                        <strong>@reward.DiscountPercentage%</strong> Discount
+                                    </div>
+                                }
+                                
+                                <button class="btn btn-primary btn-claim-reward" 
+                                        data-reward-id="@reward.Id" 
+                                        data-reward-name="@reward.Name">
+                                    <i class="fas fa-gift me-1"></i>Claim Reward
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <div class="text-center p-5 bg-light rounded">
+                        <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                        <h4>No Rewards Available</h4>
+                        <p class="text-muted">Check back later for new rewards and promotions!</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- How It Works -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h4><i class="fas fa-question-circle me-2"></i>How It Works</h4>
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-shopping-cart fa-2x"></i>
+                                </div>
+                                <p class="mt-2"><strong>1. Add Items</strong><br>Fill your cart with menu items</p>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-gift fa-2x"></i>
+                                </div>
+                                <p class="mt-2"><strong>2. Claim Reward</strong><br>Choose and claim your reward</p>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-credit-card fa-2x"></i>
+                                </div>
+                                <p class="mt-2"><strong>3. Checkout</strong><br>Apply reward during checkout</p>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-smile fa-2x"></i>
+                                </div>
+                                <p class="mt-2"><strong>4. Enjoy!</strong><br>Save money on your order</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty Cart Message -->
+        <div class="text-center p-5 bg-light rounded">
+            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+            <h4>Your Cart is Empty</h4>
+            <p class="text-muted">You need to add items to your cart before you can claim rewards.</p>
+            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="fas fa-utensils me-2"></i>Browse Menu
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.btn-claim-reward').click(function() {
+                const button = $(this);
+                const rewardId = button.data('reward-id');
+                const rewardName = button.data('reward-name');
+                
+                if (confirm(`Are you sure you want to claim "${rewardName}"?`)) {
+                    button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Claiming...');
+                    
+                    $.post('@Url.Action("ClaimPoints", "Deals")', { 
+                        rewardId: rewardId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    })
+                    .done(function(response) {
+                        if (response.success) {
+                            // Show success message
+                            alert(response.message);
+                            
+                            // Disable button and mark as claimed
+                            button.removeClass('btn-primary').addClass('btn-secondary')
+                                  .prop('disabled', true)
+                                  .html('<i class="fas fa-check me-1"></i>Claimed');
+                            
+                            // Add claimed class to card
+                            button.closest('.reward-card').addClass('claimed');
+                        } else {
+                            alert('Error: ' + response.message);
+                            button.prop('disabled', false).html('<i class="fas fa-gift me-1"></i>Claim Reward');
+                        }
+                    })
+                    .fail(function() {
+                        alert('An error occurred while claiming the reward. Please try again.');
+                        button.prop('disabled', false).html('<i class="fas fa-gift me-1"></i>Claim Reward');
+                    });
+                }
+            });
+        });
+    </script>
+}

@@ -57,27 +57,27 @@
                             <div class="card-body">
                                 <!-- Reward Info -->
                                 <div class="text-center mb-3">
-                                    @if (!string.IsNullOrEmpty(redemption.PointsReward.ImageUrl))
+                                    @if (!string.IsNullOrEmpty(redemption.PointsReward?.ImageUrl))
                                     {
-                                        <img src="@Url.Content(redemption.PointsReward.ImageUrl)" alt="@redemption.PointsReward.Title" class="img-fluid rounded mb-2" style="max-height: 100px; object-fit: cover;">
+                                        <img src="@Url.Content(redemption.PointsReward?.ImageUrl ?? "")" alt="@(redemption.PointsReward?.Title ?? "Reward")" class="img-fluid rounded mb-2" style="max-height: 100px; object-fit: cover;">
                                     }
-                                    <h5 class="card-title">@redemption.PointsReward.Title</h5>
-                                    <p class="text-muted small">@redemption.PointsReward.Description</p>
+                                    <h5 class="card-title">@(redemption.PointsReward?.Title ?? "Reward")</h5>
+                                    <p class="text-muted small">@(redemption.PointsReward?.Description ?? "")</p>
                                 </div>
 
                                 <!-- Discount Value -->
                                 <div class="text-center mb-3">
-                                    @if (redemption.PointsReward.DiscountAmount > 0)
+                                    @if (redemption.PointsReward?.DiscountAmount > 0)
                                     {
                                         <div class="discount-value">
-                                            <span class="display-6 text-success fw-bold">RM@redemption.PointsReward.DiscountAmount.ToString("F2")</span>
+                                            <span class="display-6 text-success fw-bold">RM@(redemption.PointsReward?.DiscountAmount.ToString("F2") ?? "0.00")</span>
                                             <small class="text-muted d-block">OFF your next order</small>
                                         </div>
                                     }
-                                    @if (redemption.PointsReward.DiscountPercentage > 0)
+                                    @if (redemption.PointsReward?.DiscountPercentage > 0)
                                     {
                                         <div class="discount-value">
-                                            <span class="display-6 text-success fw-bold">@redemption.PointsReward.DiscountPercentage%</span>
+                                            <span class="display-6 text-success fw-bold">@(redemption.PointsReward?.DiscountPercentage ?? 0)%</span>
                                             <small class="text-muted d-block">OFF your next order</small>
                                         </div>
                                     }

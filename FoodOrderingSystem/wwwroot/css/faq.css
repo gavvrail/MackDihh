@@ -1,8 +1,17 @@
 /* FAQ Page Styles */
 .faq-container {
     background: #ff9800;
-    min-height: 100vh;
+    min-height: calc(100vh - 200px);
     padding: 2rem 0;
+}
+
+.faq-hero {
+    background: #ff9800;
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
 .faq-header {

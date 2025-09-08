@@ -1,0 +1,616 @@
+@model FoodOrderingSystem.Models.Deal
+
+@{
+    ViewData["Title"] = "Create Promo Code";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <style>
+        .form-control.disabled,
+        .form-control:disabled {
+            background-color: #e9ecef !important;
+            color: #6c757d !important;
+            cursor: not-allowed !important;
+            opacity: 0.65 !important;
+        }
+        
+        .form-control.disabled:focus,
+        .form-control:disabled:focus {
+            background-color: #e9ecef !important;
+            border-color: #ced4da !important;
+            box-shadow: none !important;
+        }
+    </style>
+}
+
+<div class="create-promo-container" style="min-height: 80vh; padding-bottom: 100px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-plus me-2"></i>Create New Promo Code</h4>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="CreatePromoCode" method="post" id="createPromoForm">
+                            @Html.AntiForgeryToken()
+                            
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div class="alert alert-danger">
+                                    <h6>Please fix the following errors:</h6>
+                                    <ul class="mb-0">
+                                        @foreach (var kvp in ViewData.ModelState)
+                                        {
+                                            @if (kvp.Value.Errors.Any())
+                                            {
+                                                <li><strong>@kvp.Key:</strong> @string.Join(", ", kvp.Value.Errors.Select(e => e.ErrorMessage))</li>
+                                            }
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            <!-- Basic Information Section -->
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                                
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                            <label asp-for="Title" class="form-label fw-bold">Promo Name *</label>
+                                        <input asp-for="Title" class="form-control" placeholder="e.g., Welcome Discount" />
+                                        <span asp-validation-for="Title" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                            <label asp-for="PromoCode" class="form-label fw-bold">Promo Code *</label>
+                                        <input asp-for="PromoCode" class="form-control" placeholder="e.g., WELCOME10" style="text-transform: uppercase;" />
+                                        <span asp-validation-for="PromoCode" class="text-danger"></span>
+                                            <small class="form-text text-muted">Customers will enter this code at checkout</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                    <label asp-for="Description" class="form-label fw-bold">Description</label>
+                                    <textarea asp-for="Description" class="form-control" rows="2" placeholder="Brief description of the offer..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Discount Settings Section -->
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3"><i class="fas fa-percentage me-2"></i>Discount Settings</h5>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                            <label asp-for="DiscountPercentage" class="form-label fw-bold">Discount Percentage (%)</label>
+                                            <input asp-for="DiscountPercentage" class="form-control" type="number" step="1" min="0" max="100" placeholder="10" />
+                                        <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
+                                            <small class="form-text text-muted">e.g., 10 for 10% off</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                                                                    <label asp-for="DiscountedPrice" class="form-label fw-bold">Fixed Discount Amount (RM)</label>
+                                        <input asp-for="DiscountedPrice" class="form-control" type="number" step="0.01" placeholder="5.00" />
+                                        <span asp-validation-for="DiscountedPrice" class="text-danger"></span>
+                                        <small class="form-text text-muted">e.g., 5.00 for RM5 off (leave empty for 0)</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="MinimumOrderAmount" class="form-label fw-bold">Minimum Order Amount (RM)</label>
+                                    <input asp-for="MinimumOrderAmount" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                                    <span asp-validation-for="MinimumOrderAmount" class="text-danger"></span>
+                                    <small class="form-text text-muted">Leave empty for no minimum order requirement</small>
+                                </div>
+                            </div>
+
+                            <!-- Validity Period Section -->
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3"><i class="fas fa-calendar-alt me-2"></i>Validity Period</h5>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                            <label asp-for="StartDate" class="form-label fw-bold">Start Date *</label>
+                                        <input asp-for="StartDate" class="form-control" type="datetime-local" />
+                                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                            <label asp-for="EndDate" class="form-label fw-bold">End Date</label>
+                                            <input asp-for="EndDate" class="form-control" type="datetime-local" id="endDateInput" />
+                                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                                    <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="unlimitedExpiry" />
+                                        <label class="form-check-label fw-bold" for="unlimitedExpiry">
+                                            <i class="fas fa-infinity me-1"></i>Never Expires
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Usage Limits Section -->
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3"><i class="fas fa-users me-2"></i>Usage Limits</h5>
+                                
+                                    <div class="mb-3">
+                                    <label asp-for="MaxUses" class="form-label fw-bold">Uses Per Account</label>
+                                    <input asp-for="MaxUses" class="form-control" type="number" min="-1" placeholder="1" />
+                                    <span asp-validation-for="MaxUses" class="text-danger"></span>
+                                    <small class="form-text text-muted">-1 for unlimited uses per account, or set how many times each customer can use this code</small>
+                                </div>
+                            </div>
+
+                            <!-- Advanced Options (Collapsible) -->
+                            <div class="mb-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <h5 class="text-primary mb-0 me-3"><i class="fas fa-cog me-2"></i>Advanced Options</h5>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#advancedOptions">
+                                        <i class="fas fa-chevron-down me-1"></i>Show/Hide
+                                    </button>
+                                </div>
+                                
+                                <div class="collapse" id="advancedOptions">
+                                    <div class="card card-body bg-light">
+                                        <!-- Restrictions -->
+                            <div class="mb-3">
+                                            <h6 class="fw-bold">Restrictions</h6>
+                                <div class="form-check">
+                                    <input asp-for="RequiresMember" class="form-check-input" />
+                                    <label asp-for="RequiresMember" class="form-check-label">
+                                        Requires Member Status
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="RequiresStudentVerification" class="form-check-input" />
+                                    <label asp-for="RequiresStudentVerification" class="form-check-label">
+                                        Requires Student Verification
+                                    </label>
+                                </div>
+                            </div>
+
+                                        <!-- Display Options -->
+                                        <div class="mb-3">
+                                            <h6 class="fw-bold">Display Options</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label asp-for="BadgeText" class="form-label">Badge Text</label>
+                                                    <input asp-for="BadgeText" class="form-control" placeholder="e.g., New Customer" />
+                                                    <span asp-validation-for="BadgeText" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label asp-for="BadgeColor" class="form-label">Badge Color</label>
+                                                    <select asp-for="BadgeColor" class="form-select">
+                                                        <option value="primary">Primary (Blue)</option>
+                                                        <option value="success">Success (Green)</option>
+                                                        <option value="danger">Danger (Red)</option>
+                                                        <option value="warning">Warning (Yellow)</option>
+                                                        <option value="info">Info (Light Blue)</option>
+                                                        <option value="secondary">Secondary (Gray)</option>
+                                                        <option value="dark">Dark</option>
+                                                    </select>
+                                                    <span asp-validation-for="BadgeColor" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Additional Features -->
+                            <div class="mb-3">
+                                            <h6 class="fw-bold">Additional Features</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label asp-for="PointsReward" class="form-label">Extra Points Reward</label>
+                                                    <input asp-for="PointsReward" class="form-control" type="number" min="0" placeholder="0" value="0" />
+                                                    <span asp-validation-for="PointsReward" class="text-danger"></span>
+                                                    <small class="form-text text-muted">Extra points to award with this promo</small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check mt-4">
+                                    <input asp-for="IsFlashSale" class="form-check-input" />
+                                    <label asp-for="IsFlashSale" class="form-check-label">
+                                        Flash Sale
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="IsSeasonal" class="form-check-input" />
+                                    <label asp-for="IsSeasonal" class="form-check-label">
+                                        Seasonal Offer
+                                    </label>
+                                                    </div>
+                                                </div>
+                                </div>
+                            </div>
+
+                                        <!-- Terms and Conditions -->
+                            <div class="mb-3">
+                                <label asp-for="TermsAndConditions" class="form-label">Terms and Conditions</label>
+                                            <textarea asp-for="TermsAndConditions" class="form-control" rows="3" placeholder="Enter terms and conditions for this promo code..."></textarea>
+                                <span asp-validation-for="TermsAndConditions" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hidden fields for required values -->
+                            <input asp-for="Type" type="hidden" value="PromoCode" />
+                            <input asp-for="OriginalPrice" type="hidden" value="0" />
+                            <input asp-for="IsActive" type="hidden" value="true" />
+                            <input asp-for="CurrentUses" type="hidden" value="0" />
+
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="PromoCodes" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Back to Promo Codes
+                                </a>
+                                <div>
+                                    <button type="button" class="btn btn-info me-2" onclick="testForm()">
+                                        <i class="fas fa-bug me-1"></i>Test Form
+                                    </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Create Promo Code
+                                </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const startDateInput = document.querySelector('input[name="StartDate"]');
+            const endDateInput = document.querySelector('input[name="EndDate"]');
+            const unlimitedExpiryCheckbox = document.getElementById('unlimitedExpiry');
+            const promoCodeInput = document.querySelector('input[name="PromoCode"]');
+            const titleInput = document.querySelector('input[name="Title"]');
+            const discountPercentageInput = document.querySelector('input[name="DiscountPercentage"]');
+            const discountedPriceInput = document.querySelector('input[name="DiscountedPrice"]');
+            const maxUsesInput = document.querySelector('input[name="MaxUses"]');
+            
+            // Check if all required elements exist
+            if (!titleInput || !promoCodeInput || !startDateInput || !endDateInput || 
+                !maxUsesInput || !discountPercentageInput || !discountedPriceInput) {
+                console.error('Required DOM elements not found');
+                console.log('Missing elements:', {
+                    titleInput: !!titleInput,
+                    promoCodeInput: !!promoCodeInput,
+                    startDateInput: !!startDateInput,
+                    endDateInput: !!endDateInput,
+                    maxUsesInput: !!maxUsesInput,
+                    discountPercentageInput: !!discountPercentageInput,
+                    discountedPriceInput: !!discountedPriceInput
+                });
+                return;
+            }
+            
+            // Check if optional elements exist
+            if (!unlimitedExpiryCheckbox) {
+                console.warn('unlimitedExpiry checkbox not found');
+            }
+
+            // Auto-format promo code to uppercase
+            promoCodeInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            });
+
+            // Auto-generate promo code from title
+            titleInput.addEventListener('input', function(e) {
+                if (!promoCodeInput.value) {
+                    const title = e.target.value;
+                    const promoCode = title
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9\s]/g, '')
+                        .replace(/\s+/g, '')
+                        .substring(0, 10);
+                    promoCodeInput.value = promoCode;
+                }
+            });
+
+            // Set default values
+            if (!startDateInput.value) {
+                startDateInput.value = now.toISOString().slice(0, 16);
+            }
+            
+            if (!endDateInput.value) {
+                const futureDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days from now
+                endDateInput.value = futureDate.toISOString().slice(0, 16);
+            }
+            
+            // Ensure required fields have values
+            if (!titleInput.value) {
+                titleInput.value = '';
+            }
+            if (!promoCodeInput.value) {
+                promoCodeInput.value = '';
+            }
+
+            // Set default max uses per account
+            if (!maxUsesInput.value) {
+                maxUsesInput.value = '1';
+            }
+            
+            // Set default values for optional fields
+            const pointsRewardInput = document.querySelector('input[name="PointsReward"]');
+            if (pointsRewardInput && !pointsRewardInput.value) {
+                pointsRewardInput.value = '0';
+            }
+
+            // Handle unlimited expiry checkbox
+            unlimitedExpiryCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Disable both start and end date inputs and set them to infinite values
+                    startDateInput.disabled = true;
+                    endDateInput.disabled = true;
+                    
+                    // Set start date to year 0001 and end date to year 2099 to represent "never expires"
+                    const startDate = new Date('0001-01-01T00:00:00');
+                    const endDate = new Date('2099-12-31T23:59:59');
+                    startDateInput.value = startDate.toISOString().slice(0, 16);
+                    endDateInput.value = endDate.toISOString().slice(0, 16);
+                    
+                    // Add disabled styling classes and inline styles
+                    startDateInput.classList.add('disabled');
+                    endDateInput.classList.add('disabled');
+                    startDateInput.style.backgroundColor = '#e9ecef !important';
+                    startDateInput.style.color = '#6c757d !important';
+                    startDateInput.style.cursor = 'not-allowed';
+                    endDateInput.style.backgroundColor = '#e9ecef !important';
+                    endDateInput.style.color = '#6c757d !important';
+                    endDateInput.style.cursor = 'not-allowed';
+                } else {
+                    // Enable both inputs and restore normal functionality
+                    startDateInput.disabled = false;
+                    endDateInput.disabled = false;
+                    
+                    // Remove disabled styling classes and inline styles
+                    startDateInput.classList.remove('disabled');
+                    endDateInput.classList.remove('disabled');
+                    startDateInput.style.backgroundColor = '';
+                    startDateInput.style.color = '';
+                    startDateInput.style.cursor = '';
+                    endDateInput.style.backgroundColor = '';
+                    endDateInput.style.color = '';
+                    endDateInput.style.cursor = '';
+                    
+                    // Set sensible default values
+                    if (!startDateInput.value || startDateInput.value.includes('2099') || startDateInput.value.includes('0001')) {
+                        startDateInput.value = now.toISOString().slice(0, 16);
+                    }
+                    if (!endDateInput.value || endDateInput.value.includes('2099') || endDateInput.value.includes('0001')) {
+                        const futureDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+                        endDateInput.value = futureDate.toISOString().slice(0, 16);
+                    }
+                }
+            });
+
+            // Form validation and helpful hints
+            const form = document.querySelector('form');
+            if (!form) {
+                console.error('Form not found');
+                return;
+            }
+            
+            form.addEventListener('submit', function(e) {
+                console.log('Form submission started...');
+                console.log('Form action:', form.action);
+                console.log('Form method:', form.method);
+                alert('Form submission detected! Check console for details.');
+                
+                const title = titleInput.value.trim();
+                const promoCode = promoCodeInput.value.trim();
+                const discountPercentage = parseFloat(discountPercentageInput.value) || 0;
+                const discountedPrice = parseFloat(discountedPriceInput.value) || 0;
+                const minimumOrderAmount = parseFloat(document.querySelector('input[name="MinimumOrderAmount"]').value) || 0;
+                
+                console.log('Form data:', { title, promoCode, discountPercentage, discountedPrice, minimumOrderAmount });
+
+                // Basic validation
+                if (!title) {
+                    alert('Please enter a promo name.');
+                    titleInput.focus();
+                    e.preventDefault();
+                    return;
+                }
+
+                if (!promoCode) {
+                    alert('Please enter a promo code.');
+                    promoCodeInput.focus();
+                    e.preventDefault();
+                    return;
+                }
+                
+                // Check if required fields are filled
+                console.log('Validation check:', {
+                    title: title,
+                    promoCode: promoCode,
+                    startDate: startDateInput.value,
+                    endDate: endDateInput.value
+                });
+                
+                // Ensure required fields have values
+                if (!startDateInput.value) {
+                    alert('Please select a start date.');
+                    startDateInput.focus();
+                    e.preventDefault();
+                    return;
+                }
+                
+                if (!endDateInput.value) {
+                    alert('Please select an end date.');
+                    endDateInput.focus();
+                    e.preventDefault();
+                    return;
+                }
+
+                // Allow promo codes with no discount (for tracking purposes)
+                // if (discountPercentage === 0 && discountedPrice === 0) {
+                //     alert('Please enter either a discount percentage or fixed discount amount.');
+                //     discountPercentageInput.focus();
+                //     e.preventDefault();
+                //     return;
+                // }
+
+                if (discountPercentage > 0 && discountedPrice > 0) {
+                    alert('Please enter either a discount percentage OR a fixed amount, not both.');
+                    e.preventDefault();
+                    return;
+                }
+
+                // Ensure empty fields are set to 0
+                if (!discountPercentageInput.value) {
+                    discountPercentageInput.value = '0';
+                }
+                if (!discountedPriceInput.value) {
+                    discountedPriceInput.value = '0';
+                }
+                if (!document.querySelector('input[name="MinimumOrderAmount"]').value) {
+                    document.querySelector('input[name="MinimumOrderAmount"]').value = '0';
+                }
+                if (!document.querySelector('input[name="PointsReward"]').value) {
+                    document.querySelector('input[name="PointsReward"]').value = '0';
+                }
+
+                // Show success message
+                console.log('Validation passed, submitting form...');
+                const submitBtn = document.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating...';
+                submitBtn.disabled = true;
+                
+                // Allow form to submit normally
+                console.log('Form will submit now...');
+            });
+
+            // Handle empty number inputs - set to 0 when they lose focus
+            const numberInputs = ['DiscountPercentage', 'DiscountedPrice', 'MinimumOrderAmount', 'PointsReward'];
+            numberInputs.forEach(inputName => {
+                const input = document.querySelector(`input[name="${inputName}"]`);
+                if (input) {
+                    input.addEventListener('blur', function() {
+                        if (this.value === '' || this.value === null) {
+                            this.value = '0';
+                        }
+                    });
+                } else {
+                    console.warn(`Input element with name '${inputName}' not found`);
+                }
+            });
+
+            // Add helpful tooltips and real-time feedback
+            if (typeof addInputHelpers === 'function') {
+                addInputHelpers();
+            } else {
+                console.warn('addInputHelpers function not found');
+            }
+        });
+
+        function addInputHelpers() {
+            // Add character counter for promo code
+            const promoCodeInput = document.querySelector('input[name="PromoCode"]');
+            if (!promoCodeInput) {
+                console.warn('PromoCode input not found');
+                return;
+            }
+            
+            const promoCodeHelp = document.createElement('small');
+            promoCodeHelp.className = 'form-text text-muted';
+            promoCodeHelp.innerHTML = '<span id="promoCodeCounter">0</span>/10 characters';
+            promoCodeInput.parentNode.appendChild(promoCodeHelp);
+
+            promoCodeInput.addEventListener('input', function() {
+                const counter = document.getElementById('promoCodeCounter');
+                if (counter) {
+                    counter.textContent = this.value.length;
+                }
+            });
+
+            // Add discount preview
+            const discountPercentageInput = document.querySelector('input[name="DiscountPercentage"]');
+            const discountedPriceInput = document.querySelector('input[name="DiscountedPrice"]');
+            
+            if (!discountPercentageInput || !discountedPriceInput) {
+                console.warn('Discount inputs not found');
+                return;
+            }
+            
+            const discountPreview = document.createElement('small');
+            discountPreview.className = 'form-text text-success fw-bold';
+            discountPreview.id = 'discountPreview';
+            discountPreview.style.display = 'none';
+            discountPercentageInput.parentNode.appendChild(discountPreview);
+
+            function updateDiscountPreview() {
+                const percentage = parseFloat(discountPercentageInput.value) || 0;
+                const fixedAmount = parseFloat(discountedPriceInput.value) || 0;
+                
+                if (percentage > 0) {
+                    discountPreview.textContent = `Customers will get ${percentage}% off their order`;
+                    discountPreview.style.display = 'block';
+                } else if (fixedAmount > 0) {
+                    discountPreview.textContent = `Customers will get RM${fixedAmount.toFixed(2)} off their order`;
+                    discountPreview.style.display = 'block';
+                } else {
+                    discountPreview.style.display = 'none';
+                }
+            }
+
+            if (discountPercentageInput) {
+                discountPercentageInput.addEventListener('input', function() {
+                    if (this.value > 0) {
+                        discountedPriceInput.value = '';
+                    }
+                    updateDiscountPreview();
+                });
+            }
+
+            if (discountedPriceInput) {
+                discountedPriceInput.addEventListener('input', function() {
+                    if (this.value > 0) {
+                        discountPercentageInput.value = '';
+                    }
+                    updateDiscountPreview();
+                });
+            }
+        }
+        
+        function testForm() {
+            console.log('Testing form...');
+            const form = document.getElementById('createPromoForm');
+            if (form) {
+                console.log('Form found:', form);
+                console.log('Form action:', form.action);
+                console.log('Form method:', form.method);
+                
+                // Test form submission
+                const formData = new FormData(form);
+                console.log('Form data:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(key, value);
+                }
+                
+                alert('Form test completed. Check console for details.');
+            } else {
+                console.error('Form not found');
+                alert('Form not found!');
+            }
+        }
+    </script>
+}

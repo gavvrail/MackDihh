@@ -10,14 +10,164 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/food-theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/FoodOrderingSystem.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     @await RenderSectionAsync("Styles", required: false)
+    
+    <style>
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+        }
+        
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .support-chat-icon {
+            position: relative;
+        }
+        
+        .admin-support-panel {
+            padding: 0;
+        }
+        
+        .admin-support-content {
+            padding: 20px;
+        }
+        
+        .admin-support-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .admin-support-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+        
+        .admin-support-icon i {
+            color: white;
+            font-size: 20px;
+        }
+        
+        .admin-support-title h6 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .admin-support-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .admin-support-actions {
+            margin-bottom: 15px;
+        }
+        
+        .admin-support-actions .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-support-actions .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+        }
+        
+        .admin-support-actions .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+        }
+        
+        .admin-support-actions .btn-outline-secondary {
+            border-color: #dee2e6;
+            color: #6c757d;
+        }
+        
+        .admin-support-actions .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            border-color: #adb5bd;
+            color: #495057;
+        }
+        
+        .admin-support-footer {
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .support-quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .support-quick-actions .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
 </head>
 <body>
     @Html.AntiForgeryToken()
-    <div class="body-wrapper">
+    <div class="body-wrapper" @(User.IsInRole("Admin") ? "data-user-role=\"Admin\"" : "")>
         <header class="sticky-top">
-            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light">
                 <div class="container-fluid">
                     <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                         <img src="@Url.Content("~/images/logo.png")" alt="MackDihh's Logo" class="navbar-logo">
@@ -30,16 +180,34 @@
                     <div class="navbar-collapse collapse d-sm-inline-flex">
                         <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-home me-1"></i>Home
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Menu" asp-action="Index">Menu</a>
+                                <a class="nav-link" asp-area="" asp-controller="Menu" asp-action="Index">
+                                    <i class="fas fa-utensils me-1"></i>Menu
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Deals" asp-action="Index">Deals</a>
+                                <a class="nav-link" asp-area="" asp-controller="Deals" asp-action="Index">
+                                    <i class="fas fa-tags me-1"></i>Deals
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="History">My Orders</a>
+                                <a class="nav-link" asp-area="" asp-controller="Orders" asp-action="History">
+                                    <i class="fas fa-receipt me-1"></i>My Orders
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="WishList" asp-action="Index">
+                                    <i class="fas fa-heart me-1"></i>Wishlist
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Deals" asp-action="MemberPurchase">
+                                    <i class="fas fa-crown me-1"></i>Subscription
+                                </a>
                             </li>
                         </ul>
                         <ul class="navbar-nav">
@@ -53,7 +221,7 @@
 
         <main role="main" class="pb-3">
             <!-- Notification Container -->
-            <div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; display: none;">
+            <div id="notification-container" class="position-fixed end-0 p-3" style="z-index: 2000; display: none; top: 80px; right: 20px;">
                 <div id="notification" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="d-flex">
                         <div class="toast-body">
@@ -64,23 +232,25 @@
                 </div>
             </div>
             
-            @RenderBody()
+            <div class="main-content">
+                @RenderBody()
+            </div>
         </main>
 
-        <footer class="footer mt-auto pt-5 pb-4 bg-dark text-white">
+        <footer class="footer">
             <div class="container text-center text-md-start">
                 <div class="row">
                     <div class="col-md-4 col-lg-4 col-xl-4 mx-auto mb-4">
-                        <h6 class="text-uppercase fw-bold mb-4">
+                        <h5 class="text-uppercase fw-bold mb-4">
                             <img src="@Url.Content("~/images/logo.png")" alt="MackDihh's Logo" class="footer-logo">
-                            MackDihh
-                        </h6>
+                            MACKDIHH
+                        </h5>
                         <p>
-                            Your favorite meals, delivered fast. Quality ingredients and unforgettable taste, right to your doorstep.
+                            Your favorite meals, delivered fast! Quality ingredients and unforgettable taste, right to your doorstep.
                         </p>
                     </div>
                     <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-4">
-                        <h6 class="text-uppercase fw-bold mb-4">Useful Links</h6>
+                        <h5 class="text-uppercase fw-bold mb-4">Useful Links</h5>
                         <p><a asp-controller="Home" asp-action="About" class="text-reset">About Us</a></p>
                         <p><a asp-controller="Home" asp-action="Contact" class="text-reset">Contact Us</a></p>
                         <p><a asp-controller="Home" asp-action="FAQ" class="text-reset">FAQ</a></p>
@@ -88,25 +258,191 @@
                         <p><a asp-controller="Home" asp-action="Terms" class="text-reset">Terms & Conditions</a></p>
                     </div>
                     <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
-                        <h6 class="text-uppercase fw-bold mb-4">Contact</h6>
-                        <p><i class="fas fa-home me-3"></i> Kota Kinabalu, Sabah, MY</p>
-                        <p><i class="fas fa-envelope me-3"></i> info@mackdihh.com</p>
-                        <p><i class="fas fa-phone me-3"></i> + 01 234 567 88</p>
+                        <h5 class="text-uppercase fw-bold mb-4">Contact</h5>
+                        <p><i class="fas fa-home me-3"></i>Jalan Alamesra, Kota Kinabalu, Sabah</p>
+                        <p><i class="fas fa-envelope me-3"></i>info@mackdihh.com</p>
+                        <p><i class="fas fa-phone me-3"></i>+ 01 234 567 88</p>
                     </div>
                 </div>
             </div>
-            <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
-                © 2025 Copyright: MackDihh
+            <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.1);">
+                © 2025 MACKDIHH. All rights reserved.
             </div>
         </footer>
     </div>
 
-    <!-- SCRIPT LOADING SECTION - THIS ORDER IS CRITICAL -->
+    <!-- Floating Support Chat Icon -->
+    <div id="support-chat-icon" class="support-chat-icon" onclick="toggleSupportChat()">
+        <i class="fas fa-headset"></i>
+        @if (User.IsInRole("Admin"))
+        {
+            <span id="admin-chat-notification" class="notification-badge" style="display: none;">0</span>
+        }
+    </div>
+
+    <!-- Support Chat Popup -->
+    <div id="support-chat-popup" class="support-chat-popup">
+        <div class="support-chat-header">
+            @if (User.IsInRole("Admin"))
+            {
+                <h5><i class="fas fa-user-shield me-2"></i>Admin Support Panel</h5>
+            }
+            else
+            {
+                <h5><i class="fas fa-headset me-2"></i>Customer Support</h5>
+            }
+            <button type="button" class="btn-close" onclick="toggleSupportChat()"></button>
+        </div>
+        <div class="support-chat-body">
+            @if (User.IsInRole("Admin"))
+            {
+                <!-- Admin Support Panel -->
+                <div class="admin-support-panel">
+                    <div class="admin-support-content">
+                        <div class="admin-support-header">
+                            <div class="admin-support-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <div class="admin-support-title">
+                                <h6 class="mb-0">Support Dashboard</h6>
+                                <small class="text-muted">Manage customer chats</small>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-support-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="admin-unread-count">0</div>
+                                <div class="stat-label">Unread</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="admin-total-sessions">0</div>
+                                <div class="stat-label">Sessions</div>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-support-actions">
+                            <a asp-controller="AdminSupport" asp-action="Index" class="btn btn-primary btn-sm w-100 mb-2">
+                                <i class="fas fa-comments me-2"></i>View All Chats
+                            </a>
+                            <button type="button" onclick="refreshAdminStats()" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="fas fa-sync-alt me-2"></i>Refresh
+                            </button>
+                        </div>
+                        
+                        <div class="admin-support-footer">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                Auto-refresh every 30s
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (User.Identity?.IsAuthenticated == true)
+            {
+                <!-- Regular User Chat -->
+                <div id="support-chat-messages" class="support-chat-messages">
+                    <div class="support-message">
+                        <div class="support-message-content">
+                            <i class="fas fa-robot me-2"></i>
+                            <strong>MackDihh Support:</strong> Hi @(User.Identity?.Name ?? "there")! How can we help you today?
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="support-quick-actions mb-2">
+                    <button type="button" onclick="openTicketForm()" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-ticket-alt me-1"></i>Open Ticket
+                    </button>
+                </div>
+                
+                <div class="support-chat-input">
+                    <input type="text" id="support-message-input" placeholder="Type your message..." class="form-control">
+                    <button type="button" onclick="sendSupportMessage()" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <!-- Non-Authenticated User Prompt -->
+                <div class="support-chat-auth-prompt">
+                    <div class="text-center p-4">
+                        <i class="fas fa-lock fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted mb-3">Sign in to access customer support</h6>
+                        <p class="text-muted small mb-4">Please sign in or create an account to chat with our support team.</p>
+                        <div class="d-grid gap-2">
+                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-sm">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </a>
+                            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Ticket Form Modal -->
+    <div class="modal fade" id="supportTicketModal" tabindex="-1" aria-labelledby="supportTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="supportTicketModalLabel">
+                        <i class="fas fa-ticket-alt me-2"></i>Open Support Ticket
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="supportTicketForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="supportTicketSubject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="supportTicketSubject" required placeholder="Brief description of your issue">
+                        </div>
+                        <div class="mb-3">
+                            <label for="supportTicketCategory" class="form-label">Category</label>
+                            <select class="form-select" id="supportTicketCategory" required>
+                                <option value="">Select a category</option>
+                                <option value="order">Order Issue</option>
+                                <option value="delivery">Delivery Problem</option>
+                                <option value="payment">Payment Issue</option>
+                                <option value="refund">Refund Request</option>
+                                <option value="account">Account Help</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supportTicketDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="supportTicketDescription" rows="4" required 
+                                      placeholder="Please provide detailed information about your issue..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>Submit Ticket
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/notifications.js" asp-append-version="true"></script>
-
+    <script src="~/js/toast.js" asp-append-version="true"></script>
+    <script src="~/js/support-chat.js" asp-append-version="true"></script>
+    <script src="~/js/chat.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

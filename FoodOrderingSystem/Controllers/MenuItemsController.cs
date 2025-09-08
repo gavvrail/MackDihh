@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FoodOrderingSystem.Data;
 using FoodOrderingSystem.Models;
+using FoodOrderingSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 
 namespace FoodOrderingSystem.Controllers
@@ -14,10 +15,12 @@ namespace FoodOrderingSystem.Controllers
     public class MenuItemsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly FileUploadService _fileUploadService;
 
-        public MenuItemsController(ApplicationDbContext context)
+        public MenuItemsController(ApplicationDbContext context, FileUploadService fileUploadService)
         {
             _context = context;
+            _fileUploadService = fileUploadService;
         }
 
         // GET: MenuItems
@@ -337,6 +340,84 @@ namespace FoodOrderingSystem.Controllers
         private bool MenuItemExists(int id)
         {
             return _context.MenuItems.Any(e => e.Id == id);
+        }
+
+        // POST: MenuItems/UploadImage
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadImage(IFormFile image, int menuItemId)
+        {
+            try
+            {
+                if (image == null || image.Length == 0)
+                {
+                    return Json(new { success = false, message = "No file selected" });
+                }
+
+                var menuItem = await _context.MenuItems.FindAsync(menuItemId);
+                if (menuItem == null)
+                {
+                    return Json(new { success = false, message = "Menu item not found" });
+                }
+
+                // Delete old image if exists
+                if (!string.IsNullOrEmpty(menuItem.ImageUrl))
+                {
+                    _fileUploadService.DeleteFile(menuItem.ImageUrl);
+                }
+
+                // Upload new image
+                var imagePath = await _fileUploadService.UploadMenuItemImageAsync(image, menuItemId);
+                
+                // Update menu item
+                menuItem.ImageUrl = imagePath;
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, imagePath = imagePath, message = "Image uploaded successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: MenuItems/UploadCroppedImage
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadCroppedImage([FromBody] CroppedImageModel model, int menuItemId)
+        {
+            try
+            {
+                var menuItem = await _context.MenuItems.FindAsync(menuItemId);
+                if (menuItem == null)
+                {
+                    return Json(new { success = false, message = "Menu item not found" });
+                }
+
+                if (string.IsNullOrEmpty(model.ImageData))
+                {
+                    return Json(new { success = false, message = "No image data provided" });
+                }
+
+                // Delete old image if exists
+                if (!string.IsNullOrEmpty(menuItem.ImageUrl))
+                {
+                    _fileUploadService.DeleteFile(menuItem.ImageUrl);
+                }
+
+                // Process and save cropped image
+                var imagePath = await _fileUploadService.ProcessCroppedImageAsync(model.ImageData, menuItemId.ToString(), "menu");
+                
+                // Update menu item
+                menuItem.ImageUrl = imagePath;
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, imagePath = imagePath, message = "Image uploaded successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

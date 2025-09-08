@@ -46,7 +46,48 @@ namespace FoodOrderingSystem.Models
         public string? Allergens { get; set; }
 
         [Display(Name = "Points Earned Per Item")]
-        [Range(0, 100, ErrorMessage = "Points must be between 0 and 100")]
-        public int PointsPerItem { get; set; } = 1;
+        [Range(0, 1000, ErrorMessage = "Points must be between 0 and 1000")]
+        public int PointsPerItem { get; set; } = 0;
+
+        // New fields for missing features
+        [Display(Name = "Stock Quantity")]
+        [Range(0, 10000, ErrorMessage = "Stock quantity must be between 0 and 10000")]
+        public int StockQuantity { get; set; } = 0;
+
+        [Display(Name = "Minimum Stock Level")]
+        [Range(0, 1000, ErrorMessage = "Minimum stock level must be between 0 and 1000")]
+        public int MinimumStockLevel { get; set; } = 5;
+
+        [Display(Name = "SKU")]
+        [StringLength(50)]
+        public string? SKU { get; set; }
+
+        [Display(Name = "Weight (grams)")]
+        [Range(0, 10000, ErrorMessage = "Weight must be between 0 and 10000 grams")]
+        public int? Weight { get; set; }
+
+        [Display(Name = "Dimensions")]
+        public string? Dimensions { get; set; }
+
+        [Display(Name = "Tags")]
+        public string? Tags { get; set; }
+
+        [Display(Name = "Average Rating")]
+        [Range(0, 5, ErrorMessage = "Rating must be between 0 and 5")]
+        public decimal AverageRating { get; set; } = 0;
+
+        [Display(Name = "Total Reviews")]
+        public int TotalReviews { get; set; } = 0;
+
+        [Display(Name = "Created Date")]
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+        [Display(Name = "Last Modified")]
+        public DateTime LastModified { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties for new features
+        public virtual ICollection<MenuItemImage> Images { get; set; } = new List<MenuItemImage>();
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual ICollection<WishListItem> WishListItems { get; set; } = new List<WishListItem>();
     }
 }

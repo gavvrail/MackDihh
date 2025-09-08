@@ -1,0 +1,426 @@
+@model FoodOrderingSystem.Models.Deal
+
+@{
+    ViewData["Title"] = "Edit Promo Code";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <style>
+        .form-control.disabled,
+        .form-control:disabled {
+            background-color: #e9ecef !important;
+            color: #6c757d !important;
+            cursor: not-allowed !important;
+            opacity: 0.65 !important;
+        }
+        
+        .form-control.disabled:focus,
+        .form-control:disabled:focus {
+            background-color: #e9ecef !important;
+            border-color: #ced4da !important;
+            box-shadow: none !important;
+        }
+    </style>
+}
+
+<div class="edit-promo-container" style="min-height: 80vh; padding-bottom: 100px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Promo Code</h4>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="EditPromoCode" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="CreatedAt" />
+                            <input type="hidden" asp-for="CurrentUses" />
+                            
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div class="alert alert-danger">
+                                    <h6>Please fix the following errors:</h6>
+                                    <ul class="mb-0">
+                                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Title" class="form-label">Title *</label>
+                                        <input asp-for="Title" class="form-control" placeholder="e.g., Welcome Discount" />
+                                        <span asp-validation-for="Title" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="PromoCode" class="form-label">Promo Code *</label>
+                                        <input asp-for="PromoCode" class="form-control" placeholder="e.g., WELCOME10" style="text-transform: uppercase;" />
+                                        <span asp-validation-for="PromoCode" class="text-danger"></span>
+                                        <small class="form-text text-muted">Use uppercase letters and numbers only</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label">Description</label>
+                                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the promo code offer..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Type" class="form-label">Deal Type *</label>
+                                        <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<DealType>()">
+                                            <option value="">Select a type</option>
+                                        </select>
+                                        <span asp-validation-for="Type" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="MinimumOrderAmount" class="form-label">Minimum Order Amount (RM)</label>
+                                        <input asp-for="MinimumOrderAmount" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                                        <span asp-validation-for="MinimumOrderAmount" class="text-danger"></span>
+                                        <small class="form-text text-muted">Leave empty for no minimum</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="DiscountPercentage" class="form-label">Discount Percentage (%)</label>
+                                        <input asp-for="DiscountPercentage" class="form-control" type="number" step="0.01" max="100" placeholder="0.00" />
+                                        <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="DiscountedPrice" class="form-label">Fixed Discount Amount (RM)</label>
+                                        <input asp-for="DiscountedPrice" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                                        <span asp-validation-for="DiscountedPrice" class="text-danger"></span>
+                                        <small class="form-text text-muted">Use either percentage or fixed amount (leave empty for 0)</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="StartDate" class="form-label">Start Date *</label>
+                                        <input asp-for="StartDate" class="form-control" type="datetime-local" />
+                                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="EndDate" class="form-label">End Date</label>
+                                        <input asp-for="EndDate" class="form-control" type="datetime-local" />
+                                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="unlimitedExpiry" />
+                                    <label class="form-check-label" for="unlimitedExpiry">
+                                        <strong>Never Expires</strong> - This promo code will never expire
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="MaxUses" class="form-label">Uses Per Account</label>
+                                        <input asp-for="MaxUses" class="form-control" type="number" min="-1" placeholder="1" />
+                                        <span asp-validation-for="MaxUses" class="text-danger"></span>
+                                        <small class="form-text text-muted">-1 for unlimited uses per account, or set how many times each customer can use this code</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="BadgeText" class="form-label">Badge Text</label>
+                                        <input asp-for="BadgeText" class="form-control" placeholder="e.g., New Customer" />
+                                        <span asp-validation-for="BadgeText" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="BadgeColor" class="form-label">Badge Color</label>
+                                        <select asp-for="BadgeColor" class="form-select">
+                                            <option value="primary">Primary (Blue)</option>
+                                            <option value="secondary">Secondary (Gray)</option>
+                                            <option value="success">Success (Green)</option>
+                                            <option value="danger">Danger (Red)</option>
+                                            <option value="warning">Warning (Yellow)</option>
+                                            <option value="info">Info (Light Blue)</option>
+                                            <option value="dark">Dark</option>
+                                        </select>
+                                        <span asp-validation-for="BadgeColor" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="PointsReward" class="form-label">Points Reward</label>
+                                        <input asp-for="PointsReward" class="form-control" type="number" placeholder="0" value="0" />
+                                        <span asp-validation-for="PointsReward" class="text-danger"></span>
+                                        <small class="form-text text-muted">Extra points to award with this promo</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input asp-for="IsActive" class="form-check-input" />
+                                    <label asp-for="IsActive" class="form-check-label">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input asp-for="RequiresMember" class="form-check-input" />
+                                    <label asp-for="RequiresMember" class="form-check-label">
+                                        Requires Member Status
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input asp-for="RequiresStudentVerification" class="form-check-input" />
+                                    <label asp-for="RequiresStudentVerification" class="form-check-label">
+                                        Requires Student Verification
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input asp-for="IsFlashSale" class="form-check-input" />
+                                    <label asp-for="IsFlashSale" class="form-check-label">
+                                        Flash Sale
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input asp-for="IsSeasonal" class="form-check-input" />
+                                    <label asp-for="IsSeasonal" class="form-check-label">
+                                        Seasonal Offer
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="TermsAndConditions" class="form-label">Terms and Conditions</label>
+                                <textarea asp-for="TermsAndConditions" class="form-control" rows="4" placeholder="Enter terms and conditions for this promo code..."></textarea>
+                                <span asp-validation-for="TermsAndConditions" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="PromoCodes" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Back to Promo Codes
+                                </a>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save me-1"></i>Update Promo Code
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Auto-format promo code to uppercase
+        document.getElementById('PromoCode').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Format datetime inputs and handle unlimited expiry
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.querySelector('input[name="StartDate"]');
+            const endDateInput = document.querySelector('input[name="EndDate"]');
+            const unlimitedExpiryCheckbox = document.getElementById('unlimitedExpiry');
+            
+            // Check if required elements exist
+            if (!startDateInput || !endDateInput || !unlimitedExpiryCheckbox) {
+                console.error('Required DOM elements not found in EditPromoCode');
+                console.log('Missing elements:', {
+                    startDateInput: !!startDateInput,
+                    endDateInput: !!endDateInput,
+                    unlimitedExpiryCheckbox: !!unlimitedExpiryCheckbox
+                });
+                return;
+            }
+            
+            // Convert datetime values to local format for input
+            if (startDateInput.value) {
+                const startDate = new Date(startDateInput.value);
+                startDateInput.value = startDate.toISOString().slice(0, 16);
+            }
+            
+            // Check if EndDate is null (unlimited expiry)
+            if (!endDateInput.value) {
+                unlimitedExpiryCheckbox.checked = true;
+                endDateInput.disabled = true;
+                endDateInput.style.backgroundColor = '#f8f9fa';
+                endDateInput.style.color = '#6c757d';
+            } else {
+                const endDate = new Date(endDateInput.value);
+                endDateInput.value = endDate.toISOString().slice(0, 16);
+            }
+
+            // Handle unlimited expiry checkbox
+            unlimitedExpiryCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Disable both start and end date inputs and set them to infinite values
+                    startDateInput.disabled = true;
+                    endDateInput.disabled = true;
+                    
+                    // Set start date to year 0001 and end date to year 2099 to represent "never expires"
+                    const startDate = new Date('0001-01-01T00:00:00');
+                    const endDate = new Date('2099-12-31T23:59:59');
+                    startDateInput.value = startDate.toISOString().slice(0, 16);
+                    endDateInput.value = endDate.toISOString().slice(0, 16);
+                    
+                    // Add disabled styling classes and inline styles
+                    startDateInput.classList.add('disabled');
+                    endDateInput.classList.add('disabled');
+                    startDateInput.style.backgroundColor = '#e9ecef !important';
+                    startDateInput.style.color = '#6c757d !important';
+                    startDateInput.style.cursor = 'not-allowed';
+                    endDateInput.style.backgroundColor = '#e9ecef !important';
+                    endDateInput.style.color = '#6c757d !important';
+                    endDateInput.style.cursor = 'not-allowed';
+                } else {
+                    // Enable both inputs and restore normal functionality
+                    startDateInput.disabled = false;
+                    endDateInput.disabled = false;
+                    
+                    // Remove disabled styling classes and inline styles
+                    startDateInput.classList.remove('disabled');
+                    endDateInput.classList.remove('disabled');
+                    startDateInput.style.backgroundColor = '';
+                    startDateInput.style.color = '';
+                    startDateInput.style.cursor = '';
+                    endDateInput.style.backgroundColor = '';
+                    endDateInput.style.color = '';
+                    endDateInput.style.cursor = '';
+                    
+                    // Set sensible default values
+                    if (!startDateInput.value || startDateInput.value.includes('2099') || startDateInput.value.includes('0001')) {
+                        startDateInput.value = new Date().toISOString().slice(0, 16);
+                    }
+                    if (!endDateInput.value || endDateInput.value.includes('2099') || endDateInput.value.includes('0001')) {
+                        const now = new Date();
+                        const futureDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+                        endDateInput.value = futureDate.toISOString().slice(0, 16);
+                    }
+                }
+            });
+
+            // Handle empty number inputs - set to 0 when they lose focus
+            const numberInputs = ['DiscountPercentage', 'DiscountedPrice', 'MinimumOrderAmount'];
+            numberInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('blur', function() {
+                        if (this.value === '' || this.value === null) {
+                            this.value = '0';
+                        }
+                    });
+                }
+            });
+        });
+
+        // Handle number inputs to set default value of 0 if empty
+        const numberInputs = ['DiscountPercentage', 'DiscountedPrice', 'MinimumOrderAmount', 'PointsReward'];
+        numberInputs.forEach(inputName => {
+            const input = document.querySelector(`input[name="${inputName}"]`);
+            if (input) {
+                // Set default value on page load
+                if (!input.value) {
+                    input.value = '0';
+                }
+                
+                // Set default value on blur if empty
+                input.addEventListener('blur', function() {
+                    if (!this.value || this.value === '') {
+                        this.value = '0';
+                    }
+                });
+            }
+        });
+
+        // Handle MaxUses default value
+        const maxUsesInput = document.querySelector('input[name="MaxUses"]');
+        if (maxUsesInput) {
+            if (!maxUsesInput.value) {
+                maxUsesInput.value = '1';
+            }
+        }
+
+        // Form submission validation
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                console.log('Form submission detected in EditPromoCode');
+                
+                // Ensure number inputs have values
+                numberInputs.forEach(inputName => {
+                    const input = document.querySelector(`input[name="${inputName}"]`);
+                    if (input && (!input.value || input.value === '')) {
+                        input.value = '0';
+                    }
+                });
+                
+                // Ensure MaxUses has a value
+                if (maxUsesInput && (!maxUsesInput.value || maxUsesInput.value === '')) {
+                    maxUsesInput.value = '1';
+                }
+                
+                // Validate required fields
+                const startDateInput = document.querySelector('input[name="StartDate"]');
+                const endDateInput = document.querySelector('input[name="EndDate"]');
+                
+                if (!startDateInput.value) {
+                    e.preventDefault();
+                    alert('Please enter a start date.');
+                    return false;
+                }
+                
+                if (!endDateInput.value) {
+                    e.preventDefault();
+                    alert('Please enter an end date.');
+                    return false;
+                }
+                
+                console.log('Form validation passed, submitting...');
+            });
+        }
+    </script>
+}

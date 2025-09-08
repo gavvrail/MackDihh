@@ -1,23 +1,95 @@
 /* Profile Page Styles */
 .profile-container {
     padding: 2rem 0;
-    background: #f5f7fa;
+    background: transparent; /* Use the food theme background */
+    min-height: calc(100vh - 200px);
+}
+
+/* Full-width profile layout */
+.profile-full-width {
+    padding: 0;
+    margin: 0;
+    background: transparent;
     min-height: 100vh;
+    width: 100%;
 }
 
 .card {
     border: none;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
 }
 
-.card:hover {
-    transform: translateY(-5px);
+/* Full-width profile cards */
+.profile-full-width .card {
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* Points section styling for full-width layout */
+.profile-full-width .points-section {
+    padding: 1.5rem 0;
+}
+
+.profile-full-width .points-section .card {
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-full-width .points-section .card-body {
+    padding: 2rem 1.5rem;
+}
+
+.profile-full-width .points-section .card-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.profile-full-width .points-section h3 {
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.profile-full-width .points-section .fas {
+    font-size: 2.2rem;
+    margin-bottom: 0.8rem;
+}
+
+/* Profile image section for full-width layout */
+.profile-full-width .profile-image-section {
+    padding: 2rem 0;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.profile-full-width .profile-photo {
+    width: 160px;
+    height: 160px;
+    border: 4px solid #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Form section styling */
+.profile-full-width .card-body {
+    padding: 2rem;
+}
+
+/* Admin quick actions for full-width */
+.profile-full-width .admin-quick-actions {
+    padding: 1.5rem 0;
+}
+
+.profile-full-width .admin-quick-actions .btn {
+    min-height: 50px;
+    font-size: 1rem;
+    padding: 0.8rem;
 }
 
 .card-header {
-    border-radius: 15px 15px 0 0 !important;
+    border-radius: 0 !important;
     border: none;
     font-weight: 600;
 }
@@ -48,7 +120,6 @@
 }
 
 .btn:hover {
-    transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -102,6 +173,73 @@
 .btn-outline-success:hover {
     background: #28a745;
     border-color: #28a745;
+}
+
+/* Crop Interface Styles */
+.crop-interface {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+}
+
+.crop-preview-container {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.crop-preview-container img {
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.crop-controls {
+    text-align: center;
+}
+
+.crop-controls .btn {
+    margin: 0 0.5rem;
+    min-width: 100px;
+}
+
+/* Profile Image Container */
+.profile-image-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.profile-photo {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.profile-edit-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-image-container:hover .profile-edit-overlay {
+    opacity: 1;
+}
+
+.profile-edit-overlay i {
+    color: white;
+    font-size: 2rem;
 }
 
 .alert {
@@ -159,31 +297,46 @@
         margin-right: 0 !important;
         margin-bottom: 0.5rem;
     }
+    
+    /* Mobile adjustments for full-width profile */
+    .profile-full-width .points-section .card {
+        min-height: 120px;
+    }
+    
+    .profile-full-width .points-section .card-body {
+        padding: 1.5rem 1rem;
+    }
+    
+    .profile-full-width .points-section .card-title {
+        font-size: 1rem;
+    }
+    
+    .profile-full-width .points-section h3 {
+        font-size: 1.8rem;
+    }
+    
+    .profile-full-width .points-section .fas {
+        font-size: 1.8rem;
+    }
+    
+    .profile-full-width .profile-photo {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .profile-full-width .card-body {
+        padding: 1.5rem;
+    }
 }
 
-/* Animation for success messages */
+/* Animation for success messages - removed to prevent jumping */
 .alert-success {
-    animation: slideInDown 0.5s ease-out;
+    opacity: 1;
 }
 
-@keyframes slideInDown {
-    0% {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
-    100% {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* Card hover effects */
+/* Card hover effects - removed transitions to prevent jumping */
 .card-body {
-    transition: all 0.3s ease;
-}
-
-.card:hover .card-body {
-    background-color: #f8f9fa;
+    /* Removed transition to prevent jumping */
 }
 
 /* Form validation styles */

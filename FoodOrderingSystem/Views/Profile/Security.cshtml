@@ -1,0 +1,213 @@
+@model FoodOrderingSystem.Controllers.SecurityViewModel
+
+@{
+    ViewData["Title"] = "Security Dashboard";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+}
+
+<div class="profile-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Security Dashboard</h4>
+                    </div>
+                    <div class="card-body">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+                        
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        <!-- Account Status Section -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card @(Model.IsBlocked ? "border-danger" : "border-success")">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user-shield fa-3x @(Model.IsBlocked ? "text-danger" : "text-success") mb-3"></i>
+                                        <h5 class="card-title">Account Status</h5>
+                                        @if (Model.IsBlocked)
+                                        {
+                                            <p class="text-danger fw-bold">Account Blocked</p>
+                                            @if (Model.BlockedUntil.HasValue)
+                                            {
+                                                <p class="text-muted small">Until: @Model.BlockedUntil.Value.ToString("MMM dd, yyyy HH:mm")</p>
+                                            }
+                                            @if (!string.IsNullOrEmpty(Model.BlockReason))
+                                            {
+                                                <p class="text-muted small">Reason: @Model.BlockReason</p>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <p class="text-success fw-bold">Account Active</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-info">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-clock fa-3x text-info mb-3"></i>
+                                        <h5 class="card-title">Last Login</h5>
+                                        @if (Model.LastLoginDate.HasValue)
+                                        {
+                                            <p class="fw-bold">@Model.LastLoginDate.Value.ToString("MMM dd, yyyy HH:mm")</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted">No recent login</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Features Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="mb-3"><i class="fas fa-lock me-2"></i>Security Features</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card @(Model.IsEmailConfirmed ? "border-success" : "border-warning")">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-envelope fa-2x @(Model.IsEmailConfirmed ? "text-success" : "text-warning") mb-2"></i>
+                                                <h6 class="card-title">Email Verification</h6>
+                                                @if (Model.IsEmailConfirmed)
+                                                {
+                                                    <span class="badge bg-success">Verified</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">Not Verified</span>
+                                                    <div class="mt-2">
+                                                        <a asp-controller="Profile" asp-action="SendVerificationEmail" class="btn btn-sm btn-outline-warning">
+                                                            Verify Email
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card @(Model.IsPhoneNumberConfirmed ? "border-success" : "border-warning")">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-phone fa-2x @(Model.IsPhoneNumberConfirmed ? "text-success" : "text-warning") mb-2"></i>
+                                                <h6 class="card-title">Phone Verification</h6>
+                                                @if (Model.IsPhoneNumberConfirmed)
+                                                {
+                                                    <span class="badge bg-success">Verified</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">Not Verified</span>
+                                                    <div class="mt-2">
+                                                        <a asp-controller="Profile" asp-action="Index" class="btn btn-sm btn-outline-warning">
+                                                            Add Phone
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card @(Model.TwoFactorEnabled ? "border-success" : "border-warning")">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-mobile-alt fa-2x @(Model.TwoFactorEnabled ? "text-success" : "text-warning") mb-2"></i>
+                                                <h6 class="card-title">2FA (SMS)</h6>
+                                                @if (Model.TwoFactorEnabled)
+                                                {
+                                                    <span class="badge bg-success">Enabled</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">Disabled</span>
+                                                    <div class="mt-2">
+                                                        <a href="#" class="btn btn-sm btn-outline-warning" onclick="alert('2FA functionality has been moved to the Profile page. Please use the Profile page to manage your account settings.');">
+                                                            Enable 2FA
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Login Activity Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="mb-3"><i class="fas fa-history me-2"></i>Login Activity</h5>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Login Attempts:</strong> @Model.LoginAttempts</p>
+                                                @if (Model.LastLoginAttempt.HasValue)
+                                                {
+                                                    <p><strong>Last Attempt:</strong> @Model.LastLoginAttempt.Value.ToString("MMM dd, yyyy HH:mm")</p>
+                                                }
+                                            </div>
+                                            <div class="col-md-6">
+                                                @if (Model.LoginAttempts > 3)
+                                                {
+                                                    <div class="alert alert-warning">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        Multiple failed login attempts detected. Consider changing your password.
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Actions Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="mb-3"><i class="fas fa-cog me-2"></i>Security Actions</h5>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <a asp-action="ChangePassword" class="btn btn-outline-primary w-100 mb-2">
+                                                    <i class="fas fa-key me-2"></i>Change Password
+                                                </a>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <a href="#" class="btn btn-outline-warning w-100 mb-2" onclick="alert('2FA functionality has been moved to the Profile page. Please use the Profile page to manage your account settings.');">
+                                                    <i class="fas fa-mobile-alt me-2"></i>Manage 2FA
+                                                </a>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <a href="#" class="btn btn-outline-info w-100 mb-2" onclick="alert('Personal data download functionality has been moved to the Profile page. Please use the Profile page to manage your account settings.');">
+                                                    <i class="fas fa-download me-2"></i>Download Data
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

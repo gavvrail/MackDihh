@@ -1,15 +1,10 @@
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using FoodOrderingSystem.Data;
-using FoodOrderingSystem.Models;
-using FoodOrderingSystem.Services;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+using FoodOrderingSystem.Data;
+using FoodOrderingSystem.Models;
+using FoodOrderingSystem.ViewModels;
 
 namespace FoodOrderingSystem.Controllers
 {
@@ -35,6 +30,7 @@ namespace FoodOrderingSystem.Controllers
                     return RedirectToAction("Login", "Account", new { area = "Identity" });
                 }
 
+                // Get cart with items
                 var cart = await _context.Carts
                     .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.MenuItem)
@@ -42,32 +38,37 @@ namespace FoodOrderingSystem.Controllers
 
                 if (cart == null || !cart.CartItems.Any())
                 {
-                    TempData["ErrorMessage"] = "Your cart is empty.";
+                    TempData["ErrorMessage"] = "Your cart is empty. Please add items before proceeding to checkout.";
                     return RedirectToAction("Index", "Cart");
                 }
 
+                // Ensure all cart items have valid MenuItems
+                cart.CartItems = cart.CartItems.Where(ci => ci.MenuItem != null).ToList();
+                
+                if (!cart.CartItems.Any())
+                {
+                    TempData["ErrorMessage"] = "Your cart contains invalid items. Please add items before proceeding to checkout.";
+                    return RedirectToAction("Index", "Cart");
+                }
+
+                // Get user info
                 var user = await _context.Users.FindAsync(userId);
-                var checkoutViewModel = new CheckoutViewModel
+
+                var checkoutViewModel = new ViewModels.CheckoutViewModel
                 {
                     Cart = cart,
                     DeliveryAddress = user?.Address ?? "",
                     CustomerPhone = user?.PhoneNumber ?? "",
                     DeliveryInstructions = "",
-                    Notes = ""
+                    Notes = "",
+                    PaymentMethod = "Cash" // Default to Cash
                 };
-
-                // Show helpful message if user has saved information
-                if (!string.IsNullOrEmpty(user?.Address) || !string.IsNullOrEmpty(user?.PhoneNumber))
-                {
-                    TempData["InfoMessage"] = "Your saved delivery information has been pre-filled. You can modify it if needed.";
-                }
 
                 return View(checkoutViewModel);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log the exception here if you have logging configured
-                TempData["ErrorMessage"] = "An error occurred while loading the checkout page. Please try again.";
+                TempData["ErrorMessage"] = $"An error occurred while loading the checkout page: {ex.Message}";
                 return RedirectToAction("Index", "Cart");
             }
         }
@@ -75,43 +76,14 @@ namespace FoodOrderingSystem.Controllers
         // POST: /Checkout/PlaceOrder
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
+        public async Task<IActionResult> PlaceOrder(ViewModels.CheckoutViewModel model)
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("=== Starting Order Placement ===");
-                
-                // Manual validation for required fields only
-                if (string.IsNullOrWhiteSpace(model.DeliveryAddress))
-                {
-                    TempData["ErrorMessage"] = "Delivery address is required.";
-                    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    var currentCart = await _context.Carts
-                        .Include(c => c.CartItems)
-                        .ThenInclude(ci => ci.MenuItem)
-                        .FirstOrDefaultAsync(c => c.UserId == currentUserId);
-                    model.Cart = currentCart ?? new Cart();
-                    return View("Index", model);
-                }
-                
-                if (string.IsNullOrWhiteSpace(model.CustomerPhone))
-                {
-                    TempData["ErrorMessage"] = "Phone number is required.";
-                    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    var currentCart = await _context.Carts
-                        .Include(c => c.CartItems)
-                        .ThenInclude(ci => ci.MenuItem)
-                        .FirstOrDefaultAsync(c => c.UserId == currentUserId);
-                    model.Cart = currentCart ?? new Cart();
-                    return View("Index", model);
-                }
-
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                System.Diagnostics.Debug.WriteLine($"User ID: {userId}");
-                
                 if (string.IsNullOrEmpty(userId))
                 {
-                    TempData["ErrorMessage"] = "Please log in to proceed with checkout.";
+                    TempData["ErrorMessage"] = "Your session has expired. Please log in again.";
                     return RedirectToAction("Login", "Account", new { area = "Identity" });
                 }
 
@@ -122,63 +94,95 @@ namespace FoodOrderingSystem.Controllers
 
                 if (cart == null || !cart.CartItems.Any())
                 {
-                    System.Diagnostics.Debug.WriteLine("Cart is empty or null");
                     TempData["ErrorMessage"] = "Your cart is empty.";
                     return RedirectToAction("Index", "Cart");
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Cart has {cart.CartItems.Count} items");
+                if (!ModelState.IsValid)
+                {
+                    TempData["ErrorMessage"] = "Please correct the errors below.";
+                    return View("Index", model);
+                }
+
+                // Get user for member benefits
+                var user = await _context.Users.FindAsync(userId);
+                bool isMember = user != null && user.IsMember && user.MemberExpiryDate > DateTime.UtcNow;
 
                 // Calculate totals
                 var subtotal = cart.CartItems.Sum(item => item.Quantity * item.MenuItem.Price);
-                var tax = subtotal * 0.06m; // 6% tax
-                var deliveryFee = subtotal >= 100 ? 0 : 5.00m; // Free delivery for orders over RM100
-                var total = subtotal + tax + deliveryFee;
-
-                System.Diagnostics.Debug.WriteLine($"Subtotal: {subtotal}, Tax: {tax}, Delivery: {deliveryFee}, Total: {total}");
-
-                // Save user information to profile for future use
-                var user = await _context.Users.FindAsync(userId);
-                if (user != null)
+                var tax = subtotal * 0.06m;
+                var deliveryFee = subtotal >= 100 ? 0 : 5.00m;
+                
+                // Apply member discount (5% off for members)
+                decimal memberDiscount = 0;
+                if (isMember)
                 {
-                    // Update user's address and phone if provided
-                    if (!string.IsNullOrWhiteSpace(model.DeliveryAddress))
-                    {
-                        user.Address = model.DeliveryAddress.Trim();
-                    }
-                    if (!string.IsNullOrWhiteSpace(model.CustomerPhone))
-                    {
-                        user.PhoneNumber = model.CustomerPhone.Trim();
-                    }
-                    await _context.SaveChangesAsync();
+                    memberDiscount = subtotal * 0.05m; // 5% member discount
                 }
+                
+                // Apply promo code discount if provided
+                decimal discountAmount = 0;
+                string? appliedPromoCode = null;
+                
+                if (!string.IsNullOrWhiteSpace(model.PromoCode))
+                {
+                    // Check if it's a valid deal promo code
+                    var deal = await _context.Deals
+                        .FirstOrDefaultAsync(d => d.PromoCode == model.PromoCode &&
+                                                  d.IsActive &&
+                                                  d.StartDate <= DateTime.UtcNow &&
+                                                  d.EndDate >= DateTime.UtcNow &&
+                                                  d.CurrentUses < d.MaxUses);
+
+                    if (deal != null && subtotal >= deal.MinimumOrderAmount)
+                    {
+                        if (deal.DiscountPercentage > 0)
+                        {
+                            discountAmount = subtotal * (deal.DiscountPercentage / 100);
+                        }
+                        else if (deal.DiscountedPrice > 0)
+                        {
+                            discountAmount = deal.DiscountedPrice;
+                        }
+                        
+                        appliedPromoCode = model.PromoCode;
+                        
+                        // Update deal usage count
+                        deal.CurrentUses++;
+                    }
+                }
+                
+                var total = subtotal + tax + deliveryFee - discountAmount - memberDiscount;
 
                 // Create order
+                var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMdd}-{DateTime.UtcNow.Ticks % 10000:D4}";
                 var order = new Order
                 {
-                    UserId = userId ?? string.Empty,
+                    UserId = userId,
+                    OrderNumber = orderNumber,
                     OrderDate = DateTime.UtcNow,
-                    EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(45), // 45 minutes delivery time
+                    EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(45),
                     Subtotal = subtotal,
                     Tax = tax,
                     DeliveryFee = deliveryFee,
                     Total = total,
+                    TotalAmount = total,
                     Status = OrderStatus.Pending,
                     DeliveryAddress = model.DeliveryAddress.Trim(),
                     DeliveryInstructions = model.DeliveryInstructions?.Trim(),
                     CustomerPhone = model.CustomerPhone.Trim(),
-                    Notes = model.Notes?.Trim()
+                    PhoneNumber = model.CustomerPhone.Trim(),
+                    Notes = model.Notes?.Trim(),
+                    PaymentMethod = model.PaymentMethod,
+                    PaymentStatus = model.PaymentMethod == "Cash" ? "Pending" : "Paid",
+                    PromoCode = appliedPromoCode,
+                    DiscountAmount = discountAmount + memberDiscount
                 };
 
-                System.Diagnostics.Debug.WriteLine($"Created order with number: {order.OrderNumber}");
-
                 _context.Orders.Add(order);
-
-                // Save the order first to get the generated ID
                 await _context.SaveChangesAsync();
-                System.Diagnostics.Debug.WriteLine($"Order saved with ID: {order.Id}");
 
-                // Create order items with the correct OrderId
+                // Add order items
                 foreach (var cartItem in cart.CartItems)
                 {
                     var orderItem = new OrderItem
@@ -186,83 +190,62 @@ namespace FoodOrderingSystem.Controllers
                         OrderId = order.Id,
                         MenuItemId = cartItem.MenuItemId,
                         Quantity = cartItem.Quantity,
-                        Price = cartItem.MenuItem.Price
+                        Price = cartItem.MenuItem.Price,
+                        UnitPrice = cartItem.MenuItem.Price
                     };
                     _context.OrderItems.Add(orderItem);
-                    System.Diagnostics.Debug.WriteLine($"Added order item: {cartItem.MenuItem.Name} x {cartItem.Quantity} for Order ID: {order.Id}");
                 }
 
-                // Clear cart completely
-                System.Diagnostics.Debug.WriteLine($"Clearing {cart.CartItems.Count} items from cart...");
-                
-                // Award points to user based on items ordered (BEFORE clearing cart)
-                int totalPointsEarned = 0;
-                if (user != null)
-                {
-                    foreach (var cartItem in cart.CartItems)
-                    {
-                        // Calculate points based on PointsPerItem field from menu item
-                        int pointsForThisItem = cartItem.MenuItem.PointsPerItem * cartItem.Quantity;
-                        totalPointsEarned += pointsForThisItem;
-                    }
+                // Clear cart
+                _context.CartItems.RemoveRange(cart.CartItems);
 
-                    if (totalPointsEarned > 0)
+                // Add member benefits (points earning)
+                if (isMember && user != null)
+                {
+                    // Members earn 1 point for every RM1 spent
+                    int pointsEarned = (int)Math.Floor(total);
+                    if (pointsEarned > 0)
                     {
-                        user.Points += totalPointsEarned;
-                        user.TotalPointsEarned += totalPointsEarned;
+                        user.Points += pointsEarned;
+                        user.TotalPointsEarned += pointsEarned;
 
                         // Create points transaction record
                         var pointsTransaction = new UserPointsTransaction
                         {
-                            UserId = userId ?? string.Empty,
-                            Points = totalPointsEarned,
+                            UserId = userId,
+                            Points = pointsEarned,
                             Type = PointsTransactionType.Earned,
-                            Description = $"Order #{order.OrderNumber} - {totalPointsEarned} points earned",
-                            OrderId = order.Id
+                            Description = $"Order #{orderNumber} - Earned {pointsEarned} points (Member Benefit)"
                         };
 
                         _context.UserPointsTransactions.Add(pointsTransaction);
-                        System.Diagnostics.Debug.WriteLine($"Awarded {totalPointsEarned} points to user {userId}");
                     }
                 }
-                
-                _context.CartItems.RemoveRange(cart.CartItems);
-                
-                // Also remove the cart itself if it's empty
-                if (!cart.CartItems.Any())
-                {
-                    _context.Carts.Remove(cart);
-                    System.Diagnostics.Debug.WriteLine("Removed empty cart");
-                }
 
-                // Save order items and cart changes
-                System.Diagnostics.Debug.WriteLine("Saving order items and clearing cart...");
                 await _context.SaveChangesAsync();
-                System.Diagnostics.Debug.WriteLine("Database save completed successfully - Order items saved and cart cleared!");
 
-                // Email sending removed for instant order completion
-
-                // Success - redirect to confirmation page
-                System.Diagnostics.Debug.WriteLine("Order placement completed successfully");
-                
-                // Show points earned message
-                if (totalPointsEarned > 0)
+                var memberMessage = "";
+                if (isMember && user != null)
                 {
-                    TempData["SuccessMessage"] = $"Order placed successfully! You earned {totalPointsEarned} points from this order.";
+                    var pointsEarned = (int)Math.Floor(total);
+                    var discountSaved = memberDiscount;
+                    memberMessage = $" You saved RM{discountSaved:F2} with member discount and earned {pointsEarned} points!";
                 }
-                
-                // Don't set TempData message here - the confirmation page itself shows success
+
+                TempData["SuccessMessage"] = $"Order placed successfully!{memberMessage}";
                 return RedirectToAction("Confirmation", new { orderId = order.Id });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Log the exception for debugging
-                System.Diagnostics.Debug.WriteLine($"Order placement error: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                
-                TempData["ErrorMessage"] = "An error occurred while placing your order. Please try again.";
+                TempData["ErrorMessage"] = "An unexpected error occurred while placing your order. Please try again.";
                 return RedirectToAction("Index", "Cart");
             }
+        }
+
+        // GET: /Checkout/Test - Simple test to verify routing
+        public IActionResult Test()
+        {
+            return Content("Checkout controller is working!");
         }
 
         // GET: /Checkout/Confirmation/{orderId}
@@ -282,23 +265,4 @@ namespace FoodOrderingSystem.Controllers
             return View(order);
         }
     }
-
-    public class CheckoutViewModel
-    {
-        public Cart Cart { get; set; } = null!;
-        
-        [Required(ErrorMessage = "Delivery address is required")]
-        [StringLength(200, ErrorMessage = "Address cannot be longer than 200 characters")]
-        public string DeliveryAddress { get; set; } = "";
-        
-        [Required(ErrorMessage = "Phone number is required")]
-        [Phone(ErrorMessage = "Please enter a valid phone number")]
-        public string CustomerPhone { get; set; } = "";
-        
-        [Display(Name = "Delivery Instructions")]
-        public string? DeliveryInstructions { get; set; }
-        
-        [Display(Name = "Order Notes")]
-        public string? Notes { get; set; }
-    }
-} 
+}

@@ -1,0 +1,215 @@
+@model IEnumerable<FoodOrderingSystem.Models.WishListItem>
+
+@{
+    ViewData["Title"] = "My Wishlist";
+}
+
+@Html.AntiForgeryToken()
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/wishlist.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/wishlist-popup.css" asp-append-version="true" />
+}
+
+<div class="wishlist-container">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-heart me-2"></i>My Wishlist</h2>
+                    <div class="wishlist-stats">
+                        <span class="badge bg-primary fs-6">@Model.Count() item@(Model.Count() != 1 ? "s" : "")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var item in Model)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card wishlist-item-card h-100">
+                            <div class="position-relative">
+                                <img src="@Url.Content(item.MenuItem.ImageUrl)" 
+                                     class="card-img-top" 
+                                     alt="@item.MenuItem.Name"
+                                     style="height: 200px; object-fit: cover;"
+                                     onerror="this.onerror=null;this.src='https://placehold.co/300x200/E8E8E8/B7B7B7?text=Image+Error';">
+                                
+                                <!-- Remove from wishlist button -->
+                                <form asp-action="RemoveFromWishList" method="post" class="remove-wishlist-form">
+                                    <input type="hidden" name="wishListItemId" value="@item.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm remove-wishlist-btn" title="Remove from Wishlist">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">@item.MenuItem.Name</h5>
+                                <p class="card-text text-muted flex-grow-1">
+                                    @(item.MenuItem.Description.Length > 100 ? item.MenuItem.Description.Substring(0, 100) + "..." : item.MenuItem.Description)
+                                </p>
+                                
+                                <div class="price-section mb-3">
+                                    <h4 class="text-danger mb-0">RM @item.MenuItem.Price.ToString("F2")</h4>
+                                    @if (item.MenuItem.PointsPerItem > 0)
+                                    {
+                                        <small class="text-success">
+                                            <i class="fas fa-star me-1"></i>Earn @item.MenuItem.PointsPerItem point@(item.MenuItem.PointsPerItem > 1 ? "s" : "")
+                                        </small>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(item.Notes))
+                                {
+                                    <div class="notes-section mb-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-sticky-note me-1"></i>
+                                            <strong>Notes:</strong> @item.Notes
+                                        </small>
+                                    </div>
+                                }
+
+                                <div class="action-buttons mt-auto">
+                                    <div class="row g-2">
+                                        <div class="col-8">
+                                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                                <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+                                                <button type="submit" class="btn btn-success w-100">
+                                                    <i class="fas fa-shopping-cart me-1"></i>Add to Cart
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <div class="col-4">
+                                            <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-primary w-100" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer text-muted">
+                                <small>
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Added on @item.AddedDate.ToString("MMM dd, yyyy")
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card bulk-actions-card">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-tasks me-2"></i>Bulk Actions</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <button class="btn btn-outline-success w-100" onclick="addAllToCart()">
+                                        <i class="fas fa-shopping-cart me-1"></i>Add All to Cart
+                                    </button>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <button class="btn btn-outline-danger w-100" onclick="clearWishlist()">
+                                        <i class="fas fa-trash me-1"></i>Clear Wishlist
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Empty Wishlist -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <div class="empty-wishlist">
+                            <i class="fas fa-heart-broken fa-5x text-muted mb-4"></i>
+                            <h3 class="text-muted">Your wishlist is empty</h3>
+                            <p class="text-muted mb-4">Start adding items to your wishlist to save them for later!</p>
+                            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary btn-lg">
+                                <i class="fas fa-utensils me-2"></i>Browse Menu
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/wishlist.js" asp-append-version="true"></script>
+    <script>
+        function addAllToCart() {
+            // Get all wishlist items and add them to cart
+            const wishlistItems = document.querySelectorAll('.wishlist-item-card');
+            let promises = [];
+            
+            wishlistItems.forEach(item => {
+                const form = item.querySelector('form[action*="AddToCart"]');
+                if (form) {
+                    const formData = new FormData(form);
+                    promises.push(
+                        fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            }
+                        })
+                    );
+                }
+            });
+            
+            Promise.all(promises).then(() => {
+                showPopup('All items added to cart successfully!', 'success');
+                // Optionally redirect to cart after a short delay
+                setTimeout(() => {
+                    window.location.href = '/Cart';
+                }, 1500);
+            }).catch(error => {
+                showPopup('Some items could not be added to cart. Please try again.', 'error');
+            });
+        }
+        
+        function clearWishlist() {
+            if (confirm('Are you sure you want to clear your entire wishlist? This action cannot be undone.')) {
+                const formData = new FormData();
+                formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+                
+                fetch('/WishList/ClearWishList', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showPopup(data.message, 'success');
+                        // Reload the page after a short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showPopup(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showPopup('An error occurred while clearing the wishlist.', 'error');
+                });
+            }
+        }
+    </script>
+}

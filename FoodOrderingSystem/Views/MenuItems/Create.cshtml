@@ -6,6 +6,7 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/image-upload.css" asp-append-version="true" />
 }
 
 <div class="admin-header">
@@ -29,11 +30,18 @@
                             <span asp-validation-for="Name" class="text-danger"></span>
                         </div>
 
-                        <!-- New ImageUrl Field -->
+                        <!-- Image Upload Section -->
                         <div class="mb-3">
-                            <label asp-for="ImageUrl" class="form-label fw-bold">Image URL</label>
-                            <input asp-for="ImageUrl" class="form-control" />
+                            <label class="form-label fw-bold">Item Image</label>
+                            <div class="menu-item-image-section" data-menu-item-id="0">
+                                <div class="menu-item-image">
+                                    <img src="/images/default-menu-item.png" alt="Menu Item Image" 
+                                         onerror="this.src='/images/default-menu-item.png';">
+                                </div>
+                            </div>
+                            <input asp-for="ImageUrl" type="hidden" id="imageUrlInput" />
                             <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                            <small class="form-text text-muted">Drag and drop an image or click to browse. You can crop the image after selection.</small>
                         </div>
 
                         <div class="mb-3">
@@ -85,4 +93,22 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="~/js/image-upload.js" asp-append-version="true"></script>
+    <script>
+        // Initialize menu item image uploader for new items
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageUploader = new MenuItemImageUploader(0, {
+                target: '.menu-item-image-section'
+            });
+            
+            // Override the updateProfileImage method to update the hidden input
+            imageUploader.updateProfileImage = function(imagePath) {
+                document.getElementById('imageUrlInput').value = imagePath;
+                const menuItemImage = document.querySelector('.menu-item-image img');
+                if (menuItemImage) {
+                    menuItemImage.src = imagePath + '?t=' + new Date().getTime();
+                }
+            };
+        });
+    </script>
 }

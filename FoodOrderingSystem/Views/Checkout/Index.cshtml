@@ -1,5 +1,6 @@
-@using System.Security.Claims
-@model FoodOrderingSystem.Controllers.CheckoutViewModel
+@model FoodOrderingSystem.ViewModels.CheckoutViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewData["Title"] = "Checkout";
@@ -9,172 +10,152 @@
     <link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
 }
 
-<div class="checkout-container">
-    <div class="container">
-        <!-- Success/Error Messages -->
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="checkout-full-width">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="checkout-card">
+                    <div class="checkout-header">
+                        <h4><i class="fas fa-utensils me-2"></i>Food Order Checkout</h4>
             </div>
-        }
-        
+                    <div class="checkout-body">
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>
+                        <div class="alert alert-danger">
                 @TempData["ErrorMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
 
-        @if (TempData["InfoMessage"] != null)
-        {
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                <i class="fas fa-info-circle me-2"></i>
-                @TempData["InfoMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-
-        <div class="row">
-            <!-- Checkout Form -->
-            <div class="col-lg-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Checkout</h4>
-                    </div>
-                    <div class="card-body">
-                        <form asp-action="PlaceOrder" method="post" id="checkoutForm">
+                    <form asp-controller="Checkout" asp-action="PlaceOrder" method="post">
+                        @Html.AntiForgeryToken()
+                        
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h5 class="mb-3">Delivery Information</h5>
+                                <div class="form-section">
+                                    <h5><i class="fas fa-truck me-2"></i>Delivery Information</h5>
                                     
                                     <div class="mb-3">
                                         <label asp-for="DeliveryAddress" class="form-label">Delivery Address *</label>
-                                        <textarea asp-for="DeliveryAddress" class="form-control" rows="3" 
-                                                  placeholder="Enter your full delivery address" required></textarea>
-                                        <span asp-validation-for="DeliveryAddress" class="text-danger" data-valmsg-for="DeliveryAddress"></span>
+                                        <textarea asp-for="DeliveryAddress" id="deliveryAddress" name="DeliveryAddress" class="form-control" rows="3" required placeholder="Enter your complete delivery address"></textarea>
+                                        <span asp-validation-for="DeliveryAddress" class="text-danger"></span>
                                     </div>
 
                                     <div class="mb-3">
                                         <label asp-for="CustomerPhone" class="form-label">Phone Number *</label>
-                                        <input asp-for="CustomerPhone" class="form-control" 
-                                               placeholder="Enter your phone number" required />
-                                        <span asp-validation-for="CustomerPhone" class="text-danger" data-valmsg-for="CustomerPhone"></span>
+                                        <input asp-for="CustomerPhone" id="customerPhone" name="CustomerPhone" class="form-control" required placeholder="Enter your phone number" minlength="10" maxlength="11" pattern="[0-9]{10,11}" title="Phone number must be 10-11 digits">
+                                        <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+                                    </div>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <h5 class="mb-3">Additional Information (Optional)</h5>
+                                <div class="form-section">
+                                    <h5><i class="fas fa-credit-card me-2"></i>Payment Method</h5>
                                     
                                     <div class="mb-3">
-                                        <label asp-for="DeliveryInstructions" class="form-label">Delivery Instructions</label>
-                                        <textarea asp-for="DeliveryInstructions" class="form-control" rows="3" 
-                                                  placeholder="Any special delivery instructions (optional)"></textarea>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="Cash" id="paymentCash" required>
+                                            <label class="form-check-label" for="paymentCash">
+                                                <i class="fas fa-money-bill-wave me-2"></i>Cash on Delivery
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="Card" id="paymentCard" required>
+                                            <label class="form-check-label" for="paymentCard">
+                                                <i class="fas fa-credit-card me-2"></i>Credit/Debit Card
+                                            </label>
+                                        </div>
+                                        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label asp-for="Notes" class="form-label">Order Notes</label>
-                                        <textarea asp-for="Notes" class="form-control" rows="3" 
-                                                  placeholder="Any special requests or notes (optional)"></textarea>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary me-md-2">
-                                    <i class="fas fa-arrow-left me-2"></i>Back to Cart
-                                </a>
-                                <button type="submit" class="btn btn-success" id="placeOrderBtn">
-                                    <i class="fas fa-credit-card me-2"></i>Place Order
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="order-summary">
+                                    <h5><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+                                    @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table summary-table">
+                                                <thead>
+                                                    <tr>
+                                                    <th><i class="fas fa-utensils me-2"></i>Food Item</th>
+                                                    <th><i class="fas fa-hashtag me-2"></i>Quantity</th>
+                                                    <th><i class="fas fa-tag me-2"></i>Price</th>
+                                                    <th><i class="fas fa-calculator me-2"></i>Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.Cart.CartItems)
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@item.MenuItem.Name</strong></td>
+                                                            <td><span class="badge bg-primary">@item.Quantity</span></td>
+                                                            <td>RM@(item.MenuItem.Price.ToString("F2"))</td>
+                                                            <td><strong>RM@((item.Quantity * item.MenuItem.Price).ToString("F2"))</strong></td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
             </div>
 
-            <!-- Order Summary -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm sticky-top" style="top: 2rem;">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
-                    </div>
-                    <div class="card-body">
-                        @{
-                            var subtotal = Model.Cart?.CartItems?.Sum(item => item.Quantity * item.MenuItem.Price) ?? 0;
-                            var tax = subtotal * 0.06m;
-                            var deliveryFee = subtotal >= 100 ? 0 : 5.00m;
-                            var total = subtotal + tax + deliveryFee;
-                        }
-                        
-                        @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
-                        {
-                            <div class="order-items mb-3">
-                                @foreach (var item in Model.Cart.CartItems)
-                                {
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div>
-                                            <strong>@item.MenuItem.Name</strong>
-                                            <small class="text-muted d-block">Qty: @item.Quantity</small>
+                                        <div class="totals-section">
+                                            @{
+                                                var currentUser = await UserManager.GetUserAsync(User);
+                                                bool isMember = currentUser != null && currentUser.IsMember && currentUser.MemberExpiryDate > DateTime.UtcNow;
+                                                var subtotal = Model.Cart.CartItems.Sum(item => item.Quantity * item.MenuItem.Price);
+                                                var tax = subtotal * 0.06m;
+                                                var deliveryFee = subtotal >= 100 ? 0 : 5.00m;
+                                                var memberDiscount = isMember ? subtotal * 0.05m : 0;
+                                                var total = subtotal + tax + deliveryFee - memberDiscount;
+                                            }
+                                            <div class="totals-row">
+                                                        <span><i class="fas fa-shopping-basket me-2"></i>Subtotal:</span>
+                                                <span id="subtotal-amount">RM@(subtotal.ToString("F2"))</span>
+                                            </div>
+                                            <div class="totals-row">
+                                                <span><i class="fas fa-percentage me-2"></i>Tax (6%):</span>
+                                                <span id="tax-amount">RM@(tax.ToString("F2"))</span>
+                                            </div>
+                                            <div class="totals-row">
+                                                <span><i class="fas fa-truck me-2"></i>Delivery Fee:</span>
+                                                <span id="delivery-amount">@(deliveryFee == 0 ? "FREE" : "RM" + deliveryFee.ToString("F2"))</span>
+                                            </div>
+                                            @if (isMember)
+                                            {
+                                                <div class="totals-row member-benefit">
+                                                    <span><i class="fas fa-crown text-warning me-2"></i>Member Discount (5%):</span>
+                                                    <span class="text-success">-RM@((subtotal * 0.05m).ToString("F2"))</span>
+                                                </div>
+                                            }
+                                            
+                                            <div class="totals-row discount" id="discount-line" style="display: none;">
+                                                <span><i class="fas fa-ticket-alt me-2"></i>Promo Discount:</span>
+                                                <span class="amount" id="discount-amount"></span>
+                                            </div>
+                                            <div class="totals-row">
+                                                <span><i class="fas fa-calculator me-2"></i>Total:</span>
+                                                <span id="total-amount">RM@(total.ToString("F2"))</span>
                                         </div>
-                                        <span class="fw-bold">RM@((item.Quantity * item.MenuItem.Price).ToString("F2"))</span>
                                     </div>
                                 }
                             </div>
-
-                            <hr>
-
-                            <div class="order-summary">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>Subtotal:</span>
-                                    <span>RM @subtotal.ToString("F2")</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>Tax (6%):</span>
-                                    <span>RM @tax.ToString("F2")</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>Delivery Fee:</span>
-                                    <span>@(deliveryFee == 0 ? "FREE" : "RM " + deliveryFee.ToString("F2"))</span>
-                                </div>
-                                <hr>
-                                <div class="d-flex justify-content-between fw-bold fs-5">
-                                    <span>Total:</span>
-                                    <span class="text-success">RM @total.ToString("F2")</span>
                                 </div>
                             </div>
 
-                            @if (subtotal < 100)
-                            {
-                                <div class="alert alert-info mt-3">
-                                    <small>
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Add RM @((100 - subtotal).ToString("F2")) more to your order for FREE delivery!
-                                    </small>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-success mt-3">
-                                    <small>
-                                        <i class="fas fa-check-circle me-1"></i>
-                                        You qualify for FREE delivery!
-                                    </small>
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <div class="text-center text-muted">
-                                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
-                                <p>No items in cart</p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-controller="Cart" asp-action="Index" class="btn-back">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Cart
+                        </a>
+                        <button type="submit" class="btn-checkout">
+                            <i class="fas fa-check me-2"></i>Place Food Order
+                        </button>
                             </div>
-                        }
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -185,8 +166,30 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
-        // Pass the user ID to the external JavaScript file
-        window.checkoutUserId = '@User.FindFirstValue(ClaimTypes.NameIdentifier)';
+        // Store original totals for calculations
+        const originalSubtotal = @(Model.Cart?.CartItems?.Sum(item => item.Quantity * item.MenuItem.Price) ?? 0);
+        const originalTax = originalSubtotal * 0.06;
+        const originalDeliveryFee = originalSubtotal >= 100 ? 0 : 5.00;
+        const originalTotal = originalSubtotal + originalTax + originalDeliveryFee;
+        
+
+        // Phone number validation
+        document.getElementById('customerPhone').addEventListener('input', function() {
+            const phoneInput = this;
+            const phoneValue = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
+            
+            // Update the input value to only contain digits
+            if (phoneInput.value !== phoneValue) {
+                phoneInput.value = phoneValue;
+            }
+            
+            // Validate length
+            if (phoneValue.length > 0 && (phoneValue.length < 10 || phoneValue.length > 11)) {
+                phoneInput.setCustomValidity('Phone number must be between 10 and 11 digits');
+            } else {
+                phoneInput.setCustomValidity('');
+            }
+        });
     </script>
     <script src="~/js/checkout.js" asp-append-version="true"></script>
 } 

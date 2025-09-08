@@ -2,20 +2,34 @@
     <link rel="stylesheet" href="~/css/index.css" asp-append-version="true" />
 }
 
+@model FoodOrderingSystem.Controllers.HomePageViewModel
+
 @{
     ViewData["Title"] = "Home Page";
 }
 
-<!-- Remove the default container to allow full-width sections -->
-<div class="container-fluid p-0">
+<!-- Full-width home content -->
+<div class="home-full-width">
 
     <!-- Hero Section -->
-    <header class="hero-section text-white text-center">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <h1 class="display-3 font-weight-bold">Some call it fast food, We call it love at first bite.</h1>
-            <p class="lead my-4">Ready to make it official? Order your cravings now.</p>
-            <a href="../Menu" class="btn btn-warning btn-lg hero-button">Order Now</a>
+    <header class="food-hero text-white text-center">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="hero-content text-lg-start">
+                        <h1 class="display-3 font-weight-bold">Some call it fast food, We call it love at first bite!</h1>
+                        <p class="lead my-4">Ready to make it official? Order your cravings now!</p>
+                        <a href="../Menu" class="btn btn-primary btn-lg hero-button">
+                            <i class="fas fa-utensils me-2"></i>Order Now
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="hero-logo">
+                        <img src="@Url.Content("~/images/logo.png")" alt="MACKDIHH MALAYSIA Logo" class="img-fluid hero-logo-img">
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -25,12 +39,14 @@
             <h2 class="text-center mb-5 section-title">Announcement</h2>
             <div class="row align-items-center">
                 <div class="col-lg-6 text-center">
-                    <img src="@Url.Content("~/images/mackdihh_meal.jpeg")" class="img-fluid rounded-3 shadow-lg" alt="Happy Meal">
+                    <img src="@Url.Content("~/images/mackdihh_meal.jpeg")" class="img-fluid rounded-4 shadow-lg" alt="Happy Meal">
                 </div>
                 <div class="col-lg-6 text-white text-center text-lg-start mt-4 mt-lg-0">
-                    <h2 class="display-5 fw-bolder">The MackDihh Meal is Here!</h2>
-                    <p class="lead">The newly released MackDihh Meal has arrived! Experience a taste of joy with our latest creation, featuring a delicious main, a side of fun, and a surprise toy. Available for a limited time only!</p>
-                    <a asp-controller="Menu" asp-action="Index" class="btn btn-lg fw-bold announcement-btn">Order Now</a>
+                    <h2 class="display-5 fw-bolder">The MACKDIHH Meal is Here!</h2>
+                    <p class="lead">The newly released MACKDIHH Meal has arrived! Experience a taste of joy with our latest creation, featuring a delicious main, a side of fun, and a surprise toy. Available for a limited time only!</p>
+                    <a asp-controller="Menu" asp-action="Index" class="btn btn-lg fw-bold announcement-btn">
+                        <i class="fas fa-utensils me-2"></i>Order Now
+                    </a>
                 </div>
             </div>
         </div>
@@ -42,60 +58,64 @@
         <div class="row text-center">
             <!-- Featured Item 1 -->
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card product-card h-100 d-flex flex-column">
-                                            <img src="@Url.Content("~/images/mackfloaty.png")" class="card-img-top" alt="Mack Floaty" style="height: 200px; object-fit: contain;">
+                <div class="card food-menu-card h-100 d-flex flex-column">
+                    <img src="@Url.Content("~/images/mackfloaty.png")" class="card-img-top" alt="Mack Floaty" style="height: 200px; object-fit: contain;">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">Mack Floaty</h5>
                         <p class="card-text">Cool off with creamy vanilla ice cream in an ice-cold Coke.</p>
                         <div class="mt-auto">
-                            <p class="font-weight-bold mb-2">RM6.69</p>
-                            <!-- This link now goes to the Menu page -->
-                            <a asp-controller="Menu" asp-action="Index" class="btn btn-danger">Add to Order</a>
+                            <p class="price mb-2">RM6.69</p>
+                            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Add to Order
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Featured Item 2 -->
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card product-card h-100 d-flex flex-column">
-                                            <img src="@Url.Content("~/images/7.png")" class="card-img-top" alt="Mack Double Drippy Cheese Melt Burger" style="height: 200px; object-fit: contain;">
+                <div class="card food-menu-card h-100 d-flex flex-column">
+                    <img src="@Url.Content("~/images/7.png")" class="card-img-top" alt="Mack Double Drippy Cheese Melt Burger" style="height: 200px; object-fit: contain;">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">Mack Double Drippy Cheese Melt Burger</h5>
-                        <p class="card-text">For cheese lovers who want it big and drippy.</p>
+                        <p class="card-text">For cheese lovers who want it big and drippy!</p>
                         <div class="mt-auto">
-                            <p class="font-weight-bold mb-2">RM14.69</p>
-                            <!-- This link now goes to the Menu page -->
-                            <a asp-controller="Menu" asp-action="Index" class="btn btn-danger">Add to Order</a>
+                            <p class="price mb-2">RM14.69</p>
+                            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Add to Order
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Featured Item 3 -->
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card product-card h-100 d-flex flex-column">
-                                            <img src="@Url.Content("~/images/freakysundae.png")" class="card-img-top" alt="Freaky Sundae" style="height: 200px; object-fit: contain;">
+                <div class="card food-menu-card h-100 d-flex flex-column">
+                    <img src="@Url.Content("~/images/freakysundae.png")" class="card-img-top" alt="Freaky Sundae" style="height: 200px; object-fit: contain;">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">Freaky Sundae</h5>
                         <p class="card-text">Vanilla ice cream with chocolate crumbles.</p>
                         <div class="mt-auto">
-                            <p class="font-weight-bold mb-2">RM6.69</p>
-                            <!-- This link now goes to the Menu page -->
-                            <a asp-controller="Menu" asp-action="Index" class="btn btn-danger">Add to Order</a>
+                            <p class="price mb-2">RM6.69</p>
+                            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Add to Order
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Featured Item 4 -->
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card product-card h-100 d-flex flex-column">
-                                            <img src="@Url.Content("~/images/mackultibfpancake.png")" class="card-img-top" alt="Mack Ulti-Breakfast Pancake" style="height: 200px; object-fit: contain;">
+                <div class="card food-menu-card h-100 d-flex flex-column">
+                    <img src="@Url.Content("~/images/mackultibfpancake.png")" class="card-img-top" alt="Mack Ulti-Breakfast Pancake" style="height: 200px; object-fit: contain;">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">Mack Ulti-Breakfast Pancake</h5>
                         <p class="card-text">Pancakes acts as buns and in between has bacon eggs and a beef patty</p>
                         <div class="mt-auto">
-                            <p class="font-weight-bold mb-2">RM17.69</p>
-                            <!-- This link now goes to the Menu page -->
-                            <a asp-controller="Menu" asp-action="Index" class="btn btn-danger">Add to Order</a>
+                            <p class="price mb-2">RM17.69</p>
+                            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Add to Order
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -103,45 +123,130 @@
         </div>
     </section>
 
-    <!-- Promotions Section -->
+    <!-- Enhanced Promotions Section -->
     <section class="bg-light py-5">
         <div class="container">
             <h2 class="text-center mb-4 section-title">Deals & Promotions</h2>
+            
+            <!-- User Status Display for Logged-in Users -->
+            @if (Model.User != null)
+            {
+                <div class="user-status-badges text-center mb-4">
+                    <span class="badge bg-success me-2">
+                        <i class="fas fa-coins me-1"></i>@Model.UserPoints Points
+                    </span>
+                    @if (Model.IsMember)
+                    {
+                        <span class="badge bg-warning me-2">
+                            <i class="fas fa-crown me-1"></i>Member
+                        </span>
+                    }
+                    @if (Model.IsStudentVerified)
+                    {
+                        <span class="badge bg-primary me-2">
+                            <i class="fas fa-graduation-cap me-1"></i>Student
+                        </span>
+                    }
+                </div>
+            }
+            
             <div class="row">
-                <!-- Promotion 1 -->
-                <div class="col-md-6 mb-4">
-                    <div class="card promo-card">
-                        <div class="row g-0">
-                            <div class="col-md-5">
-                                <img src="@Url.Content("~/images/5.png")" class="card-img" alt="Deal" style="height: 200px; object-fit: cover;">
-                            </div>
-                            <div class="col-md-7">
-                                <div class="card-body">
-                                    <h5 class="card-title">Free Fries Friday</h5>
-                                    <p class="card-text">Get a FREE medium Fries with any purchase of RM1 or more, only on Fridays.</p>
-                                    <a href="#" class="btn btn-outline-danger">Claim Deal</a>
+                <!-- Featured Deal 1 -->
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card promo-card h-100 d-flex flex-column">
+                            <img src="@Url.Content("~/images/5.png")" class="card-img-top" alt="Free Fries Friday" style="height: 150px; object-fit: cover;">
+                            <div class="card-body d-flex flex-column">
+                                <div class="deal-badge mb-2">
+                                    <span class="badge bg-danger">FRIDAY SPECIAL</span>
+                                </div>
+                                <h5 class="card-title">Free Fries Friday</h5>
+                                <p class="card-text">Get a FREE medium Fries with any purchase of RM1 or more, only on Fridays.</p>
+                                <div class="mt-auto">
+                                    <button type="button" class="btn btn-primary claim-deal-btn w-100" data-deal="Free Fries Friday" data-requirements="Any purchase RM1+ on Fridays">
+                                        <i class="fas fa-gift me-2"></i>Claim Deal
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Promotion 2 -->
-                <div class="col-md-6 mb-4">
-                    <div class="card promo-card">
-                        <div class="row g-0">
-                            <div class="col-md-5">
-                                <img src="@Url.Content("~/images/6.png")" class="card-img" alt="New Item" style="height: 200px; object-fit: cover;">
+                
+                <!-- Featured Deal 2 -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card promo-card h-100 d-flex flex-column">
+                        <img src="@Url.Content("~/images/6.png")" class="card-img-top" alt="New Crispy Chicken" style="height: 150px; object-fit: cover;">
+                        <div class="card-body d-flex flex-column">
+                            <div class="deal-badge mb-2">
+                                <span class="badge bg-primary">NEW ITEM</span>
                             </div>
-                            <div class="col-md-7">
-                                <div class="card-body">
-                                    <h5 class="card-title">Try the new Crispy Chicken</h5>
-                                    <p class="card-text">Juicy, crispy, and tender. Our new chicken sandwich is here to blow you away.</p>
-                                    <a href="#" class="btn btn-outline-danger">Learn More</a>
-                                </div>
+                            <h5 class="card-title">Try the new Crispy Chicken</h5>
+                            <p class="card-text">Juicy, crispy, and tender. Our new chicken sandwich is here to blow you away.</p>
+                            <div class="mt-auto">
+                                <a asp-controller="Menu" asp-action="Index" class="btn btn-primary w-100">
+                                    <i class="fas fa-utensils me-2"></i>Learn More
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Featured Deal 3 - Bundle Offer -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card promo-card bundle-offer h-100 d-flex flex-column">
+                        <img src="@Url.Content("~/images/7.png")" class="card-img-top" alt="Family Bundle" style="height: 150px; object-fit: cover;">
+                        <div class="card-body d-flex flex-column">
+                            <div class="deal-badge mb-2">
+                                <span class="badge bg-primary">BUNDLE DEAL</span>
+                            </div>
+                            <h5 class="card-title">Family Bundle Special</h5>
+                            <p class="card-text">Save 20% on our family bundle! Perfect for sharing with loved ones.</p>
+                            <div class="price-info mb-2">
+                                <span class="original-price">RM45.00</span>
+                                <span class="discounted-price">RM36.00</span>
+                                <span class="discount-percentage">-20%</span>
+                            </div>
+                            <div class="mt-auto">
+                                <button type="button" class="btn btn-primary claim-deal-btn w-100" data-deal="Family Bundle Special" data-requirements="Minimum 4 items">
+                                    <i class="fas fa-box me-2"></i>Order Bundle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Featured Deal 4 - Member Exclusive -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card promo-card member-deal h-100 d-flex flex-column">
+                        <img src="@Url.Content("~/images/8.png")" class="card-img-top" alt="Member Exclusive" style="height: 150px; object-fit: cover;">
+                        <div class="card-body d-flex flex-column">
+                            <div class="deal-badge mb-2">
+                                <span class="badge bg-warning text-dark">MEMBERS ONLY</span>
+                            </div>
+                            <h5 class="card-title">Member Exclusive Deal</h5>
+                            <p class="card-text">Special 30% off for our valued members. Join now to unlock exclusive benefits!</p>
+                            <div class="mt-auto">
+                                @if (Model.IsMember)
+                                {
+                                    <button type="button" class="btn btn-primary claim-deal-btn w-100" data-deal="Member Exclusive Deal" data-requirements="Membership required">
+                                        <i class="fas fa-crown me-2"></i>Claim Deal
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Deals" asp-action="MemberPurchase" class="btn btn-primary w-100">
+                                        <i class="fas fa-crown me-2"></i>Become Member
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View All Deals Button -->
+            <div class="text-center mt-4">
+                <a asp-controller="Deals" asp-action="Index" class="btn btn-primary btn-lg">
+                    <i class="fas fa-fire me-2"></i>View All Deals & Promotions
+                </a>
             </div>
         </div>
     </section>
@@ -149,42 +254,42 @@
     <!-- Why Choose Us Section -->
     <section class="why-choose-us py-5">
         <div class="container">
-            <h2 class="text-center mb-5 section-title">Why Choose MackDihh?</h2>
+            <h2 class="text-center mb-5 section-title">Why Choose MACKDIHH?</h2>
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="feature-card text-center">
                         <div class="feature-icon mb-3">
-                            <i class="fas fa-clock fa-3x text-primary"></i>
+                            <i class="fas fa-bolt fa-3x text-primary"></i>
                         </div>
-                        <h5>Fast Delivery</h5>
-                        <p>Get your food delivered in 30-45 minutes, guaranteed!</p>
+                        <h5>Lightning Fast Delivery</h5>
+                        <p>Get your food delivered in 20-30 minutes with our advanced tracking system!</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="feature-card text-center">
                         <div class="feature-icon mb-3">
-                            <i class="fas fa-leaf fa-3x text-success"></i>
+                            <i class="fas fa-seedling fa-3x text-success"></i>
                         </div>
-                        <h5>Fresh Ingredients</h5>
-                        <p>We use only the freshest ingredients sourced locally.</p>
+                        <h5>Premium Quality</h5>
+                        <p>Farm-fresh ingredients and premium meats delivered daily to ensure the best taste!</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="feature-card text-center">
                         <div class="feature-icon mb-3">
-                            <i class="fas fa-star fa-3x text-warning"></i>
+                            <i class="fas fa-award fa-3x text-warning"></i>
                         </div>
-                        <h5>Quality Assured</h5>
-                        <p>Every dish is prepared with care and attention to detail.</p>
+                        <h5>Rewards & Points</h5>
+                        <p>Earn points with every order and redeem amazing rewards, plus exclusive member benefits!</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="feature-card text-center">
                         <div class="feature-icon mb-3">
-                            <i class="fas fa-mobile-alt fa-3x text-info"></i>
+                            <i class="fas fa-headset fa-3x text-info"></i>
                         </div>
-                        <h5>Easy Ordering</h5>
-                        <p>Order online anytime, anywhere with our user-friendly platform.</p>
+                        <h5>24/7 Support</h5>
+                        <p>Round-the-clock customer support with live chat and instant order tracking!</p>
                     </div>
                 </div>
             </div>
@@ -197,7 +302,7 @@
             <h2 class="text-center mb-5 section-title">What Our Customers Say</h2>
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <div class="review-card">
+                    <div class="review-card h-100 d-flex flex-column">
                         <div class="review-stars mb-3">
                             <i class="fas fa-star text-warning"></i>
                             <i class="fas fa-star text-warning"></i>
@@ -205,42 +310,42 @@
                             <i class="fas fa-star text-warning"></i>
                             <i class="fas fa-star text-warning"></i>
                         </div>
-                        <p class="review-text">"I was impressed with how quickly my order arrived. The delivery rider was polite and friendly. Great service all around!"</p>
-                        <div class="review-author">
-                            <strong>Ben Dover</strong>
+                        <p class="review-text">"Service tiptop! My order arrived so fast and the abang rider was super friendly. Highly recommended!"</p>
+                        <div class="review-author mt-auto">
+                            <strong>Mohd Moskov Bin Gusini</strong>
+                            <small class="text-muted d-block">Local Foodie</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="review-card h-100 d-flex flex-column">
+                        <div class="review-stars mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="review-text">"Had a late-night craving for Mack Freaky Dinosaur and MACKDIHH delivered! The food arrived hot and fresh, even at 3 AM. You guys are lifesavers."</p>
+                        <div class="review-author mt-auto">
+                            <strong>Sum Ting Wong</strong>
+                            <small class="text-muted d-block">Night Owl</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="review-card h-100 d-flex flex-column">
+                        <div class="review-stars mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="review-text">"Been using this app almost daily for my lunch fix. Always reliable, great selections, and the delivery is consistently fast. My go-to for sure!"</p>
+                        <div class="review-author mt-auto">
+                            <strong>Lily Lee La Lila</strong>
                             <small class="text-muted d-block">Regular Customer</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="review-card">
-                        <div class="review-stars mb-3">
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                        </div>
-                        <p class="review-text">"Had a late-night craving for fries and MackDihh delivered! The fries arrived hot and crispy, even at 11 PM. You guys are heroes."</p>
-                        <div class="review-author">
-                            <strong>Nguyễn Phee Diddy</strong>
-                            <small class="text-muted d-block">Tourist</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="review-card">
-                        <div class="review-stars mb-3">
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                        </div>
-                        <p class="review-text">"I ordered 1,000 of these burgers for my latest video and they were INSANE! The delivery was faster than Chandler can win a challenge. 10/10 would order from this app again!"</p>
-                        <div class="review-author">
-                            <strong>MrBeast</strong>
-                            <small class="text-muted d-block">YouTuber</small>
                         </div>
                     </div>
                 </div>
@@ -251,13 +356,37 @@
     <!-- Call to Action Section -->
     <section class="cta-section py-5">
         <div class="container text-center">
-            <h2 class="mb-4">Ready to Experience the Best?</h2>
-            <p class="lead mb-4">Join thousands of satisfied customers who choose MackDihh for their daily cravings.</p>
+            <h2 class="mb-4">Hungry for Something Delicious?</h2>
+            <p class="lead mb-4">Discover our mouth-watering menu and get your favorite meals delivered fresh to your door.</p>
             <div class="cta-buttons">
-                <a asp-controller="Menu" asp-action="Index" class="btn btn-primary btn-lg me-3">Order Now</a>
-                <a asp-controller="Deals" asp-action="Index" class="btn btn-outline-primary btn-lg">View Deals</a>
+                <a asp-controller="Menu" asp-action="Index" class="btn btn-primary btn-lg me-3">Browse Menu</a>
+                <a asp-controller="Deals" asp-action="Index" class="btn btn-outline-primary btn-lg">Special Offers</a>
             </div>
         </div>
     </section>
 
 </div>
+
+@section Scripts {
+    <script>
+        // Handle claim deal functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const claimDealBtns = document.querySelectorAll('.claim-deal-btn');
+            
+            claimDealBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const dealName = this.getAttribute('data-deal');
+                    const requirements = this.getAttribute('data-requirements');
+                    
+                    // Show deal information
+                    alert(`🎉 ${dealName}\n\nRequirements: ${requirements}\n\nThis deal will be automatically applied when you place an order on Fridays with a minimum purchase of RM1.`);
+                    
+                    // Optionally redirect to menu
+                    if (confirm('Would you like to browse our menu to start your order?')) {
+                        window.location.href = '/Menu';
+                    }
+                });
+            });
+        });
+    </script>
+}

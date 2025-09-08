@@ -97,19 +97,19 @@
                                                 <small class="text-muted">@redemption.RedeemedAt.ToString("h:mm tt")</small>
                                             </td>
                                             <td>
-                                                <strong>@redemption.User.UserName</strong>
+                                                <strong>@(redemption.User?.UserName ?? "Unknown User")</strong>
                                                 <br>
-                                                <small class="text-muted">@redemption.User.Email</small>
+                                                <small class="text-muted">@(redemption.User?.Email ?? "No email")</small>
                                             </td>
                                             <td>
-                                                <strong>@redemption.PointsReward.Title</strong>
+                                                <strong>@(redemption.PointsReward?.Title ?? "Unknown Reward")</strong>
                                                 <br>
                                                 <small class="text-muted">
-                                                    @if (redemption.PointsReward.DiscountAmount > 0)
+                                                    @if (redemption.PointsReward?.DiscountAmount > 0)
                                                     {
                                                         <span class="text-success">RM@redemption.PointsReward.DiscountAmount.ToString("F2") OFF</span>
                                                     }
-                                                    @if (redemption.PointsReward.DiscountPercentage > 0)
+                                                    @if (redemption.PointsReward?.DiscountPercentage > 0)
                                                     {
                                                         <span class="text-success">@redemption.PointsReward.DiscountPercentage% OFF</span>
                                                     }
@@ -121,10 +121,17 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <code class="user-select-all">@redemption.RedemptionCode</code>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('@redemption.RedemptionCode')" title="Copy Code">
-                                                    <i class="fas fa-copy"></i>
-                                                </button>
+                                                @if (!string.IsNullOrEmpty(redemption.RedemptionCode))
+                                                {
+                                                    <code class="user-select-all">@redemption.RedemptionCode</code>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('@redemption.RedemptionCode')" title="Copy Code">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No code</span>
+                                                }
                                             </td>
                                             <td>
                                                 @if (redemption.IsUsed)

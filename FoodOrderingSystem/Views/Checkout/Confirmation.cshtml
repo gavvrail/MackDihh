@@ -4,208 +4,64 @@
     ViewData["Title"] = "Order Confirmation";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
-}
-
-<div class="confirmation-container">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-success text-white text-center">
-                        <i class="fas fa-check-circle fa-3x mb-3"></i>
-                        <h3 class="mb-0">Order Confirmed!</h3>
-                        <p class="mb-0">Thank you for your order</p>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <h3 class="mb-0">Order Confirmed!</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h4 class="text-success">Order #@Model.OrderNumber</h4>
+                        <p class="text-muted">Placed on @Model.OrderDate.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>
                     </div>
-                    <div class="card-body">
-                        <div class="text-center mb-4">
-                            <h4 class="text-success">Order #@Model.OrderNumber</h4>
-                            <p class="text-muted">Placed on @Model.OrderDate.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Delivery Details</h5>
+                            <p><strong>Address:</strong><br>@Model.DeliveryAddress</p>
+                            <p><strong>Phone:</strong> @Model.CustomerPhone</p>
+                            <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-map-marker-alt me-2"></i>Delivery Details</h5>
-                                <div class="delivery-info">
-                                    <p><strong>Address:</strong><br>@Model.DeliveryAddress</p>
-                                    <p><strong>Phone:</strong> @Model.CustomerPhone</p>
-                                    @if (!string.IsNullOrEmpty(Model.DeliveryInstructions))
-                                    {
-                                        <p><strong>Instructions:</strong><br>@Model.DeliveryInstructions</p>
-                                    }
-                                    <p><strong>Estimated Delivery:</strong><br>@Model.EstimatedDeliveryTime?.ToString("h:mm tt")</p>
-                                </div>
+                        <div class="col-md-6">
+                            <h5>Order Summary</h5>
+                            <div class="d-flex justify-content-between">
+                                <span>Subtotal:</span>
+                                <span>RM @Model.Subtotal.ToString("F2")</span>
                             </div>
-
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-receipt me-2"></i>Order Summary</h5>
-                                <div class="order-summary">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Subtotal:</span>
-                                        <span>RM @Model.Subtotal.ToString("F2")</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Tax (6%):</span>
-                                        <span>RM @Model.Tax.ToString("F2")</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Delivery Fee:</span>
-                                        <span>@(Model.DeliveryFee == 0 ? "FREE" : $"RM {Model.DeliveryFee:F2}")</span>
-                                    </div>
-                                    <hr>
-                                    <div class="d-flex justify-content-between fw-bold fs-5">
-                                        <span>Total:</span>
-                                        <span class="text-success">RM @Model.Total.ToString("F2")</span>
-                                    </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Tax (6%):</span>
+                                <span>RM @Model.Tax.ToString("F2")</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Delivery Fee:</span>
+                                <span>@(Model.DeliveryFee == 0 ? "FREE" : $"RM {Model.DeliveryFee:F2}")</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.PromoCode) && Model.DiscountAmount > 0)
+                            {
+                                <div class="d-flex justify-content-between text-success">
+                                    <span>Discount (@Model.PromoCode):</span>
+                                    <span>-RM @Model.DiscountAmount.ToString("F2")</span>
                                 </div>
-                                
-                                <!-- Points Earned Section -->
-                                @{
-                                    var pointsEarned = Model.OrderItems.Sum(item => item.MenuItem.PointsPerItem * item.Quantity);
-                                }
-                                <div class="points-earned mt-3 p-3 bg-warning bg-opacity-10 rounded">
-                                    <h6 class="text-warning mb-2">
-                                        <i class="fas fa-star me-2"></i>Points Earned
-                                    </h6>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span>This Order:</span>
-                                        <span class="fw-bold text-warning">+@pointsEarned Points</span>
-                                    </div>
-                                    <small class="text-muted">Points earned based on menu item settings</small>
-                                </div>
+                            }
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Total:</span>
+                                <span class="text-success">RM @Model.Total.ToString("F2")</span>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="order-items mt-4">
-                            <h5><i class="fas fa-utensils me-2"></i>Order Items</h5>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Item</th>
-                                            <th class="text-center">Quantity</th>
-                                            <th class="text-end">Price</th>
-                                            <th class="text-end">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in Model.OrderItems)
-                                        {
-                                            <tr>
-                                                <td>
-                                                    <strong>@item.MenuItem.Name</strong>
-                                                    @if (!string.IsNullOrEmpty(item.MenuItem.Description))
-                                                    {
-                                                        <br><small class="text-muted">@item.MenuItem.Description</small>
-                                                    }
-                                                </td>
-                                                <td class="text-center">@item.Quantity</td>
-                                                <td class="text-end">RM@(item.Price.ToString("F2"))</td>
-                                                <td class="text-end">RM@((item.Quantity * item.Price).ToString("F2"))</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(Model.Notes))
-                        {
-                            <div class="order-notes mt-4">
-                                <h5><i class="fas fa-sticky-note me-2"></i>Order Notes</h5>
-                                <div class="alert alert-info">
-                                    @Model.Notes
-                                </div>
-                            </div>
-                        }
-
-                        <div class="order-status mt-4">
-                            <h5><i class="fas fa-truck me-2"></i>Order Status Tracking</h5>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="order-status-timeline">
-                                        <div class="status-step @(Model.Status >= OrderStatus.Confirmed ? "completed" : Model.Status == OrderStatus.Pending ? "current" : "")">
-                                            <div class="status-icon">
-                                                <i class="fas fa-check-circle"></i>
-                                            </div>
-                                            <div class="status-content">
-                                                <h6>Order Confirmed</h6>
-                                                <small class="text-muted">Your order has been received and confirmed</small>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="status-step @(Model.Status >= OrderStatus.Preparing ? "completed" : Model.Status == OrderStatus.Confirmed ? "current" : "")">
-                                            <div class="status-icon">
-                                                <i class="fas fa-utensils"></i>
-                                            </div>
-                                            <div class="status-content">
-                                                <h6>Preparing</h6>
-                                                <small class="text-muted">Your food is being prepared by our chefs</small>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="status-step @(Model.Status >= OrderStatus.Delivering ? "completed" : Model.Status == OrderStatus.Ready ? "current" : "")">
-                                            <div class="status-icon">
-                                                <i class="fas fa-motorcycle"></i>
-                                            </div>
-                                            <div class="status-content">
-                                                <h6>Out for Delivery</h6>
-                                                <small class="text-muted">Your order is on its way to you</small>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="status-step @(Model.Status == OrderStatus.Delivered ? "completed" : "")">
-                                            <div class="status-icon">
-                                                <i class="fas fa-home"></i>
-                                            </div>
-                                            <div class="status-content">
-                                                <h6>Delivered</h6>
-                                                <small class="text-muted">Your order has been delivered successfully</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="current-status-info mt-3">
-                                        <div class="alert alert-@(Model.Status switch {
-                                            OrderStatus.Pending or OrderStatus.Confirmed => "info",
-                                            OrderStatus.Preparing => "warning",
-                                            OrderStatus.Ready or OrderStatus.Delivering => "primary",
-                                            OrderStatus.Delivered => "success",
-                                            OrderStatus.Cancelled => "danger",
-                                            _ => "light"
-                                        })">
-                                            <strong>Current Status:</strong> @Model.Status.ToString()
-                                            <br>
-                                            <small>
-                                                @(Model.Status switch {
-                                                    OrderStatus.Pending => "We're processing your order and will confirm it shortly.",
-                                                    OrderStatus.Confirmed => "Your order is confirmed and will start preparation soon.",
-                                                    OrderStatus.Preparing => "Our chefs are preparing your delicious meal.",
-                                                    OrderStatus.Ready => "Your order is ready and will be dispatched for delivery.",
-                                                    OrderStatus.Delivering => "Your order is on its way! Expected delivery: " + (Model.EstimatedDeliveryTime?.ToString("h:mm tt") ?? "Soon"),
-                                                    OrderStatus.Delivered => "Your order has been delivered successfully. Enjoy your meal!",
-                                                    OrderStatus.Cancelled => "This order has been cancelled.",
-                                                    _ => "Order status is being updated."
-                                                })
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-center mt-4">
-                            <a asp-controller="Orders" asp-action="History" class="btn btn-primary me-2">
-                                <i class="fas fa-history me-2"></i>View Order History
-                            </a>
-                            <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-primary">
-                                <i class="fas fa-utensils me-2"></i>Continue Shopping
-                            </a>
-                        </div>
+                    <div class="text-center mt-4">
+                        <a asp-controller="Menu" asp-action="Index" class="btn btn-primary">
+                            Continue Shopping
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div> 
+</div>

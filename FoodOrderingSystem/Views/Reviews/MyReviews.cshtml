@@ -1,0 +1,116 @@
+@model List<FoodOrderingSystem.Models.Review>
+
+@{
+    ViewData["Title"] = "My Reviews";
+}
+
+@Html.AntiForgeryToken()
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/reviews.css" asp-append-version="true" />
+}
+
+<div class="reviews-container">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>My Reviews</h2>
+                    <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-primary">
+                        <i class="fas fa-utensils me-1"></i>Browse Menu
+                    </a>
+                </div>
+
+                @if (Model.Any())
+                {
+                    <div class="reviews-list">
+                        @foreach (var review in Model)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="stars me-2">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= review.Rating)
+                                                        {
+                                                            <i class="fas fa-star text-warning"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="far fa-star text-warning"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                                <span class="fw-bold">@review.MenuItem.Name</span>
+                                                <span class="text-muted ms-2">@review.CreatedDate.ToString("MMM dd, yyyy")</span>
+                                                @if (review.IsVerified)
+                                                {
+                                                    <span class="badge bg-success ms-2">Verified</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning ms-2">Pending</span>
+                                                }
+                                            </div>
+                                            
+                                            @if (!string.IsNullOrEmpty(review.Comment))
+                                            {
+                                                <p class="mb-3">@review.Comment</p>
+                                            }
+
+                                            <!-- Business Response -->
+                                            @if (review.Responses?.Any() == true)
+                                            {
+                                                <div class="business-response mt-3 p-3 bg-light rounded">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <i class="fas fa-store me-2 text-primary"></i>
+                                                        <strong>Business Response</strong>
+                                                    </div>
+                                                    @foreach (var response in review.Responses)
+                                                    {
+                                                        <p class="mb-1">@response.Response</p>
+                                                        <small class="text-muted">@response.CreatedDate.ToString("MMM dd, yyyy")</small>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="helpful-section">
+                                                <div class="d-flex justify-content-end gap-2 mb-2">
+                                                    <span class="btn btn-sm btn-outline-success disabled">
+                                                        <i class="fas fa-thumbs-up me-1"></i>Helpful (@review.HelpfulCount)
+                                                    </span>
+                                                    <span class="btn btn-sm btn-outline-danger disabled">
+                                                        <i class="fas fa-thumbs-down me-1"></i>Unhelpful (@review.UnhelpfulCount)
+                                                    </span>
+                                                </div>
+                                                <div class="text-muted small">
+                                                    <i class="fas fa-eye me-1"></i>@(review.HelpfulCount + review.UnhelpfulCount) total votes
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <!-- No Reviews -->
+                    <div class="text-center py-5">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No reviews yet</h4>
+                        <p class="text-muted mb-4">You haven't written any reviews yet. Start by browsing our menu!</p>
+                        <a asp-controller="Menu" asp-action="Index" class="btn btn-primary">
+                            <i class="fas fa-utensils me-1"></i>Browse Menu
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

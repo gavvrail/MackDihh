@@ -9,13 +9,13 @@
 }
 
 <!-- Page Header -->
-<div class="deals-header">
-    <div class="container">
-        <h1>@ViewData["Title"]</h1>
-        <p class="lead">Don't miss out on our amazing offers!</p>
-        
+<div class="deals-full-width @(Model.User == null ? "deals-login-required" : "")">
+    <div class="container-fluid">
         @if (Model.User != null)
         {
+            <h1>@ViewData["Title"]</h1>
+            <p class="lead">Don't miss out on our amazing food offers!</p>
+            
             <div class="user-status-badges">
                 @if (Model.IsMember)
                 {
@@ -29,261 +29,137 @@
                         <i class="fas fa-graduation-cap me-1"></i>Student
                     </span>
                 }
-                <span class="badge bg-success">
-                    <i class="fas fa-coins me-1"></i>@Model.UserPoints Points
-                </span>
+                <div class="d-flex align-items-center">
+                    <span class="me-2 fw-bold">Your Points:</span>
+                    <span class="badge bg-success">
+                        <i class="fas fa-coins me-1"></i>@Model.UserPoints Points
+                    </span>
+                </div>
             </div>
+        }
+        else
+        {
+            <h1>Rewards & Promotions</h1>
+            <p class="lead">Login to access exclusive deals and rewards!</p>
         }
     </div>
 </div>
 
 <!-- Main Content -->
 <div class="container deals-content">
-    <!-- Flash Sales Section -->
-    @if (Model.FlashSales.Any())
+    @Html.AntiForgeryToken()
+    @if (Model.User == null)
     {
-        <div class="section-container mb-5">
-            <div class="section-header">
-                <h2><i class="fas fa-bolt text-warning me-2"></i>Flash Sales</h2>
-                <p class="text-muted">Limited time offers - act fast!</p>
-            </div>
-            <div class="row">
-                @foreach (var deal in Model.FlashSales)
-                {
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="deal-card h-100 flash-sale">
-                            <div class="deal-badge">
-                                <span class="badge bg-danger">FLASH SALE</span>
-                            </div>
-                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
-                            <div class="card-body text-center d-flex flex-column">
-                                <h5 class="card-title mt-3">@deal.Title</h5>
-                                <p class="card-text">@deal.Description</p>
-                                <div class="price-info mb-3">
-                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
-                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
-                                    <span class="discount-percentage">-@deal.DiscountPercentage%</span>
+        <!-- Login Prompt for Unauthenticated Users -->
+        <div class="login-prompt-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="card shadow-lg border-0">
+                            <div class="card-body p-5 text-center">
+                                <div class="mb-4">
+                                    <i class="fas fa-lock fa-3x text-primary mb-3"></i>
+                                    <h3 class="text-primary">Login Required</h3>
+                                    <p class="text-muted">Please log in to access our exclusive deals and rewards!</p>
                                 </div>
-                                <div class="deal-requirements">
-                                    @if (deal.RequiresMember && !Model.IsMember)
-                                    {
-                                        <span class="badge bg-warning text-dark">Members Only</span>
-                                    }
-                                    @if (deal.RequiresStudentVerification && !Model.IsStudentVerified)
-                                    {
-                                        <span class="badge bg-info">Student Verification Required</span>
-                                    }
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <a href="/Identity/Account/Login" class="btn btn-primary btn-lg w-100">
+                                            <i class="fas fa-sign-in-alt me-2"></i>LOGIN
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <a href="/Identity/Account/Register" class="btn btn-outline-primary btn-lg w-100">
+                                            <i class="fas fa-user-plus me-2"></i>Register
+                                        </a>
+                                    </div>
                                 </div>
-                                <a href="#" class="btn btn-claim mt-auto">Claim Deal</a>
+                                <div class="mt-4">
+                                    <p class="text-muted small">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        New users get bonus points and exclusive member benefits!
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                }
+                </div>
             </div>
         </div>
     }
-
-    <!-- Current Deals Section -->
-    @if (Model.CurrentDeals.Any())
+    else
     {
-        <div class="section-container mb-5">
-            <div class="section-header">
-                <h2><i class="fas fa-fire text-danger me-2"></i>Current Deals</h2>
-                <p class="text-muted">Hot offers available now!</p>
+        <!-- Points & Rewards Section for Authenticated Users -->
+        <div class="section-container mb-3">
+            <div class="section-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-star text-warning me-2"></i>Points & Rewards</h2>
+                    <p class="text-muted">Redeem your points for exclusive rewards!</p>
+                </div>
+                <a href="@Url.Action("ClaimPoints", "Deals")" class="btn btn-primary btn-lg">
+                    <i class="fas fa-gift me-2"></i>Claim Points & Rewards
+                </a>
             </div>
-            <div class="row">
-                @foreach (var deal in Model.CurrentDeals)
-                {
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="deal-card h-100">
-                            @if (!string.IsNullOrEmpty(deal.BadgeText))
-                            {
+        </div>
+
+        <!-- Birthday Benefits Section for Members -->
+        @if (Model.User.IsMember && Model.User.MemberExpiryDate > DateTime.UtcNow && Model.User.DateOfBirth.HasValue)
+        {
+            var today = DateTime.UtcNow;
+            var birthday = Model.User.DateOfBirth.Value;
+            var isBirthdayMonth = today.Month == birthday.Month && today.Year == birthday.Year;
+            
+            if (isBirthdayMonth)
+            {
+                <div class="section-container mb-3">
+                    <div class="section-header">
+                        <h2><i class="fas fa-birthday-cake text-danger me-2"></i>🎂 Birthday Special! 🎉</h2>
+                        <p class="text-muted">It's your birthday month! Claim your special birthday benefits!</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-8 mx-auto">
+                            <div class="deal-card birthday-benefit">
                                 <div class="deal-badge">
-                                    <span class="badge bg-@deal.BadgeColor">@deal.BadgeText</span>
+                                    <span class="badge bg-danger">BIRTHDAY SPECIAL</span>
                                 </div>
-                            }
-                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
-                            <div class="card-body text-center d-flex flex-column">
-                                <h5 class="card-title mt-3">@deal.Title</h5>
-                                <p class="card-text">@deal.Description</p>
-                                <div class="price-info mb-3">
-                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
-                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Happy Birthday! 🎂</h5>
+                                    <p class="card-text">As a valued member, you're entitled to special birthday benefits!</p>
+                                    <div class="birthday-benefits mb-4">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="benefit-item">
+                                                    <i class="fas fa-coins text-warning fa-2x mb-2"></i>
+                                                    <h6>100 Bonus Points</h6>
+                                                    <p>Get 100 free points as a birthday gift!</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="benefit-item">
+                                                    <i class="fas fa-ice-cream text-primary fa-2x mb-2"></i>
+                                                    <h6>Free Dessert</h6>
+                                                    <p>Show your birthday benefit code for a free dessert!</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a asp-action="ClaimBirthdayBenefit" class="btn btn-danger btn-lg">
+                                        <i class="fas fa-gift me-2"></i>Claim Birthday Benefits
+                                    </a>
                                 </div>
-                                <a href="#" class="btn btn-claim mt-auto">Claim Deal</a>
                             </div>
                         </div>
                     </div>
-                }
-            </div>
-        </div>
-    }
-
-    <!-- Bundle Offers Section -->
-    @if (Model.BundleOffers.Any())
-    {
-        <div class="section-container mb-5">
-            <div class="section-header">
-                <h2><i class="fas fa-box text-primary me-2"></i>Bundle Offers</h2>
-                <p class="text-muted">Save more with our value bundles!</p>
-            </div>
-            <div class="row">
-                @foreach (var deal in Model.BundleOffers)
-                {
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="deal-card h-100 bundle-offer">
-                            <div class="deal-badge">
-                                <span class="badge bg-primary">BUNDLE</span>
-                            </div>
-                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
-                            <div class="card-body text-center d-flex flex-column">
-                                <h5 class="card-title mt-3">@deal.Title</h5>
-                                <p class="card-text">@deal.Description</p>
-                                <div class="price-info mb-3">
-                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
-                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
-                                    <span class="discount-percentage">-@deal.DiscountPercentage%</span>
-                                </div>
-                                <a href="#" class="btn btn-claim mt-auto">Order Bundle</a>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
-
-    <!-- Seasonal Discounts Section -->
-    @if (Model.SeasonalDiscounts.Any())
-    {
-        <div class="section-container mb-5">
-            <div class="section-header">
-                <h2><i class="fas fa-calendar-alt text-success me-2"></i>Seasonal Discounts</h2>
-                <p class="text-muted">Special offers for special occasions!</p>
-            </div>
-            <div class="row">
-                @foreach (var deal in Model.SeasonalDiscounts)
-                {
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="deal-card h-100 seasonal">
-                            <div class="deal-badge">
-                                <span class="badge bg-success">SEASONAL</span>
-                            </div>
-                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
-                            <div class="card-body text-center d-flex flex-column">
-                                <h5 class="card-title mt-3">@deal.Title</h5>
-                                <p class="card-text">@deal.Description</p>
-                                <div class="price-info mb-3">
-                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
-                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
-                                </div>
-                                <a href="#" class="btn btn-claim mt-auto">Get Offer</a>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
-
-    <!-- Member Deals Section -->
-    @if (Model.MemberDeals.Any())
-    {
-        <div class="section-container mb-5">
-            <div class="section-header">
-                <h2><i class="fas fa-crown text-warning me-2"></i>Member Exclusive Deals</h2>
-                <p class="text-muted">Special offers for our valued members!</p>
-                @if (!Model.IsMember)
-                {
-                    <a asp-action="MemberPurchase" class="btn btn-outline-warning btn-sm">
-                        <i class="fas fa-crown me-1"></i>Become a Member
-                    </a>
-                }
-            </div>
-            <div class="row">
-                @foreach (var deal in Model.MemberDeals)
-                {
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="deal-card h-100 member-deal">
-                            <div class="deal-badge">
-                                <span class="badge bg-warning text-dark">MEMBERS ONLY</span>
-                            </div>
-                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
-                            <div class="card-body text-center d-flex flex-column">
-                                <h5 class="card-title mt-3">@deal.Title</h5>
-                                <p class="card-text">@deal.Description</p>
-                                <div class="price-info mb-3">
-                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
-                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
-                                </div>
-                                @if (Model.IsMember)
-                                {
-                                    <a href="#" class="btn btn-claim mt-auto">Claim Member Deal</a>
-                                }
-                                else
-                                {
-                                    <a asp-action="MemberPurchase" class="btn btn-outline-warning mt-auto">Join to Claim</a>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
-
-    <!-- Student Discounts Section -->
-    @if (Model.StudentDiscounts.Any())
-    {
-        <div class="section-container mb-5">
-            <div class="section-header">
-                <h2><i class="fas fa-graduation-cap text-primary me-2"></i>Student Discounts</h2>
-                <p class="text-muted">Special offers for students!</p>
-                @if (!Model.IsStudentVerified)
-                {
-                    <a asp-action="StudentVerification" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-graduation-cap me-1"></i>Verify Student Status
-                    </a>
-                }
-            </div>
-            <div class="row">
-                @foreach (var deal in Model.StudentDiscounts)
-                {
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="deal-card h-100 student-discount">
-                            <div class="deal-badge">
-                                <span class="badge bg-primary">STUDENT DISCOUNT</span>
-                            </div>
-                            <img src="@Url.Content(deal.ImageUrl ?? "~/images/default-deal.png")" class="deal-card-img-top" alt="@deal.Title">
-                            <div class="card-body text-center d-flex flex-column">
-                                <h5 class="card-title mt-3">@deal.Title</h5>
-                                <p class="card-text">@deal.Description</p>
-                                <div class="price-info mb-3">
-                                    <span class="original-price">RM@deal.OriginalPrice.ToString("F2")</span>
-                                    <span class="discounted-price">RM@deal.DiscountedPrice.ToString("F2")</span>
-                                </div>
-                                @if (Model.IsStudentVerified)
-                                {
-                                    <a href="#" class="btn btn-claim mt-auto">Claim Student Discount</a>
-                                }
-                                else
-                                {
-                                    <a asp-action="StudentVerification" class="btn btn-outline-primary mt-auto">Verify to Claim</a>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
+                </div>
+            }
+        }
 
     <!-- Promo Codes Section -->
     @if (Model.PromoCodes.Any())
     {
         <div class="section-container mb-5">
             <div class="section-header">
-                <h2><i class="fas fa-ticket-alt text-info me-2"></i>Promo Codes</h2>
+                <h2><i class="fas fa-ticket-alt text-info me-2"></i>Your Available Promo Codes</h2>
                 <p class="text-muted">Use these codes at checkout for extra savings!</p>
             </div>
             <div class="row">
@@ -306,11 +182,33 @@
                                 <div class="discount-info mb-3">
                                     <span class="discount-percentage">-@deal.DiscountPercentage% OFF</span>
                                 </div>
-                                <a href="#" class="btn btn-claim mt-auto">Use Code</a>
+                                <div class="mt-auto">
+                                    <p class="text-success small mb-0">
+                                        <i class="fas fa-check-circle me-1"></i>Available for checkout
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 }
+            </div>
+        </div>
+    }
+    else if (Model.User != null)
+    {
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-ticket-alt text-info me-2"></i>Promo Codes</h2>
+                <p class="text-muted">Your available promo codes will appear here</p>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No available promo code for you</h4>
+                        <p class="text-muted">Check back later for new promo codes or contact support for assistance.</p>
+                    </div>
+                </div>
             </div>
         </div>
     }
@@ -413,7 +311,9 @@
                         <div class="row">
                             @foreach (var item in category.OrderBy(i => i.Name))
                             {
-                                var pointsRequired = Math.Max(1, item.PointsPerItem);
+                                // Calculate points required based on price (1 point = RM 1.00)
+                                // If PointsPerItem is set, use it; otherwise calculate from price
+                                var pointsRequired = item.PointsPerItem > 0 ? item.PointsPerItem : (int)Math.Ceiling(item.Price);
                                 var canRedeem = Model.UserPoints >= pointsRequired;
                                 
                                 <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
@@ -436,19 +336,28 @@
                                                 <del>RM @item.Price.ToString("F2")</del> → <strong class="text-success">FREE!</strong>
                                             </p>
                                             
-                                            <form asp-controller="Menu" asp-action="RedeemItem" method="post" class="mt-auto">
-                                                <input type="hidden" name="menuItemId" value="@item.Id" />
-                                                <button type="submit" class="btn btn-success btn-sm w-100" @(canRedeem ? "" : "disabled")>
-                                                    @if (canRedeem)
-                                                    {
-                                                        <i class="fas fa-gift me-1"></i>@("Redeem Now")
-                                                    }
-                                                    else
-                                                    {
-                                                        <i class="fas fa-lock me-1"></i>@($"Need {pointsRequired - Model.UserPoints} more points")
-                                                    }
-                                                </button>
-                                            </form>
+                                            @if (Model.User.IsMember && Model.User.MemberExpiryDate > DateTime.UtcNow)
+                                            {
+                                                <form asp-controller="Menu" asp-action="RedeemItem" method="post" class="mt-auto">
+                                                    <input type="hidden" name="menuItemId" value="@item.Id" />
+                                                    <button type="submit" class="btn btn-success btn-sm w-100" @(canRedeem ? "" : "disabled")>
+                                                        @if (canRedeem)
+                                                        {
+                                                            <i class="fas fa-gift me-1"></i>@("Redeem Now")
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-lock me-1"></i>@($"Need {pointsRequired - Model.UserPoints} more points")
+                                                        }
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <a asp-action="MemberPurchase" class="btn btn-warning btn-sm w-100 mt-auto">
+                                                    <i class="fas fa-crown me-1"></i>Become Member to Redeem
+                                                </a>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -470,9 +379,40 @@
             </div>
         </div>
     }
+    }
 </div>
 
 
 @section Scripts {
     <script src="~/js/deals.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle copy promo code buttons
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            
+            copyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const promoCode = this.getAttribute('data-code');
+                    
+                    // Copy to clipboard
+                    navigator.clipboard.writeText(promoCode).then(function() {
+                        // Show success feedback
+                        const originalIcon = button.innerHTML;
+                        button.innerHTML = '<i class="fas fa-check"></i>';
+                        button.classList.add('btn-success');
+                        button.classList.remove('btn-outline-secondary');
+                        
+                        // Reset after 2 seconds
+                        setTimeout(() => {
+                            button.innerHTML = originalIcon;
+                            button.classList.remove('btn-success');
+                            button.classList.add('btn-outline-secondary');
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('Could not copy text: ', err);
+                    });
+                });
+            });
+        });
+    </script>
 }

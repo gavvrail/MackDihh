@@ -1,10 +1,31 @@
-﻿/* --- Account Page Styles --- */
+﻿/* Account-specific styles */
 .account-container {
+    min-height: calc(100vh - 200px);
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 4rem 1rem;
-    background-color: #f8f9fa;
+    justify-content: center;
+    background: #ffffff;
+    padding: 20px;
+}
+
+/* Login security warning styles */
+.text-danger ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.text-danger li {
+    color: #dc3545;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+/* Specific styling for login attempt warnings */
+.validation-summary-errors ul li {
+    color: #dc3545 !important;
+    font-weight: 600;
 }
 
 .account-form-wrapper {

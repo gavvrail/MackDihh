@@ -22,17 +22,20 @@ namespace FoodOrderingSystem.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly FileUploadService _fileUploadService;
 
         public ProfileController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            FileUploadService fileUploadService)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _fileUploadService = fileUploadService;
         }
 
         // GET: /Profile
@@ -51,6 +54,9 @@ namespace FoodOrderingSystem.Controllers
                 return NotFound();
             }
 
+            // Check if user is admin
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
             var profileViewModel = new ProfileViewModel
             {
                 UserName = user.UserName ?? string.Empty,
@@ -59,10 +65,52 @@ namespace FoodOrderingSystem.Controllers
                 Address = user.Address ?? string.Empty,
                 FirstName = user.FirstName ?? string.Empty,
                 LastName = user.LastName ?? string.Empty,
-                IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user)
+                DateOfBirth = user.DateOfBirth,
+                Points = user.Points,
+                TotalPointsEarned = user.TotalPointsEarned,
+                TotalPointsRedeemed = user.TotalPointsRedeemed,
+                IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user),
+                IsAdmin = isAdmin
             };
 
+            ViewBag.ProfilePhotoUrl = user.ProfilePhotoUrl;
+            ViewBag.IsAdmin = isAdmin;
             return View(profileViewModel);
+        }
+
+        // GET: /Profile/Security
+        public async Task<IActionResult> Security()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return NotFound();
+            }
+            
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var securityViewModel = new SecurityViewModel
+            {
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                PhoneNumber = user.PhoneNumber ?? string.Empty,
+                IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user),
+                IsPhoneNumberConfirmed = await _userManager.IsPhoneNumberConfirmedAsync(user),
+                IsTwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user),
+                LastLoginDate = user.LastLoginDate,
+                LoginAttempts = user.LoginAttempts,
+                LastLoginAttempt = user.LastLoginAttempt,
+                IsBlocked = user.IsBlocked,
+                BlockedUntil = user.BlockedUntil,
+                BlockReason = user.BlockReason,
+                TwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user)
+            };
+
+            return View(securityViewModel);
         }
 
         // POST: /Profile/Update
@@ -91,14 +139,31 @@ namespace FoodOrderingSystem.Controllers
             // Update user properties
             user.UserName = model.UserName;
             user.Email = model.Email;
-            user.PhoneNumber = model.PhoneNumber;
             user.Address = model.Address;
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
+            user.DateOfBirth = model.DateOfBirth;
 
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
+                // Update phone number using the proper Identity method
+                var newPhoneNumber = model.PhoneNumber?.Trim() ?? string.Empty;
+                var currentPhoneNumber = user.PhoneNumber?.Trim() ?? string.Empty;
+                
+                if (newPhoneNumber != currentPhoneNumber)
+                {
+                    var phoneResult = await _userManager.SetPhoneNumberAsync(user, newPhoneNumber);
+                    if (!phoneResult.Succeeded)
+                    {
+                        foreach (var error in phoneResult.Errors)
+                        {
+                            ModelState.AddModelError("", $"Phone number error: {error.Description}");
+                        }
+                        return View("Index", model);
+                    }
+                }
+
                 TempData["SuccessMessage"] = "Profile updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -109,6 +174,104 @@ namespace FoodOrderingSystem.Controllers
             }
 
             return View("Index", model);
+        }
+
+        // POST: /Profile/UploadProfilePicture
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadProfilePicture(IFormFile profilePicture)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "User not found" });
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "User not found" });
+                }
+
+                if (profilePicture == null || profilePicture.Length == 0)
+                {
+                    return Json(new { success = false, message = "No file selected" });
+                }
+
+                // Delete old profile picture if exists
+                if (!string.IsNullOrEmpty(user.ProfilePhotoUrl))
+                {
+                    _fileUploadService.DeleteFile(user.ProfilePhotoUrl);
+                }
+
+                // Upload new profile picture
+                var imagePath = await _fileUploadService.UploadProfilePictureAsync(profilePicture, userId);
+                
+                // Update user profile
+                user.ProfilePhotoUrl = imagePath;
+                // Use context directly to ensure ProfilePhotoUrl is saved
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+                // Also update through UserManager to ensure Identity cache is updated
+                await _userManager.UpdateAsync(user);
+
+                return Json(new { success = true, imagePath = imagePath, message = "Profile picture updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: /Profile/UploadCroppedProfilePicture
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadCroppedProfilePicture([FromBody] CroppedImageModel model)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "User not found" });
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "User not found" });
+                }
+
+                if (string.IsNullOrEmpty(model.ImageData))
+                {
+                    return Json(new { success = false, message = "No image data provided" });
+                }
+
+                // Delete old profile picture if exists
+                if (!string.IsNullOrEmpty(user.ProfilePhotoUrl))
+                {
+                    _fileUploadService.DeleteFile(user.ProfilePhotoUrl);
+                }
+
+                // Process and save cropped image
+                var imagePath = await _fileUploadService.ProcessCroppedImageAsync(model.ImageData, userId, "profile");
+                
+                // Update user profile
+                user.ProfilePhotoUrl = imagePath;
+                // Use context directly to ensure ProfilePhotoUrl is saved
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+                // Also update through UserManager to ensure Identity cache is updated
+                await _userManager.UpdateAsync(user);
+
+                return Json(new { success = true, imagePath = imagePath, message = "Profile picture updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         // GET: /Profile/ChangePassword
@@ -231,7 +394,34 @@ namespace FoodOrderingSystem.Controllers
         [StringLength(50, ErrorMessage = "Last name cannot be longer than 50 characters")]
         public string? LastName { get; set; }
 
+        [DataType(DataType.Date)]
+        [Display(Name = "Date of Birth")]
+        public DateTime? DateOfBirth { get; set; }
+
+        // Points information
+        public int Points { get; set; } = 0;
+        public int TotalPointsEarned { get; set; } = 0;
+        public int TotalPointsRedeemed { get; set; } = 0;
+
         public bool IsEmailConfirmed { get; set; }
+        public bool IsAdmin { get; set; } = false;
+    }
+
+    public class SecurityViewModel
+    {
+        public string UserName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string? PhoneNumber { get; set; }
+        public bool IsEmailConfirmed { get; set; }
+        public bool IsPhoneNumberConfirmed { get; set; }
+        public bool IsTwoFactorEnabled { get; set; }
+        public DateTime? LastLoginDate { get; set; }
+        public int LoginAttempts { get; set; }
+        public DateTime? LastLoginAttempt { get; set; }
+        public bool IsBlocked { get; set; }
+        public DateTime? BlockedUntil { get; set; }
+        public string? BlockReason { get; set; }
+        public bool TwoFactorEnabled { get; set; }
     }
 
     public class ChangePasswordViewModel

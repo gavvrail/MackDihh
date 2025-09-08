@@ -36,6 +36,22 @@ namespace FoodOrderingSystem.Controllers
             return View(orders);
         }
 
+        // GET: /Orders/Track/{orderId}
+        public async Task<IActionResult> Track(int orderId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
+
         // GET: /Orders/Cancel/{id}
         public async Task<IActionResult> Cancel(int id)
         {

@@ -1,5 +1,125 @@
 ﻿/* Deals Page Styles */
 
+/* Main Content Container */
+.deals-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Login prompt section styling */
+.login-prompt-section {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-prompt-section .card {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Birthday Benefits Styling */
+.birthday-benefit {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+    border: none;
+    color: white;
+}
+
+.birthday-benefit .card-title {
+    color: white;
+    font-weight: bold;
+}
+
+.birthday-benefit .card-text {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.birthday-benefit .benefit-item {
+    color: white;
+}
+
+.birthday-benefit .benefit-item h6 {
+    color: white;
+    font-weight: bold;
+}
+
+.birthday-benefit .benefit-item p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.birthday-benefit .btn-danger {
+    background: white;
+    color: #ff6b6b;
+    border: 2px solid white;
+    font-weight: bold;
+}
+
+.birthday-benefit .btn-danger:hover {
+    background: #f8f9fa;
+    color: #ff6b6b;
+    border: 2px solid #f8f9fa;
+}
+
+/* FAQ Section Styling */
+.accordion-button {
+    font-weight: 600;
+    border: none;
+    box-shadow: none;
+}
+
+.accordion-button:not(.collapsed) {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+.accordion-item {
+    border: 1px solid #dee2e6;
+    margin-bottom: 0.5rem;
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+.accordion-item:first-of-type {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.accordion-item:last-of-type {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.accordion-body {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.accordion-body ul {
+    margin-bottom: 0;
+}
+
+.accordion-body li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.accordion-body strong {
+    color: #495057;
+}
+
+.login-prompt-section .btn {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 12px 24px;
+}
+
 /* Page Header */
 .deals-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -29,12 +149,12 @@
 
 /* Section Containers */
 .section-container {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
 }
 
 .section-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .section-header h2 {
