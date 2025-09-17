@@ -8,6 +8,13 @@ function initializeChat() {
         return;
     }
 
+    // Check if we're actually on a page that needs SignalR chat
+    const isOnChatPage = document.getElementById('chatMessages') && !document.getElementById('support-chat-icon');
+    if (!isOnChatPage) {
+        console.log('Not on a chat page, skipping SignalR initialization');
+        return;
+    }
+
     chatConnection = new signalR.HubConnectionBuilder()
         .withUrl("/chatHub")
         .withAutomaticReconnect()
@@ -20,11 +27,44 @@ function initializeChat() {
     }).catch(function (err) {
         console.error("SignalR Chat connection error: ", err);
         updateConnectionStatus(false);
+        
+        // Only show error messages if we're actually on a chat page that needs SignalR
+        const isOnChatPage = document.getElementById('chatMessages') && !document.getElementById('support-chat-icon');
+        
+        if (isOnChatPage && typeof showNotification === 'function') {
+            if (err.status === 401) {
+                showNotification('Please log in to use chat', 'error', 5000);
+            } else if (err.status === 403) {
+                showNotification('You do not have permission to use chat', 'error', 5000);
+            } else {
+                showNotification('Chat service is temporarily unavailable', 'error', 5000);
+            }
+        } else {
+            // If not on a chat page, just log the error silently
+            console.log('SignalR connection failed but not on a chat page, ignoring error');
+        }
+        
+        // Only retry if we're on a chat page that needs SignalR
+        if (isOnChatPage) {
+            setTimeout(function() {
+                if (chatConnection.state === signalR.HubConnectionState.Disconnected) {
+                    initializeChat();
+                }
+            }, 5000);
+        }
     });
 
     // Message received handler
     chatConnection.on("ReceiveMessage", function (message) {
         displayMessage(message);
+    });
+
+    // Error handler
+    chatConnection.on("Error", function (error) {
+        console.error("Chat error:", error);
+        if (typeof showNotification === 'function') {
+            showNotification(error, 'error', 5000);
+        }
     });
 
     // Typing indicator handler
@@ -74,14 +114,21 @@ function leaveChatSession() {
 // Send message
 function sendChatMessage(message, senderName) {
     if (chatConnection && currentSessionId && message.trim()) {
-        chatConnection.invoke("SendMessage", currentSessionId, message, senderName);
+        // Sanitize inputs before sending
+        const sanitizedMessage = sanitizeInput(message);
+        const sanitizedSenderName = sanitizeInput(senderName);
+        
+        if (sanitizedMessage.length > 0) {
+            chatConnection.invoke("SendMessage", currentSessionId, sanitizedMessage, sanitizedSenderName);
+        }
     }
 }
 
 // Send typing indicator
 function sendTypingIndicator(senderName, isTyping) {
     if (chatConnection && currentSessionId) {
-        chatConnection.invoke("SendTypingIndicator", currentSessionId, senderName, isTyping);
+        const sanitizedSenderName = sanitizeInput(senderName);
+        chatConnection.invoke("SendTypingIndicator", currentSessionId, sanitizedSenderName, isTyping);
     }
 }
 
@@ -128,23 +175,63 @@ function updateConnectionStatus(isConnected) {
     }
 }
 
-// Escape HTML to prevent XSS
+// Escape HTML to prevent XSS - Enhanced version
 function escapeHtml(text) {
+    if (typeof text !== 'string') {
+        return '';
+    }
+    
     const map = {
         '&': '&amp;',
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
-        "'": '&#039;'
+        "'": '&#039;',
+        '/': '&#x2F;',
+        '`': '&#x60;',
+        '=': '&#x3D;'
     };
-    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    
+    return text.replace(/[&<>"'`=\/]/g, function(m) { 
+        return map[m] || m; 
+    });
+}
+
+// Sanitize user input more thoroughly
+function sanitizeInput(input) {
+    if (typeof input !== 'string') {
+        return '';
+    }
+    
+    // Remove any potential script tags and their content
+    let sanitized = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    
+    // Remove any potential javascript: protocols
+    sanitized = sanitized.replace(/javascript:/gi, '');
+    
+    // Remove any potential data: protocols that could be dangerous
+    sanitized = sanitized.replace(/data:(?!image\/[png|jpg|jpeg|gif|webp])/gi, '');
+    
+    // Trim whitespace and limit length
+    sanitized = sanitized.trim().substring(0, 1000);
+    
+    return sanitized;
 }
 
 // Initialize chat when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize if we're on a chat page
-    if (document.getElementById('chatMessages') || document.getElementById('support-chat-icon')) {
+    // Only initialize SignalR chat if we're on a specific chat page that needs it
+    // Check for specific chat elements that require SignalR (not the support widget)
+    const chatMessages = document.getElementById('chatMessages');
+    const supportChatIcon = document.getElementById('support-chat-icon');
+    
+    // Only initialize if we have chatMessages but not the support chat icon
+    // This means we're on a dedicated chat page, not the main site with support widget
+    if (chatMessages && !supportChatIcon) {
+        console.log('Initializing SignalR chat for dedicated chat page');
         initializeChat();
+    } else {
+        console.log('Skipping SignalR chat initialization - not on a chat page');
     }
 });
 

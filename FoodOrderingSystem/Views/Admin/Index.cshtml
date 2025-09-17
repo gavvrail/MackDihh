@@ -45,9 +45,9 @@
             <div class="card stat-card">
                 <div class="card-body text-center">
                     <h3 class="text-info">@Model.TotalOrders</h3>
-                    <p class="mb-0">Total Orders</p>
+                    <p class="mb-0">Order History</p>
                     <a href="@Url.Action("Orders", "Admin")" class="btn btn-sm btn-primary mt-2 admin-stat-btn">
-                        <i class="fas fa-list me-1"></i>Manage Orders
+                        <i class="fas fa-list me-1"></i>View History
                     </a>
                 </div>
             </div>
@@ -56,11 +56,11 @@
             <div class="card stat-card">
                 <div class="card-body text-center">
                     <h3 class="text-warning">@Model.PendingOrders</h3>
-                    <p class="mb-0">Pending Orders</p>
+                    <p class="mb-0">Current Orders</p>
                     @if (Model.PendingOrders > 0)
                     {
-                        <a href="@Url.Action("Orders", "Admin", new { status = "Pending" })" class="btn btn-sm btn-primary mt-2 admin-stat-btn">
-                            <i class="fas fa-eye me-1"></i>View Pending
+                        <a href="@Url.Action("Orders", "Admin", new { current = "true" })" class="btn btn-sm btn-primary mt-2 admin-stat-btn">
+                            <i class="fas fa-eye me-1"></i>View Current
                         </a>
                     }
                     else

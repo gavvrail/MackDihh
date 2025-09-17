@@ -90,57 +90,58 @@
     </div>
 </div>
 
-<!-- Ticket Form Modal -->
-<div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="ticketModalLabel">
-                    <i class="fas fa-ticket-alt me-2"></i>Open Support Ticket
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="ticketForm">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="ticketSubject" class="form-label">Subject</label>
-                        <input type="text" class="form-control" id="ticketSubject" required placeholder="Brief description of your issue">
-                    </div>
-                    <div class="mb-3">
-                        <label for="ticketCategory" class="form-label">Category</label>
-                        <select class="form-select" id="ticketCategory" required>
-                            <option value="">Select a category</option>
-                            <option value="order">Order Issue</option>
-                            <option value="delivery">Delivery Problem</option>
-                            <option value="payment">Payment Issue</option>
-                            <option value="refund">Refund Request</option>
-                            <option value="account">Account Help</option>
-                            <option value="technical">Technical Support</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="ticketPriority" class="form-label">Priority</label>
-                        <select class="form-select" id="ticketPriority" required>
-                            <option value="low">Low - General inquiry</option>
-                            <option value="medium" selected>Medium - Standard issue</option>
-                            <option value="high">High - Urgent issue</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="ticketDescription" class="form-label">Description</label>
-                        <textarea class="form-control" id="ticketDescription" rows="4" required 
-                                  placeholder="Please provide detailed information about your issue..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-paper-plane me-1"></i>Submit Ticket
-                    </button>
-                </div>
-            </form>
+<!-- Custom Ticket Form Modal -->
+<div id="ticketModal" class="custom-modal" style="display: none;">
+    <div class="custom-modal-backdrop"></div>
+    <div class="custom-modal-content">
+        <div class="custom-modal-header">
+            <h5 class="custom-modal-title">
+                <i class="fas fa-ticket-alt me-2"></i>Open Support Ticket
+            </h5>
+            <button type="button" class="custom-close-btn" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+        <form id="ticketForm">
+            <div class="custom-modal-body">
+                <div class="mb-3">
+                    <label for="ticketSubject" class="form-label">Subject</label>
+                    <input type="text" class="form-control" id="ticketSubject" required placeholder="Brief description of your issue">
+                </div>
+                <div class="mb-3">
+                    <label for="ticketCategory" class="form-label">Category</label>
+                    <select class="form-select" id="ticketCategory" required>
+                        <option value="">Select a category</option>
+                        <option value="order">Order Issue</option>
+                        <option value="delivery">Delivery Problem</option>
+                        <option value="payment">Payment Issue</option>
+                        <option value="refund">Refund Request</option>
+                        <option value="account">Account Help</option>
+                        <option value="technical">Technical Support</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="ticketPriority" class="form-label">Priority</label>
+                    <select class="form-select" id="ticketPriority" required>
+                        <option value="low">Low - General inquiry</option>
+                        <option value="medium" selected>Medium - Standard issue</option>
+                        <option value="high">High - Urgent issue</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="ticketDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="ticketDescription" rows="4" required 
+                              placeholder="Please provide detailed information about your issue..."></textarea>
+                </div>
+            </div>
+            <div class="custom-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('ticketModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-1"></i>Submit Ticket
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -168,8 +169,7 @@
         
         // Show ticket form
         function showTicketForm() {
-            const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
-            modal.show();
+            showCustomModal('ticketModal');
         }
         
         // Handle ticket form submission
@@ -189,8 +189,7 @@
             document.getElementById('sendButton').click();
             
             // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('ticketModal'));
-            modal.hide();
+            closeModal('ticketModal');
             
             // Reset form
             document.getElementById('ticketForm').reset();

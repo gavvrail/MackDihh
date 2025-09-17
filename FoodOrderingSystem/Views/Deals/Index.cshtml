@@ -1,275 +1,263 @@
 ﻿@model FoodOrderingSystem.Controllers.DealsViewModel
 
 @{
-    ViewData["Title"] = "Hot Deals & Promotions";
+    ViewData["Title"] = "Points & Rewards";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/deals.css" asp-append-version="true" />
 }
 
-<!-- Page Header -->
-<div class="deals-full-width @(Model.User == null ? "deals-login-required" : "")">
-    <div class="container-fluid">
-        @if (Model.User != null)
+@if (Model.User == null)
+{
+    <!-- Login Required Section -->
+    <div class="deals-hero-section deals-login-required">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <div class="hero-content">
+                        <i class="fas fa-gift hero-icon"></i>
+                        <h1 class="hero-title">Unlock Amazing Rewards</h1>
+                        <p class="hero-subtitle">Login to start earning points and access exclusive deals!</p>
+                        <div class="hero-actions">
+                            <a href="/Identity/Account/Login" class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                            <a href="/Identity/Account/Register" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Register
+                            </a>
+                        </div>
+                        <div class="hero-benefits">
+                            <div class="benefit-item">
+                                <i class="fas fa-coins text-warning"></i>
+                                <span>Earn 1 point per RM1 spent</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-gift text-success"></i>
+                                <span>Redeem for free food</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-ticket-alt text-info"></i>
+                                <span>Exclusive promo codes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Hero Section with Points Display -->
+    <div class="deals-hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Welcome back, @Model.User.FirstName!</h1>
+                        <p class="hero-subtitle">Earn points on every order and redeem them for free food!</p>
+                        
+                        <!-- Points Display -->
+                        <div class="points-display-card">
+                            <div class="points-main">
+                                <div class="points-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="points-info">
+                                    <span class="points-number">@Model.UserPoints</span>
+                                    <span class="points-label">Available Points</span>
+                                </div>
+                            </div>
+                            <div class="points-value">
+                                <span class="value-amount">RM @Model.UserPoints.ToString("F2")</span>
+                                <span class="value-label">Redeemable Value</span>
+                            </div>
+                        </div>
+                        
+                        <div class="hero-actions">
+                            <a href="@Url.Action("ClaimPoints", "Deals")" class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-gift me-2"></i>Claim Rewards
+                            </a>
+                            <a href="/Menu" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-utensils me-2"></i>Order Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-visual">
+                        <div class="points-animation">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container deals-content">
+        @Html.AntiForgeryToken()
+        
+        <!-- Points Summary Dashboard -->
+        <div class="points-dashboard mb-5">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="dashboard-card">
+                        <div class="card-icon bg-primary">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>@Model.UserPoints</h3>
+                            <p>Available Points</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="dashboard-card">
+                        <div class="card-icon bg-success">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>RM @Model.UserPoints.ToString("F2")</h3>
+                            <p>Redeemable Value</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="dashboard-card">
+                        <div class="card-icon bg-info">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>@Model.RedeemableItems.Count</h3>
+                            <p>Items Available</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="dashboard-card">
+                        <div class="card-icon bg-warning">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>@Model.PromoCodes.Count</h3>
+                            <p>Promo Codes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How Points Work Section -->
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-info-circle text-info me-2"></i>How Points Work</h2>
+                <p class="text-muted">Simple and rewarding points system for everyone!</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center">
+                                <div class="points-step-icon mb-3">
+                                    <i class="fas fa-shopping-cart fa-3x text-primary"></i>
+                                </div>
+                                <h5>1. Order Food</h5>
+                                <p class="text-muted">Place an order and earn 1 point for every RM1 you spend</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center">
+                                <div class="points-step-icon mb-3">
+                                    <i class="fas fa-coins fa-3x text-warning"></i>
+                                </div>
+                                <h5>2. Earn Points</h5>
+                                <p class="text-muted">Points are automatically added to your account after each order</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center">
+                                <div class="points-step-icon mb-3">
+                                    <i class="fas fa-gift fa-3x text-success"></i>
+                                </div>
+                                <h5>3. Redeem Rewards</h5>
+                                <p class="text-muted">Use your points to get free food items - 1 point = RM1 value</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promo Codes Section -->
+        @if (Model.PromoCodes.Any())
         {
-            <h1>@ViewData["Title"]</h1>
-            <p class="lead">Don't miss out on our amazing food offers!</p>
-            
-            <div class="user-status-badges">
-                @if (Model.IsMember)
-                {
-                    <span class="badge bg-gold me-2">
-                        <i class="fas fa-crown me-1"></i>Member
-                    </span>
-                }
-                @if (Model.IsStudentVerified)
-                {
-                    <span class="badge bg-primary me-2">
-                        <i class="fas fa-graduation-cap me-1"></i>Student
-                    </span>
-                }
-                <div class="d-flex align-items-center">
-                    <span class="me-2 fw-bold">Your Points:</span>
-                    <span class="badge bg-success">
-                        <i class="fas fa-coins me-1"></i>@Model.UserPoints Points
-                    </span>
+            <div class="section-container mb-5">
+                <div class="section-header">
+                    <h2><i class="fas fa-ticket-alt text-info me-2"></i>Your Available Promo Codes</h2>
+                    <p class="text-muted">Use these codes at checkout for extra savings!</p>
+                </div>
+                <div class="row">
+                    @foreach (var deal in Model.PromoCodes)
+                    {
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="deal-card h-100 promo-code">
+                                <div class="deal-badge">
+                                    <span class="badge bg-info">PROMO CODE</span>
+                                </div>
+                                <div class="card-body text-center d-flex flex-column">
+                                    <h5 class="card-title mt-3">@deal.Title</h5>
+                                    <p class="card-text">@deal.Description</p>
+                                    <div class="promo-code-display mb-3">
+                                        <span class="promo-code-text">@deal.PromoCode</span>
+                                        <button class="btn btn-sm btn-outline-secondary copy-btn" data-code="@deal.PromoCode">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="discount-info mb-3">
+                                        <span class="discount-percentage">-@deal.DiscountPercentage% OFF</span>
+                                    </div>
+                                    <div class="mt-auto">
+                                        <p class="text-success small mb-0">
+                                            <i class="fas fa-check-circle me-1"></i>Available for checkout
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         }
         else
         {
-            <h1>Rewards & Promotions</h1>
-            <p class="lead">Login to access exclusive deals and rewards!</p>
-        }
-    </div>
-</div>
-
-<!-- Main Content -->
-<div class="container deals-content">
-    @Html.AntiForgeryToken()
-    @if (Model.User == null)
-    {
-        <!-- Login Prompt for Unauthenticated Users -->
-        <div class="login-prompt-section">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 col-lg-6">
-                        <div class="card shadow-lg border-0">
-                            <div class="card-body p-5 text-center">
-                                <div class="mb-4">
-                                    <i class="fas fa-lock fa-3x text-primary mb-3"></i>
-                                    <h3 class="text-primary">Login Required</h3>
-                                    <p class="text-muted">Please log in to access our exclusive deals and rewards!</p>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <a href="/Identity/Account/Login" class="btn btn-primary btn-lg w-100">
-                                            <i class="fas fa-sign-in-alt me-2"></i>LOGIN
-                                        </a>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <a href="/Identity/Account/Register" class="btn btn-outline-primary btn-lg w-100">
-                                            <i class="fas fa-user-plus me-2"></i>Register
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <p class="text-muted small">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        New users get bonus points and exclusive member benefits!
-                                    </p>
-                                </div>
-                            </div>
+            <div class="section-container mb-5">
+                <div class="section-header">
+                    <h2><i class="fas fa-ticket-alt text-info me-2"></i>Promo Codes</h2>
+                    <p class="text-muted">Your available promo codes will appear here</p>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No available promo codes</h4>
+                            <p class="text-muted">Check back later for new promo codes or contact support for assistance.</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    }
-    else
-    {
-        <!-- Points & Rewards Section for Authenticated Users -->
-        <div class="section-container mb-3">
-            <div class="section-header d-flex justify-content-between align-items-center">
-                <div>
-                    <h2><i class="fas fa-star text-warning me-2"></i>Points & Rewards</h2>
-                    <p class="text-muted">Redeem your points for exclusive rewards!</p>
-                </div>
-                <a href="@Url.Action("ClaimPoints", "Deals")" class="btn btn-primary btn-lg">
-                    <i class="fas fa-gift me-2"></i>Claim Points & Rewards
-                </a>
-            </div>
-        </div>
-
-        <!-- Birthday Benefits Section for Members -->
-        @if (Model.User.IsMember && Model.User.MemberExpiryDate > DateTime.UtcNow && Model.User.DateOfBirth.HasValue)
-        {
-            var today = DateTime.UtcNow;
-            var birthday = Model.User.DateOfBirth.Value;
-            var isBirthdayMonth = today.Month == birthday.Month && today.Year == birthday.Year;
-            
-            if (isBirthdayMonth)
-            {
-                <div class="section-container mb-3">
-                    <div class="section-header">
-                        <h2><i class="fas fa-birthday-cake text-danger me-2"></i>🎂 Birthday Special! 🎉</h2>
-                        <p class="text-muted">It's your birthday month! Claim your special birthday benefits!</p>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-8 mx-auto">
-                            <div class="deal-card birthday-benefit">
-                                <div class="deal-badge">
-                                    <span class="badge bg-danger">BIRTHDAY SPECIAL</span>
-                                </div>
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">Happy Birthday! 🎂</h5>
-                                    <p class="card-text">As a valued member, you're entitled to special birthday benefits!</p>
-                                    <div class="birthday-benefits mb-4">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="benefit-item">
-                                                    <i class="fas fa-coins text-warning fa-2x mb-2"></i>
-                                                    <h6>100 Bonus Points</h6>
-                                                    <p>Get 100 free points as a birthday gift!</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="benefit-item">
-                                                    <i class="fas fa-ice-cream text-primary fa-2x mb-2"></i>
-                                                    <h6>Free Dessert</h6>
-                                                    <p>Show your birthday benefit code for a free dessert!</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <a asp-action="ClaimBirthdayBenefit" class="btn btn-danger btn-lg">
-                                        <i class="fas fa-gift me-2"></i>Claim Birthday Benefits
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
         }
 
-    <!-- Promo Codes Section -->
-    @if (Model.PromoCodes.Any())
-    {
-        <div class="section-container mb-5">
-            <div class="section-header">
-                <h2><i class="fas fa-ticket-alt text-info me-2"></i>Your Available Promo Codes</h2>
-                <p class="text-muted">Use these codes at checkout for extra savings!</p>
-            </div>
-            <div class="row">
-                @foreach (var deal in Model.PromoCodes)
-                {
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="deal-card h-100 promo-code">
-                            <div class="deal-badge">
-                                <span class="badge bg-info">PROMO CODE</span>
-                            </div>
-                            <div class="card-body text-center d-flex flex-column">
-                                <h5 class="card-title mt-3">@deal.Title</h5>
-                                <p class="card-text">@deal.Description</p>
-                                <div class="promo-code-display mb-3">
-                                    <span class="promo-code-text">@deal.PromoCode</span>
-                                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-code="@deal.PromoCode">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                                <div class="discount-info mb-3">
-                                    <span class="discount-percentage">-@deal.DiscountPercentage% OFF</span>
-                                </div>
-                                <div class="mt-auto">
-                                    <p class="text-success small mb-0">
-                                        <i class="fas fa-check-circle me-1"></i>Available for checkout
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
-    else if (Model.User != null)
-    {
-        <div class="section-container mb-5">
-            <div class="section-header">
-                <h2><i class="fas fa-ticket-alt text-info me-2"></i>Promo Codes</h2>
-                <p class="text-muted">Your available promo codes will appear here</p>
-            </div>
-            <div class="row">
-                <div class="col-12">
-                    <div class="text-center py-5">
-                        <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
-                        <h4 class="text-muted">No available promo code for you</h4>
-                        <p class="text-muted">Check back later for new promo codes or contact support for assistance.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-    <!-- Referral Bonus Section -->
-    @if (Model.ReferralBonus != null)
-    {
-        <div class="section-container mb-5">
-            <div class="section-header">
-                <h2><i class="fas fa-users text-success me-2"></i>Referral Program</h2>
-                <p class="text-muted">Refer friends and earn rewards!</p>
-            </div>
-            <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <div class="deal-card referral-bonus">
-                        <div class="deal-badge">
-                            <span class="badge bg-success">REFERRAL BONUS</span>
-                        </div>
-                        <div class="card-body text-center">
-                            <h5 class="card-title">@Model.ReferralBonus.Title</h5>
-                            <p class="card-text">@Model.ReferralBonus.Description</p>
-                            <div class="referral-benefits mb-4">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="benefit-item">
-                                            <i class="fas fa-gift text-success fa-2x mb-2"></i>
-                                            <h6>You Get</h6>
-                                            <p>RM10 credit for each friend who joins</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="benefit-item">
-                                            <i class="fas fa-heart text-danger fa-2x mb-2"></i>
-                                            <h6>Your Friend Gets</h6>
-                                            <p>RM5 credit on their first order</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <a asp-action="ReferralProgram" class="btn btn-success btn-lg">
-                                <i class="fas fa-share me-2"></i>Start Referring
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-
-
-    <!-- Points Redemption Section (Free Food) -->
-    @if (Model.User != null)
-    {
+        <!-- Points Redemption Section -->
         <div class="section-container mb-5">
             <div class="section-header">
                 <h2><i class="fas fa-utensils text-success me-2"></i>Redeem Points for Free Food</h2>
                 <p class="text-muted">Use your points to get free menu items! 1 Point = RM 1.00 value</p>
             </div>
             
-            <!-- Points Display Card -->
+            <!-- Quick Points Info -->
             <div class="row mb-4">
                 <div class="col-lg-8 mx-auto">
                     <div class="deal-card points-redemption-header">
@@ -311,8 +299,6 @@
                         <div class="row">
                             @foreach (var item in category.OrderBy(i => i.Name))
                             {
-                                // Calculate points required based on price (1 point = RM 1.00)
-                                // If PointsPerItem is set, use it; otherwise calculate from price
                                 var pointsRequired = item.PointsPerItem > 0 ? item.PointsPerItem : (int)Math.Ceiling(item.Price);
                                 var canRedeem = Model.UserPoints >= pointsRequired;
                                 
@@ -336,28 +322,19 @@
                                                 <del>RM @item.Price.ToString("F2")</del> → <strong class="text-success">FREE!</strong>
                                             </p>
                                             
-                                            @if (Model.User.IsMember && Model.User.MemberExpiryDate > DateTime.UtcNow)
-                                            {
-                                                <form asp-controller="Menu" asp-action="RedeemItem" method="post" class="mt-auto">
-                                                    <input type="hidden" name="menuItemId" value="@item.Id" />
-                                                    <button type="submit" class="btn btn-success btn-sm w-100" @(canRedeem ? "" : "disabled")>
-                                                        @if (canRedeem)
-                                                        {
-                                                            <i class="fas fa-gift me-1"></i>@("Redeem Now")
-                                                        }
-                                                        else
-                                                        {
-                                                            <i class="fas fa-lock me-1"></i>@($"Need {pointsRequired - Model.UserPoints} more points")
-                                                        }
-                                                    </button>
-                                                </form>
-                                            }
-                                            else
-                                            {
-                                                <a asp-action="MemberPurchase" class="btn btn-warning btn-sm w-100 mt-auto">
-                                                    <i class="fas fa-crown me-1"></i>Become Member to Redeem
-                                                </a>
-                                            }
+                                            <form asp-controller="Menu" asp-action="RedeemItem" method="post" class="mt-auto">
+                                                <input type="hidden" name="menuItemId" value="@item.Id" />
+                                                <button type="submit" class="btn btn-success btn-sm w-100" @(canRedeem ? "" : "disabled")>
+                                                    @if (canRedeem)
+                                                    {
+                                                        <i class="fas fa-gift me-1"></i>@:Redeem Now
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-lock me-1"></i>@:Need @(pointsRequired - Model.UserPoints) more points
+                                                    }
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -378,10 +355,58 @@
                 }
             </div>
         </div>
-    }
-    }
-</div>
 
+        <!-- Quick Actions Section -->
+        <div class="section-container mb-5">
+            <div class="section-header">
+                <h2><i class="fas fa-bolt text-warning me-2"></i>Quick Actions</h2>
+                <p class="text-muted">Earn more points and maximize your rewards!</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="quick-action-card">
+                        <div class="action-icon bg-primary">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <h5>Order Food</h5>
+                        <p>Earn 1 point for every RM1 spent</p>
+                        <a href="/Menu" class="btn btn-primary btn-sm">Start Ordering</a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="quick-action-card">
+                        <div class="action-icon bg-success">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h5>Write Reviews</h5>
+                        <p>Earn 5 points for each review</p>
+                        <a href="/Reviews/Create" class="btn btn-success btn-sm">Write Review</a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="quick-action-card">
+                        <div class="action-icon bg-info">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h5>Refer Friends</h5>
+                        <p>Earn 50 points per referral</p>
+                        <a href="/Profile" class="btn btn-info btn-sm">Get Referral Code</a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="quick-action-card">
+                        <div class="action-icon bg-warning">
+                            <i class="fas fa-birthday-cake"></i>
+                        </div>
+                        <h5>Birthday Bonus</h5>
+                        <p>Get 100 bonus points on your birthday</p>
+                        <a href="@Url.Action("ClaimBirthdayBenefit", "Deals")" class="btn btn-warning btn-sm">Claim Bonus</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @section Scripts {
     <script src="~/js/deals.js" asp-append-version="true"></script>
@@ -413,6 +438,23 @@
                     });
                 });
             });
+
+            // Add animation to points display
+            const pointsNumber = document.querySelector('.points-number-large');
+            if (pointsNumber) {
+                const finalValue = parseInt(pointsNumber.textContent);
+                let currentValue = 0;
+                const increment = Math.ceil(finalValue / 50);
+                
+                const timer = setInterval(() => {
+                    currentValue += increment;
+                    if (currentValue >= finalValue) {
+                        currentValue = finalValue;
+                        clearInterval(timer);
+                    }
+                    pointsNumber.textContent = currentValue;
+                }, 50);
+            }
         });
     </script>
 }

@@ -16,7 +16,7 @@
             <div class="col-lg-10">
                 <div class="checkout-card">
                     <div class="checkout-header">
-                        <h4><i class="fas fa-utensils me-2"></i>Food Order Checkout</h4>
+                        <h4><i class="fas fa-utensils me-2"></i>Checkout</h4>
             </div>
                     <div class="checkout-body">
         @if (TempData["ErrorMessage"] != null)
@@ -26,7 +26,20 @@
             </div>
         }
 
-                    <form asp-controller="Checkout" asp-action="PlaceOrder" method="post">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-warning">
+                <h6><i class="fas fa-exclamation-triangle me-2"></i>Please fix the following errors:</h6>
+                <ul class="mb-0">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        }
+
+                    <form id="checkoutForm" asp-controller="Checkout" asp-action="PlaceOrder" method="post">
                         @Html.AntiForgeryToken()
                         
                             <div class="row">
@@ -69,6 +82,36 @@
                                         <span asp-validation-for="PaymentMethod" class="text-danger"></span>
                                     </div>
 
+                                    <!-- Card Details Section -->
+                                    <div id="cardDetailsSection" style="display: none;">
+                                        <h6 class="mb-3"><i class="fas fa-credit-card me-2"></i>Card Information</h6>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="CardNumber" class="form-label">Card Number *</label>
+                                            <input asp-for="CardNumber" id="CardNumber" name="CardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+                                            <span asp-validation-for="CardNumber" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="CardHolderName" class="form-label">Card Holder Name *</label>
+                                            <input asp-for="CardHolderName" id="CardHolderName" name="CardHolderName" class="form-control" placeholder="John Doe">
+                                            <span asp-validation-for="CardHolderName" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label asp-for="CardExpiry" class="form-label">Expiry Date *</label>
+                                                <input asp-for="CardExpiry" id="CardExpiry" name="CardExpiry" class="form-control" placeholder="MM/YY" maxlength="5">
+                                                <span asp-validation-for="CardExpiry" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label asp-for="CardCvv" class="form-label">CVV *</label>
+                                                <input asp-for="CardCvv" id="CardCvv" name="CardCvv" class="form-control" placeholder="123" maxlength="4">
+                                                <span asp-validation-for="CardCvv" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -105,13 +148,10 @@
 
                                         <div class="totals-section">
                                             @{
-                                                var currentUser = await UserManager.GetUserAsync(User);
-                                                bool isMember = currentUser != null && currentUser.IsMember && currentUser.MemberExpiryDate > DateTime.UtcNow;
                                                 var subtotal = Model.Cart.CartItems.Sum(item => item.Quantity * item.MenuItem.Price);
                                                 var tax = subtotal * 0.06m;
                                                 var deliveryFee = subtotal >= 100 ? 0 : 5.00m;
-                                                var memberDiscount = isMember ? subtotal * 0.05m : 0;
-                                                var total = subtotal + tax + deliveryFee - memberDiscount;
+                                                var total = subtotal + tax + deliveryFee;
                                             }
                                             <div class="totals-row">
                                                         <span><i class="fas fa-shopping-basket me-2"></i>Subtotal:</span>
@@ -125,13 +165,6 @@
                                                 <span><i class="fas fa-truck me-2"></i>Delivery Fee:</span>
                                                 <span id="delivery-amount">@(deliveryFee == 0 ? "FREE" : "RM" + deliveryFee.ToString("F2"))</span>
                                             </div>
-                                            @if (isMember)
-                                            {
-                                                <div class="totals-row member-benefit">
-                                                    <span><i class="fas fa-crown text-warning me-2"></i>Member Discount (5%):</span>
-                                                    <span class="text-success">-RM@((subtotal * 0.05m).ToString("F2"))</span>
-                                                </div>
-                                            }
                                             
                                             <div class="totals-row discount" id="discount-line" style="display: none;">
                                                 <span><i class="fas fa-ticket-alt me-2"></i>Promo Discount:</span>

@@ -6,15 +6,53 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <style>
+        @@media print {
+            .btn-group, .btn {
+                display: none !important;
+            }
+            .reports-container {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .card {
+                border: 1px solid #ddd !important;
+                box-shadow: none !important;
+            }
+        }
+        
+        .chart-error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .export-buttons {
+            gap: 10px;
+        }
+    </style>
 }
 
 <div class="reports-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2><i class="fas fa-chart-line me-2"></i>Analytics & Reports</h2>
-                    <div class="btn-group">
+                    <div class="btn-group export-buttons">
+                        <button class="btn btn-outline-secondary" onclick="location.reload()" title="Refresh Data">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
                         <button class="btn btn-outline-primary" onclick="exportReport('pdf')">
                             <i class="fas fa-file-pdf me-1"></i>Export PDF
                         </button>
@@ -26,6 +64,7 @@
             </div>
         </div>
 
+
         <!-- Key Metrics Row -->
         <div class="row mb-4">
             <div class="col-lg-3 col-md-6 mb-3">
@@ -33,7 +72,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <h4 class="mb-0">RM@Model.TotalSales.ToString("F2")</h4>
+                                <h4 class="mb-0">RM@(Model.TotalSales.ToString("F2"))</h4>
                                 <p class="mb-0">Total Sales</p>
                             </div>
                             <div class="align-self-center">
@@ -63,7 +102,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <h4 class="mb-0">RM@Model.AverageOrderValue.ToString("F2")</h4>
+                                <h4 class="mb-0">RM@(Model.AverageOrderValue.ToString("F2"))</h4>
                                 <p class="mb-0">Avg Order Value</p>
                             </div>
                             <div class="align-self-center">
@@ -101,7 +140,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="text-center">
-                                    <h3 class="text-primary">RM@Model.RecentSales.ToString("F2")</h3>
+                                    <h3 class="text-primary">RM@(Model.RecentSales.ToString("F2"))</h3>
                                     <p class="text-muted">Recent Sales</p>
                                 </div>
                             </div>
@@ -196,7 +235,7 @@
                                                 </td>
                                                 <td>@item.MenuItemName</td>
                                                 <td>@item.TotalQuantity</td>
-                                                <td>RM@item.TotalRevenue.ToString("F2")</td>
+                                                <td>RM@(item.TotalRevenue.ToString("F2"))</td>
                                                 <td>
                                                     <div class="progress" style="height: 20px;">
                                                         <div class="progress-bar" role="progressbar" style="width: @percentage.ToString("F1")%">
@@ -248,7 +287,7 @@
                                         {
                                             <tr>
                                                 <td>@month.MonthName</td>
-                                                <td>RM@month.Revenue.ToString("F2")</td>
+                                                <td>RM@(month.Revenue.ToString("F2"))</td>
                                                 <td>@month.OrderCount</td>
                                                 <td>RM@(month.OrderCount > 0 ? (month.Revenue / month.OrderCount).ToString("F2") : "0.00")</td>
                                             </tr>
@@ -278,73 +317,205 @@
         // Revenue Chart
         const revenueCtx = document.getElementById('revenueChart');
         if (revenueCtx) {
-            const revenueData = @Html.Raw(Json.Serialize(Model.MonthlyRevenue?.Select(m => new { Month = m.MonthName, Revenue = m.Revenue }) ?? Enumerable.Empty<object>()));
-            console.log('Revenue Data:', revenueData);
-            
-            if (revenueData && revenueData.length > 0) {
-                new Chart(revenueCtx.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: revenueData.map(d => d.Month),
-                        datasets: [{
-                            label: 'Revenue (RM)',
-                            data: revenueData.map(d => d.Revenue),
-                            borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            tension: 0.1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true
+            try {
+                // Get the raw data first
+                const rawRevenueData = @Html.Raw(Json.Serialize(Model.MonthlyRevenue));
+                console.log('Raw Revenue Data:', rawRevenueData);
+                
+                // Process the data safely
+                const revenueData = rawRevenueData && Array.isArray(rawRevenueData) 
+                    ? rawRevenueData.map(m => ({ 
+                        Month: m.MonthName || 'Unknown Month', 
+                        Revenue: parseFloat(m.Revenue) || 0 
+                    }))
+                    : [];
+                
+                console.log('Processed Revenue Data:', revenueData);
+                
+                if (revenueData && revenueData.length > 0 && revenueData.some(d => d.Revenue > 0)) {
+                    new Chart(revenueCtx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: revenueData.map(d => d.Month),
+                            datasets: [{
+                                label: 'Revenue (RM)',
+                                data: revenueData.map(d => d.Revenue),
+                                borderColor: 'rgb(75, 192, 192)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.1,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return 'RM ' + value.toFixed(2);
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
-                });
-            } else {
-                revenueCtx.getContext('2d').fillText('No revenue data available', 10, 50);
+                    });
+                } else {
+                    // Show a message in the chart area
+                    const ctx = revenueCtx.getContext('2d');
+                    ctx.clearRect(0, 0, revenueCtx.width, revenueCtx.height);
+                    ctx.font = '16px Arial';
+                    ctx.fillStyle = '#666';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No revenue data available', revenueCtx.width / 2, revenueCtx.height / 2);
+                    console.log('No revenue data to display');
+                }
+            } catch (error) {
+                console.error('Error creating revenue chart:', error);
+                const ctx = revenueCtx.getContext('2d');
+                ctx.clearRect(0, 0, revenueCtx.width, revenueCtx.height);
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.fillText('Error loading chart data', revenueCtx.width / 2, revenueCtx.height / 2);
             }
         }
 
         // Status Chart
         const statusCtx = document.getElementById('statusChart');
         if (statusCtx) {
-            const statusData = @Html.Raw(Json.Serialize(Model.OrderStatusDistribution.Select(s => new { Status = s.Status.ToString(), Count = s.Count })));
-            console.log('Status Data:', statusData);
-            
-            if (statusData && statusData.length > 0) {
-                new Chart(statusCtx.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: statusData.map(d => d.Status),
-                        datasets: [{
-                            data: statusData.map(d => d.Count),
-                            backgroundColor: [
-                                '#FF6384',
-                                '#36A2EB',
-                                '#FFCE56',
-                                '#4BC0C0',
-                                '#9966FF',
-                                '#FF9F40'
-                            ]
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
-            } else {
-                statusCtx.getContext('2d').fillText('No status data available', 10, 50);
+            try {
+                // Get the raw data first
+                const rawStatusData = @Html.Raw(Json.Serialize(Model.OrderStatusDistribution));
+                console.log('Raw Status Data:', rawStatusData);
+                
+                // Process the data safely
+                const statusData = rawStatusData && Array.isArray(rawStatusData) 
+                    ? rawStatusData.map(s => ({ 
+                        Status: s.Status || 'Unknown', 
+                        Count: parseInt(s.Count) || 0 
+                    }))
+                    : [];
+                
+                console.log('Processed Status Data:', statusData);
+                
+                if (statusData && statusData.length > 0 && statusData.some(d => d.Count > 0)) {
+                    new Chart(statusCtx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: statusData.map(d => d.Status),
+                            datasets: [{
+                                data: statusData.map(d => d.Count),
+                                backgroundColor: [
+                                    '#FF6384', // Red
+                                    '#36A2EB', // Blue
+                                    '#FFCE56', // Yellow
+                                    '#4BC0C0', // Teal
+                                    '#9966FF', // Purple
+                                    '#FF9F40'  // Orange
+                                ],
+                                borderWidth: 2,
+                                borderColor: '#fff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    // Show a message in the chart area
+                    const ctx = statusCtx.getContext('2d');
+                    ctx.clearRect(0, 0, statusCtx.width, statusCtx.height);
+                    ctx.font = '16px Arial';
+                    ctx.fillStyle = '#666';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No status data available', statusCtx.width / 2, statusCtx.height / 2);
+                    console.log('No status data to display');
+                }
+            } catch (error) {
+                console.error('Error creating status chart:', error);
+                const ctx = statusCtx.getContext('2d');
+                ctx.clearRect(0, 0, statusCtx.width, statusCtx.height);
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.fillText('Error loading chart data', statusCtx.width / 2, statusCtx.height / 2);
             }
         }
 
         function exportReport(format) {
-            // Placeholder for export functionality
-            alert(`Exporting report as ${format.toUpperCase()}...`);
+            try {
+                if (format === 'pdf') {
+                    // Create a simple PDF export using window.print
+                    window.print();
+                } else if (format === 'excel') {
+                    // Create CSV export
+                    exportToCSV();
+                } else {
+                    alert('Unsupported export format: ' + format);
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting report. Please try again.');
+            }
+        }
+
+        function exportToCSV() {
+            try {
+                // Get the data from the page
+                const data = [];
+                
+                // Add monthly revenue data
+                const revenueData = @Html.Raw(Json.Serialize(Model.MonthlyRevenue?.Select(m => new { Month = m.MonthName, Revenue = m.Revenue, Orders = m.OrderCount }) ?? Enumerable.Empty<object>()));
+                if (revenueData && revenueData.length > 0) {
+                    data.push(['Monthly Revenue Report']);
+                    data.push(['Month', 'Revenue (RM)', 'Orders']);
+                    revenueData.forEach(item => {
+                        data.push([item.Month, item.Revenue, item.Orders]);
+                    });
+                    data.push([]);
+                }
+                
+                // Add top selling items
+                const topItems = @Html.Raw(Json.Serialize(Model.TopSellingItems?.Select(t => new { Name = t.MenuItemName, Quantity = t.TotalQuantity, Revenue = t.TotalRevenue }) ?? Enumerable.Empty<object>()));
+                if (topItems && topItems.length > 0) {
+                    data.push(['Top Selling Items']);
+                    data.push(['Item Name', 'Quantity Sold', 'Revenue (RM)']);
+                    topItems.forEach(item => {
+                        data.push([item.Name, item.Quantity, item.Revenue]);
+                    });
+                }
+                
+                // Convert to CSV
+                const csvContent = data.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                
+                // Download file
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `reports_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('CSV export error:', error);
+                alert('Error exporting CSV. Please try again.');
+            }
         }
     </script>
 }

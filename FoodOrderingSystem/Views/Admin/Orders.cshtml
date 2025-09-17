@@ -4,6 +4,8 @@
     ViewData["Title"] = "Manage Orders";
 }
 
+@Html.AntiForgeryToken()
+
 @section Styles {
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <style>
@@ -22,7 +24,7 @@
             font-weight: 600;
             border-bottom: 2px solid #dee2e6;
             font-size: 1rem;
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            background: #007bff;
             color: white;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
             border: none;
@@ -36,18 +38,12 @@
             padding: 0.5rem 1rem;
             margin: 0.2rem;
         }
-        .dropdown-menu {
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-            min-width: 250px;
-        }
-        .dropdown-header {
-            font-weight: 600;
-            color: #495057;
-            font-size: 0.9rem;
-        }
+        /* Dropdown styles removed - using modal instead */
         .order-row {
             height: 80px;
             transition: all 0.2s ease;
+            position: relative;
+            z-index: 1;
         }
         .order-row:hover {
             background-color: #f8f9fa;
@@ -57,9 +53,13 @@
         .actions-cell {
             min-width: 350px;
         }
+        .admin-table tbody tr {
+            position: relative;
+        }
         .table-container {
             min-height: 500px;
             overflow-x: auto;
+            overflow-y: visible;
         }
         .card {
             margin-bottom: 2rem;
@@ -202,44 +202,15 @@
                                         <div class="d-flex gap-1 flex-wrap">
                                             <!-- View Details Button -->
                                             <button type="button" class="btn btn-sm btn-outline-info" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#orderDetailsModal" 
-                                                    data-order-id="@order.Id">
+                                                    onclick="viewOrderDetails(@order.Id)">
                                                 <i class="fas fa-eye me-1"></i>View
                                             </button>
                                             
-                                            <!-- Status Update Dropdown -->
-                                            <div class="dropdown d-inline-block">
-                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" 
-                                                        type="button" 
-                                                        data-bs-toggle="dropdown" 
-                                                        aria-expanded="false">
-                                                    <i class="fas fa-edit me-1"></i>Update
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li><h6 class="dropdown-header">Update Order Status</h6></li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Confirmed')">
-                                                        <i class="fas fa-check-circle text-info me-2"></i>Confirm Order
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Preparing')">
-                                                        <i class="fas fa-utensils text-primary me-2"></i>Start Preparing
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Ready')">
-                                                        <i class="fas fa-check text-success me-2"></i>Mark Ready
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Delivering')">
-                                                        <i class="fas fa-truck text-info me-2"></i>Start Delivery
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Delivered')">
-                                                        <i class="fas fa-home text-secondary me-2"></i>Mark Delivered
-                                                    </a></li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item text-danger" href="#" onclick="updateOrderStatus(@order.Id, 'Cancelled')">
-                                                        <i class="fas fa-times-circle me-2"></i>Cancel Order
-                                                    </a></li>
-                                                </ul>
-                                            </div>
+                                            <!-- Status Update Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="showStatusUpdateModal(@order.Id, '@order.OrderNumber', '@order.Status')">
+                                                <i class="fas fa-edit me-1"></i>Update
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -273,13 +244,198 @@
     </div>
 </div>
 
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusUpdateModalLabel">Update Order Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Order Number:</label>
+                    <p class="form-control-plaintext" id="modalOrderNumber"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Current Status:</label>
+                    <span class="badge bg-primary" id="modalCurrentStatus"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="statusSelect" class="form-label">New Status:</label>
+                    <select class="form-select" id="statusSelect">
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Preparing">Preparing</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Delivering">Delivering</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusUpdate">Update Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        // Pass configuration to the external JavaScript file
-        window.adminOrdersConfig = {
-            updateUrl: '@Url.Action("UpdateOrderStatus", "Admin")',
-            getDetailsUrl: '@Url.Action("GetOrderDetails", "Admin")'
-        };
+        let currentOrderId = null;
+        
+        // View order details function
+        function viewOrderDetails(orderId) {
+            console.log('Viewing order details for ID:', orderId);
+            
+            // Show loading content
+            document.getElementById('orderDetailsContent').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+            
+            // Show the modal immediately
+            const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+            modal.show();
+            
+            // Fetch order details
+            fetch(`@Url.Action("GetOrderDetails", "Admin")/${orderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const order = data.order;
+                        document.getElementById('orderDetailsContent').innerHTML = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-receipt me-2"></i>Order Information</h6>
+                                    <p><strong>Order Number:</strong> ${order.orderNumber}</p>
+                                    <p><strong>Customer:</strong> ${order.customerName}</p>
+                                    <p><strong>Order Date:</strong> ${new Date(order.orderDate).toLocaleDateString()}</p>
+                                    <p><strong>Status:</strong> <span class="badge bg-primary">${order.status}</span></p>
+                                    <p><strong>Total:</strong> RM${order.total.toFixed(2)}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-map-marker-alt me-2"></i>Delivery Details</h6>
+                                    <p><strong>Address:</strong> ${order.deliveryAddress || 'N/A'}</p>
+                                    <p><strong>Phone:</strong> ${order.customerPhone || 'N/A'}</p>
+                                    <p><strong>Instructions:</strong> ${order.deliveryInstructions || 'None'}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <h6><i class="fas fa-utensils me-2"></i>Order Items</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${order.orderItems.map(item => `
+                                            <tr>
+                                                <td>${item.menuItemName}</td>
+                                                <td>${item.quantity}</td>
+                                                <td>RM${item.price.toFixed(2)}</td>
+                                                <td>RM${(item.quantity * item.price).toFixed(2)}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('orderDetailsContent').innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Error loading order details: ${data.message}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('orderDetailsContent').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            An error occurred while loading order details.
+                        </div>
+                    `;
+                });
+        }
+        
+        // Status update modal function
+        function showStatusUpdateModal(orderId, orderNumber, currentStatus) {
+            currentOrderId = orderId;
+            document.getElementById('modalOrderNumber').textContent = orderNumber;
+            document.getElementById('modalCurrentStatus').textContent = currentStatus;
+            document.getElementById('statusSelect').value = currentStatus;
+            
+            // Show Bootstrap modal
+            const modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+            modal.show();
+        }
+        
+        // Update order status function
+        function updateOrderStatus(orderId, newStatus) {
+            if (!orderId || !newStatus) {
+                console.error('Missing orderId or newStatus');
+                return;
+            }
+
+            // Show loading state
+            const updateBtn = document.getElementById('confirmStatusUpdate');
+            const originalText = updateBtn.innerHTML;
+            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Updating...';
+            updateBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('orderId', orderId);
+            formData.append('newStatus', newStatus);
+            formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+            fetch('@Url.Action("UpdateOrderStatus", "Admin")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('statusUpdateModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // Show success message
+                    alert('Order status updated successfully!');
+                    
+                    // Reload the page
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to update order status'));
+                }
+            })
+            .catch(error => {
+                console.error('Error updating order status:', error);
+                alert('Error updating order status: ' + error.message);
+            })
+            .finally(() => {
+                // Restore button state
+                updateBtn.innerHTML = originalText;
+                updateBtn.disabled = false;
+            });
+        }
+
+        // Handle confirm status update
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('confirmStatusUpdate').addEventListener('click', function() {
+                if (currentOrderId) {
+                    const newStatus = document.getElementById('statusSelect').value;
+                    updateOrderStatus(currentOrderId, newStatus);
+                }
+            });
+        });
     </script>
-    <script src="~/js/admin-orders.js" asp-append-version="true"></script>
 } 

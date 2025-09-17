@@ -367,7 +367,7 @@ namespace FoodOrderingSystem.Controllers
             var emailBody = EmailTemplates.GetEmailConfirmationTemplate(user.UserName ?? "User", HtmlEncoder.Default.Encode(callbackUrl ?? ""));
             await _emailSender.SendEmailAsync(user.Email ?? "", "Welcome to MackDihh! Please confirm your email", emailBody);
 
-            TempData["SuccessMessage"] = "Verification email sent! Please check your inbox and click the confirmation link.";
+            TempData["SuccessMessage"] = "Verification email has been sent! Please check your inbox and click the confirmation link to verify your email address.";
             return RedirectToAction(nameof(Index));
         }
     }

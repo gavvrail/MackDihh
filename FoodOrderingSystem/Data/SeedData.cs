@@ -99,12 +99,12 @@ namespace FoodOrderingSystem.Data
                     {
                         new PointsReward
                         {
-                            Title = "RM5 OFF Your Order",
-                            Description = "Get RM5 off your next order when you spend minimum RM30",
-                            PointsRequired = 100,
-                            DiscountAmount = 5.00m,
+                            Title = "Free World Famous Fries",
+                            Description = "Redeem your points for a free order of our World Famous Fries!",
+                            PointsRequired = 50,
+                            DiscountAmount = 2.79m,
                             DiscountPercentage = 0,
-                            ImageUrl = "~/images/reward-5off.png",
+                            ImageUrl = "/images/mackfries.png",
                             IsActive = true,
                             MaxRedemptions = -1,
                             StartDate = DateTime.UtcNow,
@@ -112,12 +112,12 @@ namespace FoodOrderingSystem.Data
                         },
                         new PointsReward
                         {
-                            Title = "RM10 OFF Your Order",
-                            Description = "Get RM10 off your next order when you spend minimum RM50",
+                            Title = "Free Big MackDihh",
+                            Description = "Get a free Big MackDihh burger with your points! Our signature double-decker burger.",
                             PointsRequired = 200,
-                            DiscountAmount = 10.00m,
+                            DiscountAmount = 7.99m,
                             DiscountPercentage = 0,
-                            ImageUrl = "~/images/reward-10off.png",
+                            ImageUrl = "/images/15.png",
                             IsActive = true,
                             MaxRedemptions = -1,
                             StartDate = DateTime.UtcNow,
@@ -125,25 +125,12 @@ namespace FoodOrderingSystem.Data
                         },
                         new PointsReward
                         {
-                            Title = "15% OFF Any Order",
-                            Description = "Get 15% discount on your entire order, no minimum purchase required",
-                            PointsRequired = 300,
-                            DiscountAmount = 0,
-                            DiscountPercentage = 15.00m,
-                            ImageUrl = "~/images/reward-15percent.png",
-                            IsActive = true,
-                            MaxRedemptions = -1,
-                            StartDate = DateTime.UtcNow,
-                            EndDate = DateTime.UtcNow.AddMonths(6)
-                        },
-                        new PointsReward
-                        {
-                            Title = "Free Delivery",
-                            Description = "Get free delivery on your next order, regardless of order amount",
+                            Title = "Free Cappuccino",
+                            Description = "Enjoy a free premium Cappuccino from our McCafe! Perfect for coffee lovers.",
                             PointsRequired = 150,
-                            DiscountAmount = 5.00m, // Equivalent to delivery fee
+                            DiscountAmount = 7.99m,
                             DiscountPercentage = 0,
-                            ImageUrl = "~/images/reward-free-delivery.png",
+                            ImageUrl = "/images/21.png",
                             IsActive = true,
                             MaxRedemptions = -1,
                             StartDate = DateTime.UtcNow,
@@ -151,16 +138,42 @@ namespace FoodOrderingSystem.Data
                         },
                         new PointsReward
                         {
-                            Title = "RM25 OFF Premium Orders",
-                            Description = "Get RM25 off when you order RM100 or more - perfect for family meals!",
+                            Title = "Free Happy Meal",
+                            Description = "Get a free Happy Meal for your little ones! Includes burger, fries, drink, and toy.",
+                            PointsRequired = 250,
+                            DiscountAmount = 9.99m,
+                            DiscountPercentage = 0,
+                            ImageUrl = "/images/Doraemon_meal.png",
+                            IsActive = true,
+                            MaxRedemptions = -1,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(6)
+                        },
+                        new PointsReward
+                        {
+                            Title = "Free Family Bucket",
+                            Description = "Redeem for a free MackDihh Family Bucket! Perfect for family gatherings.",
                             PointsRequired = 500,
                             DiscountAmount = 25.00m,
                             DiscountPercentage = 0,
-                            ImageUrl = "~/images/reward-25off.png",
+                            ImageUrl = "/images/mackfamilybucket.png",
                             IsActive = true,
-                            MaxRedemptions = 50, // Limited offer
+                            MaxRedemptions = 20, // Limited offer
                             StartDate = DateTime.UtcNow,
                             EndDate = DateTime.UtcNow.AddMonths(3)
+                        },
+                        new PointsReward
+                        {
+                            Title = "Free McFlurry",
+                            Description = "Enjoy a free McFlurry dessert! Creamy vanilla soft serve with OREO® cookies.",
+                            PointsRequired = 80,
+                            DiscountAmount = 3.29m,
+                            DiscountPercentage = 0,
+                            ImageUrl = "/images/4.png",
+                            IsActive = true,
+                            MaxRedemptions = -1,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(6)
                         }
                     };
 
@@ -175,8 +188,8 @@ namespace FoodOrderingSystem.Data
                     {
                         new Deal
                         {
-                            Title = "Welcome Discount",
-                            Description = "Get 10% off your first order! Perfect for new customers.",
+                            Title = "Welcome to MackDihh!",
+                            Description = "Get 10% off your first order! Perfect for new customers trying our delicious food.",
                             Type = DealType.PromoCode,
                             PromoCode = "WELCOME10",
                             DiscountPercentage = 10.0m,
@@ -187,12 +200,13 @@ namespace FoodOrderingSystem.Data
                             MinimumOrderAmount = 0,
                             BadgeText = "New Customer",
                             BadgeColor = "success",
-                            TermsAndConditions = "Valid for first-time customers only. Cannot be combined with other offers."
+                            TermsAndConditions = "Valid for first-time customers only. Cannot be combined with other offers.",
+                            ImageUrl = "/images/logo.png"
                         },
                         new Deal
                         {
-                            Title = "Student Special",
-                            Description = "Students get 15% off any order over RM20!",
+                            Title = "Student Special - Big MackDihh Combo",
+                            Description = "Students get 15% off any order over RM20! Perfect for the Big MackDihh Combo.",
                             Type = DealType.StudentDiscount,
                             PromoCode = "STUDENT15",
                             DiscountPercentage = 15.0m,
@@ -201,15 +215,15 @@ namespace FoodOrderingSystem.Data
                             IsActive = true,
                             MaxUses = -1, // Unlimited
                             MinimumOrderAmount = 20.0m,
-                            RequiresStudentVerification = true,
                             BadgeText = "Student Only",
                             BadgeColor = "primary",
-                            TermsAndConditions = "Valid student ID required. Minimum order RM20."
+                            TermsAndConditions = "Valid student ID required. Minimum order RM20.",
+                            ImageUrl = "/images/9.png"
                         },
                         new Deal
                         {
-                            Title = "Family Feast Deal",
-                            Description = "Save RM15 on orders over RM50! Perfect for family meals.",
+                            Title = "Family Feast - MackDihh Family Bucket",
+                            Description = "Save RM15 on orders over RM50! Perfect for our Family Bucket meals.",
                             Type = DealType.BundleOffer,
                             PromoCode = "FAMILY15",
                             DiscountPercentage = 0,
@@ -221,12 +235,13 @@ namespace FoodOrderingSystem.Data
                             MinimumOrderAmount = 50.0m,
                             BadgeText = "Family Deal",
                             BadgeColor = "warning",
-                            TermsAndConditions = "Minimum order RM50. Valid for 3 months."
+                            TermsAndConditions = "Minimum order RM50. Valid for 3 months.",
+                            ImageUrl = "/images/mackfamilybucket.png"
                         },
                         new Deal
                         {
-                            Title = "Flash Sale - 20% Off",
-                            Description = "Limited time! Get 20% off everything for the next 24 hours!",
+                            Title = "Flash Sale - Spicy Habanero Burger",
+                            Description = "Limited time! Get 20% off our new Spicy Habanero Burger for the next 24 hours!",
                             Type = DealType.FlashSale,
                             PromoCode = "FLASH20",
                             DiscountPercentage = 20.0m,
@@ -237,28 +252,13 @@ namespace FoodOrderingSystem.Data
                             IsFlashSale = true,
                             BadgeText = "Flash Sale",
                             BadgeColor = "danger",
-                            TermsAndConditions = "Limited time offer. Valid for 24 hours only."
+                            TermsAndConditions = "Limited time offer. Valid for 24 hours only.",
+                            ImageUrl = "/images/4.png"
                         },
                         new Deal
                         {
-                            Title = "Member Exclusive",
-                            Description = "Members get 25% off any order! Join our loyalty program.",
-                            Type = DealType.MemberDeal,
-                            PromoCode = "MEMBER25",
-                            DiscountPercentage = 25.0m,
-                            StartDate = DateTime.UtcNow,
-                            EndDate = DateTime.UtcNow.AddMonths(6),
-                            IsActive = true,
-                            MaxUses = -1,
-                            RequiresMember = true,
-                            BadgeText = "Member Only",
-                            BadgeColor = "info",
-                            TermsAndConditions = "Valid for registered members only."
-                        },
-                        new Deal
-                        {
-                            Title = "Weekend Special",
-                            Description = "Enjoy 12% off on weekends! Friday to Sunday only.",
+                            Title = "Weekend Breakfast Special",
+                            Description = "Enjoy 12% off on weekends! Perfect for our Sausage & Egg Muffin and Hotcakes.",
                             Type = DealType.SeasonalDiscount,
                             PromoCode = "WEEKEND12",
                             DiscountPercentage = 12.0m,
@@ -269,7 +269,42 @@ namespace FoodOrderingSystem.Data
                             IsSeasonal = true,
                             BadgeText = "Weekend Only",
                             BadgeColor = "secondary",
-                            TermsAndConditions = "Valid Friday to Sunday only."
+                            TermsAndConditions = "Valid Friday to Sunday only.",
+                            ImageUrl = "/images/12.png"
+                        },
+                        new Deal
+                        {
+                            Title = "Happy Meal Fun - Doraemon Special",
+                            Description = "Kids love our Doraemon Happy Meal! Get 10% off any Happy Meal order.",
+                            Type = DealType.BundleOffer,
+                            PromoCode = "HAPPY10",
+                            DiscountPercentage = 10.0m,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(6),
+                            IsActive = true,
+                            MaxUses = 300,
+                            MinimumOrderAmount = 0,
+                            BadgeText = "Kids Special",
+                            BadgeColor = "info",
+                            TermsAndConditions = "Valid for Happy Meal orders only.",
+                            ImageUrl = "/images/Doraemon_meal.png"
+                        },
+                        new Deal
+                        {
+                            Title = "McCafe Coffee Break",
+                            Description = "Enjoy 15% off our premium McCafe drinks! Perfect for your coffee break.",
+                            Type = DealType.PromoCode,
+                            PromoCode = "COFFEE15",
+                            DiscountPercentage = 15.0m,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(4),
+                            IsActive = true,
+                            MaxUses = 400,
+                            MinimumOrderAmount = 15.0m,
+                            BadgeText = "McCafe Special",
+                            BadgeColor = "dark",
+                            TermsAndConditions = "Valid for McCafe items only. Minimum order RM15.",
+                            ImageUrl = "/images/21.png"
                         }
                     };
 

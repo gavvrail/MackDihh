@@ -8,24 +8,158 @@
     padding: 20px;
 }
 
-/* Login security warning styles */
-.text-danger ul {
+/* Enhanced validation message styles */
+.text-danger {
+    color: #dc3545 !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    display: block;
+    line-height: 1.4;
+}
+
+/* Validation summary styling */
+.validation-summary-errors {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.validation-summary-errors ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.text-danger li {
-    color: #dc3545;
-    font-size: 0.875rem;
-    font-weight: 500;
-    margin-bottom: 0.25rem;
+.validation-summary-errors ul li {
+    color: #721c24 !important;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
 }
 
-/* Specific styling for login attempt warnings */
-.validation-summary-errors ul li {
-    color: #dc3545 !important;
+.validation-summary-errors ul li:before {
+    content: "⚠️";
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+/* Individual field validation styling */
+.form-floating .text-danger {
+    background-color: #fff5f5;
+    border: 1px solid #fed7d7;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+    display: none; /* Hide by default */
+    align-items: center;
+    font-size: 0.8rem;
+    line-height: 1.3;
+}
+
+.form-floating .text-danger:before {
+    content: "⚠️";
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Show validation messages only when they have content */
+.form-floating .text-danger:not(:empty) {
+    display: flex;
+}
+
+/* Additional rule to hide empty validation spans */
+.form-floating .text-danger:empty {
+    display: none !important;
+}
+
+/* Hide validation messages that only contain whitespace */
+.form-floating .text-danger:not(:empty) {
+    display: flex;
+}
+
+.form-floating .text-danger:empty,
+.form-floating .text-danger:blank {
+    display: none !important;
+}
+
+/* Password requirements styling */
+.password-requirements {
+    background-color: #e7f3ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.password-requirements h6 {
+    color: #0066cc;
     font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.password-requirements li {
+    color: #4a5568;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Default state - show X for all requirements */
+.password-requirements li:before {
+    content: "✗";
+    color: #e53e3e;
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+/* Valid state - show checkmark when requirement is met */
+.password-requirements li.valid:before {
+    content: "✓";
+    color: #38a169;
+}
+
+.password-requirements li.valid {
+    color: #38a169;
+}
+
+/* Invalid state - show X when requirement is not met */
+.password-requirements li.invalid:before {
+    content: "✗";
+    color: #e53e3e;
+}
+
+.password-requirements li.invalid {
+    color: #e53e3e;
+}
+
+/* Form field focus states */
+.form-floating > .form-control:focus {
+    border-color: #D83028;
+    box-shadow: 0 0 0 0.2rem rgba(216, 48, 40, 0.25);
+}
+
+/* Error state styling */
+.form-floating > .form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Success state styling */
+.form-floating > .form-control.is-valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
 }
 
 .account-form-wrapper {
@@ -58,6 +192,83 @@
 
 .form-floating > label {
     padding: 1rem 1rem;
+}
+
+/* Password toggle button positioning - FIXED VERSION */
+.form-floating {
+    position: relative;
+}
+
+/* Target only password toggle buttons within form-floating containers */
+.form-floating .password-toggle-btn {
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 30 !important; /* Very high z-index to stay above everything */
+    border: none !important;
+    background: transparent !important;
+    color: #6c757d !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    font-size: 1rem !important;
+    width: 24px !important;
+    height: 24px !important;
+    max-height: 24px !important; /* Prevent height expansion */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
+}
+
+/* Ensure the button is positioned relative to the input field, not the entire container */
+.form-floating input[type="password"] + .password-toggle-btn,
+.form-floating input[type="text"] + .password-toggle-btn {
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 30 !important;
+    max-height: 24px !important;
+}
+
+/* Ensure password requirements are positioned below and don't interfere */
+.password-requirements {
+    margin-top: 0.5rem !important;
+    position: relative !important;
+    z-index: 1 !important;
+    clear: both !important;
+}
+
+.password-toggle-btn:hover {
+    color: #495057 !important;
+    background: transparent !important;
+}
+
+.password-toggle-btn:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.password-toggle-btn i {
+    font-size: 1rem !important;
+    line-height: 1 !important;
+}
+
+/* Add padding to password fields to make room for toggle button */
+.form-floating input[type="password"],
+.form-floating input[type="text"] {
+    padding-right: 45px !important;
+}
+
+/* Ensure the toggle button stays in place even with validation messages */
+.form-floating .form-control:focus + .password-toggle-btn,
+.form-floating .form-control:not(:focus) + .password-toggle-btn {
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
 }
 
 button.btn-account {

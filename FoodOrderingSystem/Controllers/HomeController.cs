@@ -38,8 +38,6 @@ namespace FoodOrderingSystem.Controllers
                 FeaturedDeals = featuredDeals,
                 User = user,
                 UserPoints = user?.Points ?? 0,
-                IsMember = user?.IsMember ?? false,
-                IsStudentVerified = user?.IsStudentVerified ?? false
             };
 
             return View(viewModel);
@@ -82,7 +80,5 @@ namespace FoodOrderingSystem.Controllers
         public List<Deal> FeaturedDeals { get; set; } = new();
         public ApplicationUser? User { get; set; }
         public int UserPoints { get; set; }
-        public bool IsMember { get; set; }
-        public bool IsStudentVerified { get; set; }
     }
 }

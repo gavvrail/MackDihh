@@ -94,12 +94,11 @@ namespace FoodOrderingSystem.Controllers
                 return NotFound();
             }
 
-            // Check if user is a member
-            bool isMember = user.IsMember && user.MemberExpiryDate > DateTime.UtcNow;
-            if (!isMember)
+            // Check if user has enough points
+            if (user.Points < 1)
             {
-                TempData["ErrorMessage"] = "You must be a member to redeem points. Become a member to unlock this feature!";
-                return RedirectToAction("MemberPurchase", "Deals");
+                TempData["ErrorMessage"] = "You need at least 1 point to redeem items. Start earning points by placing orders!";
+                return RedirectToAction("Index", "Deals");
             }
 
             // Calculate points required based on PointsPerItem field

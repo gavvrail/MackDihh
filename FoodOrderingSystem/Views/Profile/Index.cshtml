@@ -1,4 +1,6 @@
 @model FoodOrderingSystem.Controllers.ProfileViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewData["Title"] = "My Profile";
@@ -9,186 +11,112 @@
     <link rel="stylesheet" href="~/css/image-upload.css" asp-append-version="true" />
 }
 
-<div class="profile-full-width">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header @(ViewBag.IsAdmin ? "bg-danger" : "bg-primary") text-white">
-                        <h4 class="mb-0">
-                            <i class="fas @(ViewBag.IsAdmin ? "fa-user-shield" : "fa-user") me-2"></i>
-                            Your Profile
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        @if (TempData["SuccessMessage"] != null)
-                        {
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="profile-container">
+    <div class="container">
+        <!-- Profile Header Section -->
+        <div class="profile-header">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <div class="profile-image-section">
+                        <div class="profile-image-container">
+                            <img id="profile-photo" 
+                                 src="@(string.IsNullOrEmpty(ViewBag.ProfilePhotoUrl) ? "/images/default-profile.png" : ViewBag.ProfilePhotoUrl)" 
+                                 alt="Profile Photo" 
+                                 class="rounded-circle profile-photo"
+                                 onerror="this.src='/images/default-profile.png';">
+                            <div class="profile-edit-overlay">
+                                <i class="fas fa-camera"></i>
                             </div>
-                        }
+                            <input type="file" id="profile-photo-input" accept="image/*" style="display: none;">
+                        </div>
                         
-                        @if (TempData["InfoMessage"] != null)
-                        {
-                            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                                <i class="fas fa-info-circle me-2"></i>@TempData["InfoMessage"]
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <!-- Crop Interface (Hidden by default) -->
+                        <div class="crop-interface" id="cropInterface" style="display: none;">
+                            <div class="crop-preview-container">
+                                <img id="cropImage" src="" alt="Crop Preview" style="max-width: 100%; max-height: 300px;">
                             </div>
-                        }
-
-                        <!-- Profile Image Section -->
-                        <div class="profile-image-section text-center mb-4">
-                            <div class="profile-image-container">
-                                <img id="profile-photo" 
-                                     src="@(string.IsNullOrEmpty(ViewBag.ProfilePhotoUrl) ? "/images/default-profile.png" : ViewBag.ProfilePhotoUrl)" 
-                                     alt="Profile Photo" 
-                                     class="rounded-circle profile-photo"
-                                     onerror="this.src='/images/default-profile.png';">
-                                <div class="profile-edit-overlay">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </div>
-                                <input type="file" id="profile-photo-input" accept="image/*" style="display: none;">
-                            </div>
-                            
-                            <!-- Crop Interface (Hidden by default) -->
-                            <div class="crop-interface" id="cropInterface" style="display: none;">
-                                <div class="crop-preview-container">
-                                    <img id="cropImage" src="" alt="Crop Preview" style="max-width: 100%; max-height: 300px;">
-                                </div>
-                                <div class="crop-controls mt-3">
-                                    <button type="button" class="btn btn-success me-2" id="saveCropBtn">
-                                        <i class="fas fa-check me-1"></i>Save
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" id="cancelCropBtn">
-                                        <i class="fas fa-times me-1"></i>Cancel
-                                    </button>
-                                </div>
+                            <div class="crop-controls mt-3">
+                                <button type="button" class="btn btn-success me-2" id="saveCropBtn">
+                                    <i class="fas fa-check me-1"></i>Save
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="cancelCropBtn">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </button>
                             </div>
                         </div>
-
-                        @if (!ViewBag.IsAdmin)
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="profile-info">
+                        <h1 class="profile-name">@Model.UserName</h1>
+                        <p class="profile-email">
+                            <i class="fas fa-envelope me-2"></i>@Model.Email
+                            @if (Model.IsEmailConfirmed)
+                            {
+                                <span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i>Verified</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning ms-2"><i class="fas fa-exclamation-triangle me-1"></i>Unverified</span>
+                            }
+                        </p>
+                        @if (!string.IsNullOrEmpty(Model.PhoneNumber))
                         {
-                            <!-- Points Section (Only for regular users) -->
-                            <div class="points-section mb-4">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="card bg-primary text-white">
-                                            <div class="card-body text-center">
-                                                <i class="fas fa-coins fa-2x mb-2"></i>
-                                                <h5 class="card-title">Current Points</h5>
-                                                <h3 class="mb-0">@Model.Points</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="card bg-success text-white">
-                                            <div class="card-body text-center">
-                                                <i class="fas fa-arrow-up fa-2x mb-2"></i>
-                                                <h5 class="card-title">Total Earned</h5>
-                                                <h3 class="mb-0">@Model.TotalPointsEarned</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="card bg-warning text-white">
-                                            <div class="card-body text-center">
-                                                <i class="fas fa-arrow-down fa-2x mb-2"></i>
-                                                <h5 class="card-title">Total Redeemed</h5>
-                                                <h3 class="mb-0">@Model.TotalPointsRedeemed</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="text-center mt-3">
-                                    <a asp-controller="Deals" asp-action="Index" class="btn btn-outline-primary">
-                                        <i class="fas fa-gift me-2"></i>Redeem Points
-                                    </a>
-                                </div>
+                            <p class="profile-phone">
+                                <i class="fas fa-phone me-2"></i>@Model.PhoneNumber
+                            </p>
+                        }
+                        @if (ViewBag.IsAdmin)
+                        {
+                            <div class="admin-badge">
+                                <span class="badge bg-danger fs-6">
+                                    <i class="fas fa-crown me-1"></i>Administrator
+                                </span>
                             </div>
                         }
                         else
                         {
-                            <!-- Admin Quick Actions (Below Profile Picture) -->
-                            <div class="admin-quick-actions mb-4">
-                                <h5 class="mb-3">
-                                    <i class="fas fa-tachometer-alt me-2"></i>Administrative Actions
-                                </h5>
-                                <div class="row">
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-danger w-100">
-                                            <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-danger w-100">
-                                            <i class="fas fa-users me-2"></i>Manage Users
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="Admin" asp-action="Orders" class="btn btn-outline-info w-100">
-                                            <i class="fas fa-shopping-cart me-2"></i>Manage Orders
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="Admin" asp-action="Reports" class="btn btn-outline-success w-100">
-                                            <i class="fas fa-chart-line me-2"></i>Sales Reports
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="Admin" asp-action="PromoCodes" class="btn btn-outline-primary w-100">
-                                            <i class="fas fa-tags me-2"></i>Promo Codes
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="Admin" asp-action="PointsRewards" class="btn btn-outline-danger w-100">
-                                            <i class="fas fa-gift me-2"></i>Points Rewards
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="Admin" asp-action="RedemptionHistory" class="btn btn-outline-secondary w-100">
-                                            <i class="fas fa-history me-2"></i>Redemption History
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="AdminSupport" asp-action="Index" class="btn btn-outline-warning w-100">
-                                            <i class="fas fa-headset me-2"></i>Customer Support
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="Categories" asp-action="Index" class="btn btn-outline-warning w-100">
-                                            <i class="fas fa-tags me-2"></i>Categories
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="MenuItems" asp-action="Index" class="btn btn-outline-success w-100">
-                                            <i class="fas fa-utensils me-2"></i>Menu Items
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-controller="Admin" asp-action="OrderCancellations" class="btn btn-outline-info w-100">
-                                            <i class="fas fa-times-circle me-2"></i>Order Cancellations
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mb-2">
-                                        <a asp-action="Security" class="btn btn-outline-secondary w-100">
-                                            <i class="fas fa-user-shield me-2"></i>My Security
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
                         }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        
+        @if (TempData["InfoMessage"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-2"></i>@TempData["InfoMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Main Profile Card -->
+                <div class="card profile-main-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-edit me-2"></i>Profile Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+
 
                         <form asp-action="Update" method="post">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Current Username</label>
-                                        <div class="form-control-plaintext border rounded p-2 bg-light mb-2">
-                                            @Model.UserName
-                                        </div>
-                                        <label asp-for="UserName" class="form-label">Update Username *</label>
-                                        <input asp-for="UserName" class="form-control" placeholder="Enter new username" />
+                                        <label asp-for="UserName" class="form-label">Username *</label>
+                                        <input asp-for="UserName" class="form-control" placeholder="Enter username" />
                                         <span asp-validation-for="UserName" class="text-danger"></span>
                                     </div>
 
@@ -211,11 +139,9 @@
                                         @if (!Model.IsEmailConfirmed)
                                         {
                                             <div class="mt-2">
-                                                <form asp-action="SendVerificationEmail" method="post" style="display: inline;">
-                                                    <button type="submit" class="btn btn-sm btn-outline-warning">
-                                                        <i class="fas fa-envelope me-1"></i>Verify Email
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="sendVerificationEmail()">
+                                                    <i class="fas fa-envelope me-1"></i>Verify Email
+                                                </button>
                                                 <small class="text-muted ms-2">Click to send verification email</small>
                                             </div>
                                         }
@@ -228,12 +154,8 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Current Phone Number</label>
-                                        <div class="form-control-plaintext border rounded p-2 bg-light mb-2">
-                                            @(string.IsNullOrEmpty(Model.PhoneNumber) ? "No phone number set" : Model.PhoneNumber)
-                                        </div>
-                                        <label asp-for="PhoneNumber" class="form-label">Update Phone Number</label>
-                                        <input asp-for="PhoneNumber" class="form-control" placeholder="Enter new phone number" maxlength="11" pattern="[0-9]{10,11}" title="Please enter a valid Malaysian phone number (10-11 digits)" />
+                                        <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                                        <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number" maxlength="11" pattern="[0-9]{10,11}" title="Please enter a valid Malaysian phone number (10-11 digits)" />
                                         <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                                         <small class="form-text text-muted">Enter a valid Malaysian phone number (10-11 digits)</small>
                                     </div>
@@ -242,19 +164,19 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label asp-for="FirstName" class="form-label">First Name</label>
-                                        <input asp-for="FirstName" class="form-control" />
+                                        <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
                                         <span asp-validation-for="FirstName" class="text-danger"></span>
                                     </div>
 
                                     <div class="mb-3">
                                         <label asp-for="LastName" class="form-label">Last Name</label>
-                                        <input asp-for="LastName" class="form-control" />
+                                        <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
                                         <span asp-validation-for="LastName" class="text-danger"></span>
                                     </div>
 
                                     <div class="mb-3">
                                         <label asp-for="Address" class="form-label">Address</label>
-                                        <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                                        <textarea asp-for="Address" class="form-control" rows="3" placeholder="Enter your address"></textarea>
                                         <span asp-validation-for="Address" class="text-danger"></span>
                                     </div>
 
@@ -282,35 +204,121 @@
                         </form>
                     </div>
                 </div>
-
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4">
                 @if (!ViewBag.IsAdmin)
                 {
-                    <!-- Quick Actions (Only for regular users) -->
-                    <div class="card shadow-sm mt-4">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Quick Actions</h5>
+                    <!-- Points & Stats Card -->
+                    <div class="card profile-sidebar-card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Points & Statistics
+                            </h6>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <a asp-controller="Orders" asp-action="History" class="btn btn-outline-info w-100">
-                                        <i class="fas fa-history me-2"></i>View Order History
-                                    </a>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-icon bg-primary">
+                                        <i class="fas fa-coins"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-value">@Model.Points</div>
+                                        <div class="stat-label">Current Points</div>
+                                    </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-success w-100">
-                                        <i class="fas fa-utensils me-2"></i>Browse Menu
-                                    </a>
+                                <div class="stat-item">
+                                    <div class="stat-icon bg-success">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-value">@Model.TotalPointsEarned</div>
+                                        <div class="stat-label">Total Earned</div>
+                                    </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <a asp-action="Security" class="btn btn-outline-warning w-100">
-                                        <i class="fas fa-shield-alt me-2"></i>Security Dashboard
-                                    </a>
+                                <div class="stat-item">
+                                    <div class="stat-icon bg-warning">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-value">@Model.TotalPointsRedeemed</div>
+                                        <div class="stat-label">Total Redeemed</div>
+                                    </div>
                                 </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <a asp-controller="Deals" asp-action="Index" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-gift me-1"></i>Redeem Points
+                                </a>
                             </div>
                         </div>
                     </div>
                 }
+                else
+                {
+                    <!-- Admin Quick Actions -->
+                    <div class="card profile-sidebar-card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="admin-actions-grid">
+                                <a asp-controller="Admin" asp-action="Index" class="admin-action-btn">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                                <a asp-controller="Admin" asp-action="Users" class="admin-action-btn">
+                                    <i class="fas fa-users"></i>
+                                    <span>Users</span>
+                                </a>
+                                <a asp-controller="Admin" asp-action="Orders" class="admin-action-btn">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Orders</span>
+                                </a>
+                                <a asp-controller="Admin" asp-action="Reports" class="admin-action-btn">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>Reports</span>
+                                </a>
+                                <a asp-controller="AdminSupport" asp-action="Index" class="admin-action-btn">
+                                    <i class="fas fa-headset"></i>
+                                    <span>Support</span>
+                                </a>
+                                <a asp-controller="MenuItems" asp-action="Index" class="admin-action-btn">
+                                    <i class="fas fa-utensils"></i>
+                                    <span>Menu</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Quick Actions Card -->
+                <div class="card profile-sidebar-card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>Quick Actions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a asp-controller="Orders" asp-action="History" class="quick-action-btn">
+                                <i class="fas fa-history"></i>
+                                <span>Order History</span>
+                            </a>
+                            <a asp-controller="Menu" asp-action="Index" class="quick-action-btn">
+                                <i class="fas fa-utensils"></i>
+                                <span>Browse Menu</span>
+                            </a>
+                            <a asp-action="Security" class="quick-action-btn">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Security</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -430,6 +438,27 @@
                 if (unsavedIndicator) unsavedIndicator.style.display = 'none';
                 if (saveButtonText) saveButtonText.textContent = 'Update Profile';
             }
+        }
+
+        // Function to send verification email
+        function sendVerificationEmail() {
+            // Create a form dynamically and submit it
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("SendVerificationEmail", "Profile")';
+            
+            // Add anti-forgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '__RequestVerificationToken';
+                tokenInput.value = token.value;
+                form.appendChild(tokenInput);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
 } 

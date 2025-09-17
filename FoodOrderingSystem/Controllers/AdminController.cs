@@ -44,7 +44,7 @@ namespace FoodOrderingSystem.Controllers
                 TotalMenuItems = await _context.MenuItems.CountAsync(),
                 TotalOrders = await _context.Orders.CountAsync(),
                 TotalSales = await _context.Orders.SumAsync(o => o.Total),
-                PendingOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Pending),
+                PendingOrders = await _context.Orders.CountAsync(o => o.Status != OrderStatus.Delivered && o.Status != OrderStatus.Cancelled),
                 RecentOrders = await _context.Orders
                     .Include(o => o.User)
                     .OrderByDescending(o => o.OrderDate)
@@ -88,7 +88,7 @@ namespace FoodOrderingSystem.Controllers
         }
 
         // GET: /Admin/Orders
-        public async Task<IActionResult> Orders(string status = "", string search = "")
+        public async Task<IActionResult> Orders(string status = "", string search = "", string current = "")
         {
             // Clear any non-admin related success messages
             var successMessage = TempData["SuccessMessage"]?.ToString();
@@ -102,7 +102,12 @@ namespace FoodOrderingSystem.Controllers
                 .ThenInclude(oi => oi.MenuItem)
                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(status) && Enum.TryParse<OrderStatus>(status, out var orderStatus))
+            // Handle "current" parameter to show all orders except Delivered and Cancelled
+            if (!string.IsNullOrEmpty(current) && current.ToLower() == "true")
+            {
+                query = query.Where(o => o.Status != OrderStatus.Delivered && o.Status != OrderStatus.Cancelled);
+            }
+            else if (!string.IsNullOrEmpty(status) && Enum.TryParse<OrderStatus>(status, out var orderStatus))
             {
                 query = query.Where(o => o.Status == orderStatus);
             }
@@ -121,6 +126,7 @@ namespace FoodOrderingSystem.Controllers
 
             ViewBag.StatusFilter = status;
             ViewBag.SearchTerm = search;
+            ViewBag.CurrentFilter = current;
             return View(orders);
         }
 
@@ -840,53 +846,53 @@ namespace FoodOrderingSystem.Controllers
         // GET: /Admin/Reports
         public async Task<IActionResult> Reports()
         {
-            var reportsViewModel = new ReportsViewModel
+            try
             {
-                // Sales Analytics
-                TotalSales = await _context.Orders.SumAsync(o => o.Total),
-                TotalOrders = await _context.Orders.CountAsync(),
-                AverageOrderValue = await _context.Orders.AverageAsync(o => o.Total),
+                // Get basic order counts first
+                var totalOrders = await _context.Orders.CountAsync();
+                var totalSales = await _context.Orders.SumAsync(o => o.Total);
                 
-                // Recent Performance (Last 30 days)
-                RecentSales = await _context.Orders
-                    .Where(o => o.OrderDate >= DateTime.UtcNow.AddDays(-30))
-                    .SumAsync(o => o.Total),
-                RecentOrders = await _context.Orders
-                    .Where(o => o.OrderDate >= DateTime.UtcNow.AddDays(-30))
-                    .CountAsync(),
+                // Calculate average order value safely
+                var averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
                 
-                // Top Selling Items
-                TopSellingItems = await _context.OrderItems
+                // Get recent performance data (Last 30 days)
+                var recentOrdersQuery = _context.Orders.Where(o => o.OrderDate >= DateTime.UtcNow.AddDays(-30));
+                var recentSales = await recentOrdersQuery.SumAsync(o => o.Total);
+                var recentOrders = await recentOrdersQuery.CountAsync();
+                
+                // Get top selling items with null safety
+                var topSellingItems = await _context.OrderItems
                     .Include(oi => oi.MenuItem)
+                    .Where(oi => oi.MenuItem != null) // Ensure MenuItem exists
                     .GroupBy(oi => oi.MenuItemId)
                     .Select(g => new TopSellingItem
                     {
-                        MenuItemName = g.First().MenuItem.Name,
+                        MenuItemName = g.First().MenuItem.Name ?? "Unknown Item",
                         TotalQuantity = g.Sum(oi => oi.Quantity),
                         TotalRevenue = g.Sum(oi => oi.Quantity * oi.Price)
                     })
                     .OrderByDescending(x => x.TotalQuantity)
                     .Take(10)
-                    .ToListAsync(),
+                    .ToListAsync();
                 
-                // Order Status Distribution
-                OrderStatusDistribution = await _context.Orders
+                // Get order status distribution
+                var orderStatusDistribution = await _context.Orders
                     .GroupBy(o => o.Status)
                     .Select(g => new OrderStatusCount
                     {
                         Status = g.Key,
                         Count = g.Count()
                     })
-                    .ToListAsync(),
+                    .ToListAsync();
                 
-                // Customer Analytics
-                TotalCustomers = await _context.Users.CountAsync(),
-                ActiveCustomers = await _context.Users
-                    .Where(u => u.LastLoginDate >= DateTime.UtcNow.AddDays(-30))
-                    .CountAsync(),
+                // Get customer analytics
+                var totalCustomers = await _context.Users.CountAsync();
+                var activeCustomers = await _context.Users
+                    .Where(u => u.LastLoginDate.HasValue && u.LastLoginDate >= DateTime.UtcNow.AddDays(-30))
+                    .CountAsync();
                 
-                // Revenue by Month (Last 12 months)
-                MonthlyRevenue = await _context.Orders
+                // Get monthly revenue data (Last 12 months)
+                var monthlyRevenue = await _context.Orders
                     .Where(o => o.OrderDate >= DateTime.UtcNow.AddMonths(-12))
                     .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
                     .Select(g => new MonthlyRevenue
@@ -898,10 +904,43 @@ namespace FoodOrderingSystem.Controllers
                     })
                     .OrderBy(x => x.Year)
                     .ThenBy(x => x.Month)
-                    .ToListAsync()
-            };
+                    .ToListAsync();
 
-            return View(reportsViewModel);
+                var reportsViewModel = new ReportsViewModel
+                {
+                    // Sales Analytics
+                    TotalSales = totalSales,
+                    TotalOrders = totalOrders,
+                    AverageOrderValue = averageOrderValue,
+                    
+                    // Recent Performance (Last 30 days)
+                    RecentSales = recentSales,
+                    RecentOrders = recentOrders,
+                    
+                    // Top Selling Items
+                    TopSellingItems = topSellingItems,
+                    
+                    // Order Status Distribution
+                    OrderStatusDistribution = orderStatusDistribution,
+                    
+                    // Customer Analytics
+                    TotalCustomers = totalCustomers,
+                    ActiveCustomers = activeCustomers,
+                    
+                    // Revenue by Month (Last 12 months)
+                    MonthlyRevenue = monthlyRevenue
+                };
+
+                return View(reportsViewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading reports data");
+                TempData["ErrorMessage"] = "An error occurred while loading reports. Please try again.";
+                
+                // Return empty view model to prevent crashes
+                return View(new ReportsViewModel());
+            }
         }
 
         // GET: /Admin/PromoCodes
@@ -1231,6 +1270,7 @@ namespace FoodOrderingSystem.Controllers
         {
             return _context.AutoResponses.Any(e => e.Id == id);
         }
+
     }
 
     public class AdminDashboardViewModel

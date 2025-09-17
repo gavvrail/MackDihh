@@ -30,8 +30,6 @@ namespace FoodOrderingSystem.Models
         public int MaxUses { get; set; } = -1; // -1 means unlimited
         public int CurrentUses { get; set; } = 0;
         
-        public bool RequiresMember { get; set; } = false;
-        public bool RequiresStudentVerification { get; set; } = false;
         public bool IsFlashSale { get; set; } = false;
         public bool IsSeasonal { get; set; } = false;
         
@@ -59,9 +57,7 @@ namespace FoodOrderingSystem.Models
         SeasonalDiscount,
         PromoCode,
         LimitedTimeOffer,
-        MemberDeal,
         StudentDiscount,
-        ReferralBonus,
         PointsReward
     }
 } 

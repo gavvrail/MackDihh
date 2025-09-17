@@ -12,10 +12,12 @@ namespace FoodOrderingSystem.Controllers
     public class CheckoutController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CheckoutController(ApplicationDbContext context)
+        public CheckoutController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: /Checkout
@@ -100,25 +102,39 @@ namespace FoodOrderingSystem.Controllers
 
                 if (!ModelState.IsValid)
                 {
+                    // Re-populate the cart data for the view
+                    model.Cart = cart;
                     TempData["ErrorMessage"] = "Please correct the errors below.";
                     return View("Index", model);
                 }
 
-                // Get user for member benefits
-                var user = await _context.Users.FindAsync(userId);
-                bool isMember = user != null && user.IsMember && user.MemberExpiryDate > DateTime.UtcNow;
-
-                // Calculate totals
-                var subtotal = cart.CartItems.Sum(item => item.Quantity * item.MenuItem.Price);
-                var tax = subtotal * 0.06m;
-                var deliveryFee = subtotal >= 100 ? 0 : 5.00m;
-                
-                // Apply member discount (5% off for members)
-                decimal memberDiscount = 0;
-                if (isMember)
+                // Calculate totals with validation
+                var subtotal = cart.CartItems.Sum(item => 
                 {
-                    memberDiscount = subtotal * 0.05m; // 5% member discount
+                    if (item.MenuItem?.Price == null || item.MenuItem.Price < 0)
+                    {
+                        throw new InvalidOperationException($"Invalid price for menu item: {item.MenuItem?.Name ?? "Unknown"}");
+                    }
+                    if (item.Quantity <= 0)
+                    {
+                        throw new InvalidOperationException($"Invalid quantity for menu item: {item.MenuItem.Name}");
+                    }
+                    return item.Quantity * item.MenuItem.Price;
+                });
+                
+                if (subtotal <= 0)
+                {
+                    throw new InvalidOperationException("Invalid order total calculated.");
                 }
+                
+                // Get order settings from configuration
+                var taxRate = decimal.Parse(_configuration["OrderSettings:TaxRate"] ?? "0.06");
+                var deliveryFee = decimal.Parse(_configuration["OrderSettings:DeliveryFee"] ?? "5.00");
+                var freeDeliveryThreshold = decimal.Parse(_configuration["OrderSettings:FreeDeliveryThreshold"] ?? "100.00");
+                var estimatedDeliveryMinutes = int.Parse(_configuration["OrderSettings:EstimatedDeliveryMinutes"] ?? "45");
+                
+                var tax = subtotal * taxRate;
+                var deliveryFeeAmount = subtotal >= freeDeliveryThreshold ? 0 : deliveryFee;
                 
                 // Apply promo code discount if provided
                 decimal discountAmount = 0;
@@ -152,87 +168,103 @@ namespace FoodOrderingSystem.Controllers
                     }
                 }
                 
-                var total = subtotal + tax + deliveryFee - discountAmount - memberDiscount;
+                var total = subtotal + tax + deliveryFeeAmount - discountAmount;
 
-                // Create order
-                var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMdd}-{DateTime.UtcNow.Ticks % 10000:D4}";
-                var order = new Order
+                // Declare variables outside transaction scope
+                Order order;
+                ApplicationUser? user = null;
+
+                // Use database transaction to ensure data consistency
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    UserId = userId,
-                    OrderNumber = orderNumber,
-                    OrderDate = DateTime.UtcNow,
-                    EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(45),
-                    Subtotal = subtotal,
-                    Tax = tax,
-                    DeliveryFee = deliveryFee,
-                    Total = total,
-                    TotalAmount = total,
-                    Status = OrderStatus.Pending,
-                    DeliveryAddress = model.DeliveryAddress.Trim(),
-                    DeliveryInstructions = model.DeliveryInstructions?.Trim(),
-                    CustomerPhone = model.CustomerPhone.Trim(),
-                    PhoneNumber = model.CustomerPhone.Trim(),
-                    Notes = model.Notes?.Trim(),
-                    PaymentMethod = model.PaymentMethod,
-                    PaymentStatus = model.PaymentMethod == "Cash" ? "Pending" : "Paid",
-                    PromoCode = appliedPromoCode,
-                    DiscountAmount = discountAmount + memberDiscount
-                };
-
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
-
-                // Add order items
-                foreach (var cartItem in cart.CartItems)
-                {
-                    var orderItem = new OrderItem
+                    // Create order
+                    var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMdd}-{DateTime.UtcNow.Ticks % 10000:D4}";
+                    order = new Order
                     {
-                        OrderId = order.Id,
-                        MenuItemId = cartItem.MenuItemId,
-                        Quantity = cartItem.Quantity,
-                        Price = cartItem.MenuItem.Price,
-                        UnitPrice = cartItem.MenuItem.Price
+                        UserId = userId,
+                        OrderNumber = orderNumber,
+                        OrderDate = DateTime.UtcNow,
+                        EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(estimatedDeliveryMinutes),
+                        Subtotal = subtotal,
+                        Tax = tax,
+                        DeliveryFee = deliveryFeeAmount,
+                        Total = total,
+                        TotalAmount = total,
+                        Status = OrderStatus.Pending,
+                        DeliveryAddress = model.DeliveryAddress.Trim(),
+                        DeliveryInstructions = model.DeliveryInstructions?.Trim(),
+                        CustomerPhone = model.CustomerPhone.Trim(),
+                        PhoneNumber = model.CustomerPhone.Trim(),
+                        Notes = model.Notes?.Trim(),
+                        PaymentMethod = model.PaymentMethod,
+                        PaymentStatus = model.PaymentMethod == "Cash" ? "Pending" : "Paid",
+                        PromoCode = appliedPromoCode,
+                        DiscountAmount = discountAmount
                     };
-                    _context.OrderItems.Add(orderItem);
-                }
 
-                // Clear cart
-                _context.CartItems.RemoveRange(cart.CartItems);
+                    _context.Orders.Add(order);
+                    await _context.SaveChangesAsync();
 
-                // Add member benefits (points earning)
-                if (isMember && user != null)
-                {
-                    // Members earn 1 point for every RM1 spent
-                    int pointsEarned = (int)Math.Floor(total);
-                    if (pointsEarned > 0)
+                    // Add order items
+                    foreach (var cartItem in cart.CartItems)
                     {
-                        user.Points += pointsEarned;
-                        user.TotalPointsEarned += pointsEarned;
-
-                        // Create points transaction record
-                        var pointsTransaction = new UserPointsTransaction
+                        var orderItem = new OrderItem
                         {
-                            UserId = userId,
-                            Points = pointsEarned,
-                            Type = PointsTransactionType.Earned,
-                            Description = $"Order #{orderNumber} - Earned {pointsEarned} points (Member Benefit)"
+                            OrderId = order.Id,
+                            MenuItemId = cartItem.MenuItemId,
+                            Quantity = cartItem.Quantity,
+                            Price = cartItem.MenuItem.Price,
+                            UnitPrice = cartItem.MenuItem.Price
                         };
-
-                        _context.UserPointsTransactions.Add(pointsTransaction);
+                        _context.OrderItems.Add(orderItem);
                     }
+
+                    // Add points earning for all users
+                    user = await _context.Users.FindAsync(userId);
+                    if (user != null)
+                    {
+                        // Users earn 1 point for every RM1 spent
+                        int pointsEarned = (int)Math.Floor(total);
+                        if (pointsEarned > 0)
+                        {
+                            user.Points += pointsEarned;
+                            user.TotalPointsEarned += pointsEarned;
+
+                            // Create points transaction record
+                            var pointsTransaction = new UserPointsTransaction
+                            {
+                                UserId = userId,
+                                Points = pointsEarned,
+                                Type = PointsTransactionType.Earned,
+                                Description = $"Order #{orderNumber} - Earned {pointsEarned} points"
+                            };
+
+                            _context.UserPointsTransactions.Add(pointsTransaction);
+                        }
+                    }
+
+                    // Clear cart
+                    _context.CartItems.RemoveRange(cart.CartItems);
+
+                    // Commit all changes
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
                 }
 
-                await _context.SaveChangesAsync();
-
-                var memberMessage = "";
-                if (isMember && user != null)
+                var pointsMessage = "";
+                if (user != null)
                 {
                     var pointsEarned = (int)Math.Floor(total);
-                    var discountSaved = memberDiscount;
-                    memberMessage = $" You saved RM{discountSaved:F2} with member discount and earned {pointsEarned} points!";
+                    pointsMessage = $" You earned {pointsEarned} points!";
                 }
 
-                TempData["SuccessMessage"] = $"Order placed successfully!{memberMessage}";
+                TempData["SuccessMessage"] = $"Order placed successfully!{pointsMessage}";
                 return RedirectToAction("Confirmation", new { orderId = order.Id });
             }
             catch (Exception)

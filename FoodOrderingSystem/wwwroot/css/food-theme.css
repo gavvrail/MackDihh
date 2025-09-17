@@ -12,13 +12,15 @@
     --food-orange: #ff8c00;         /* Orange accent */
     --food-white: #ffffff;          /* Pure white */
     --food-black: #000000;          /* Pure black */
+    --food-gradient: linear-gradient(135deg, var(--food-primary), var(--food-secondary));
+    --food-gradient-light: linear-gradient(135deg, var(--food-light), var(--food-white));
     --food-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     --food-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Global Body Styling - Flat Red Background Matching Logo */
+/* Global Body Styling - Clean White Background */
 body {
-    background: var(--food-primary);
+    background: white;
     background-attachment: fixed;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     position: relative;
@@ -416,7 +418,7 @@ body::before {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    background: rgba(255,255,255,0.1);
     animation: shimmer 3s ease-in-out infinite;
 }
 
@@ -455,27 +457,53 @@ body::before {
     opacity: 0.9;
 }
 
-/* Food Menu Cards - Flat Colors */
+/* Food Menu Cards - No Background */
 .food-menu-card {
-    background: var(--food-white);
-    border-radius: 20px;
-    box-shadow: var(--food-shadow);
+    background: transparent;
+    border: none;
+    box-shadow: none;
     overflow: hidden;
+    position: relative;
+    transition: all 0.3s ease;
+    margin: 5px;
 }
 
 .food-menu-card:hover {
-    box-shadow: var(--food-shadow-hover);
+    box-shadow: none;
+    transform: translateY(-5px);
+}
+
+/* Add white box highlight around menu items */
+.food-menu-card::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: var(--food-white);
+    border: 2px solid var(--food-primary);
+    border-radius: 15px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: -1;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.food-menu-card:hover::before {
+    opacity: 1;
+    transform: scale(1.01);
 }
 
 .food-menu-card .card-img-top {
     height: 200px;
     object-fit: cover;
-    border-radius: 0;
+    border-radius: 15px;
 }
 
 .food-menu-card .card-body {
     padding: 1.5rem;
-    background: var(--food-white);
+    background: transparent;
 }
 
 .food-menu-card .card-title {
@@ -582,6 +610,7 @@ body::before {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
 }
+
 
 /* Loading States */
 .loading {

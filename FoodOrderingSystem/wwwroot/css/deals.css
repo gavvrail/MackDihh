@@ -1,5 +1,258 @@
 ﻿/* Deals Page Styles */
 
+/* Hero Section */
+.deals-hero-section {
+    background: #667eea;
+    color: white;
+    padding: 4rem 0;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.deals-hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.deals-login-required {
+    background: #ff6b6b;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.hero-actions {
+    margin-bottom: 2rem;
+}
+
+.hero-benefits {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.hero-visual {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.points-animation {
+    font-size: 8rem;
+    opacity: 0.3;
+}
+
+/* Points Display Card */
+.points-display-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 2rem 0;
+    backdrop-filter: blur(10px);
+}
+
+.points-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.points-icon {
+    font-size: 3rem;
+    color: #4ade80;
+}
+
+.points-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.points-number {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #4ade80;
+}
+
+.points-label {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.points-value {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.value-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #4ade80;
+    display: block;
+}
+
+.value-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Points Dashboard */
+.points-dashboard {
+    margin-bottom: 3rem;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    height: 100%;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.card-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.card-content p {
+    color: #6c757d;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Quick Actions */
+.quick-action-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    height: 100%;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.action-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.quick-action-card h5 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.quick-action-card p {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* Points Work Section */
+.points-step-icon {
+    transition: transform 0.3s ease;
+}
+
+.points-step-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Points Summary Section */
+.bg-gradient-primary {
+    background: #007bff;
+}
+
+.points-stat h4 {
+    font-weight: bold;
+    color: white !important;
+}
+
+.points-stat p {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.9rem;
+}
+
+/* Ensure text is visible */
+.bg-gradient-primary h3,
+.bg-gradient-primary h4,
+.bg-gradient-primary p {
+    color: white !important;
+}
+
 /* Main Content Container */
 .deals-content {
     flex: 1;
@@ -22,7 +275,7 @@
 
 /* Birthday Benefits Styling */
 .birthday-benefit {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+    background: #ff6b6b;
     border: none;
     color: white;
 }
@@ -71,7 +324,7 @@
 }
 
 .accordion-button:not(.collapsed) {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: #007bff;
     color: white;
 }
 
@@ -122,7 +375,7 @@
 
 /* Page Header */
 .deals-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     color: white;
     padding: 3rem 0;
     margin-bottom: 2rem;
@@ -206,7 +459,7 @@
 }
 
 .flash-sale .deal-badge .badge {
-    background: linear-gradient(45deg, #dc3545, #ff6b6b) !important;
+    background: #dc3545 !important;
     animation: pulse 2s infinite;
 }
 
@@ -216,12 +469,12 @@
 
 .member-deal {
     border: 2px solid #ffc107;
-    background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+    background: #fff9e6;
 }
 
 .student-discount {
     border: 2px solid #007bff;
-    background: linear-gradient(135deg, #e6f3ff 0%, #cce7ff 100%);
+    background: #e6f3ff;
 }
 
 .seasonal {
@@ -234,12 +487,12 @@
 
 .referral-bonus {
     border: 2px solid #28a745;
-    background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+    background: #e8f5e8;
 }
 
 .points-summary {
     border: 2px solid #ffc107;
-    background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+    background: #fff9e6;
 }
 
 /* Price Information */
@@ -362,13 +615,13 @@
 
 .membership-plan-card.selected {
     border-color: #007bff;
-    background: linear-gradient(135deg, #e6f3ff 0%, #cce7ff 100%);
+    background: #e6f3ff;
     box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
 }
 
 .membership-plan-card.popular {
     border-color: #ffc107;
-    background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+    background: #fff9e6;
 }
 
 .popular-badge {
@@ -591,7 +844,7 @@
 
 /* Buttons */
 .btn-claim {
-    background: linear-gradient(45deg, #28a745, #20c997);
+    background: #28a745;
     border: none;
     color: white;
     font-weight: 600;
@@ -601,7 +854,7 @@
 }
 
 .btn-claim:hover {
-    background: linear-gradient(45deg, #20c997, #28a745);
+    background: #20c997;
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
     color: white;
@@ -622,16 +875,59 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .deals-header {
+    .deals-hero-section {
         padding: 2rem 0;
     }
     
-    .deals-header h1 {
+    .hero-title {
         font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .hero-benefits {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .points-display-card {
+        padding: 1.5rem;
     }
     
     .points-number {
         font-size: 2rem;
+    }
+    
+    .points-icon {
+        font-size: 2rem;
+    }
+    
+    .value-amount {
+        font-size: 1.5rem;
+    }
+    
+    .dashboard-card {
+        padding: 1rem;
+    }
+    
+    .card-content h3 {
+        font-size: 1.5rem;
+    }
+    
+    .quick-action-card {
+        padding: 1.5rem;
+    }
+    
+    .action-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .points-animation {
+        font-size: 4rem;
     }
     
     .plan-price .amount {
@@ -645,6 +941,38 @@
     
     .share-buttons .btn {
         margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .points-display-card {
+        padding: 1rem;
+    }
+    
+    .points-main {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .points-number {
+        font-size: 1.8rem;
+    }
+    
+    .value-amount {
+        font-size: 1.3rem;
+    }
+    
+    .dashboard-card {
+        margin-bottom: 1rem;
+    }
+    
+    .quick-action-card {
+        margin-bottom: 1rem;
     }
 }
 
@@ -676,7 +1004,7 @@
 /* Points Redemption Section */
 .points-redemption-header {
     border: 2px solid #28a745;
-    background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+    background: #e8f5e8;
 }
 
 .points-display-large {
@@ -686,7 +1014,7 @@
 .points-number-large {
     font-size: 4rem;
     font-weight: 700;
-    color: #28a745;
+    color: #4ade80;
     display: block;
     line-height: 1;
 }
@@ -722,7 +1050,7 @@
 }
 
 .redeem-item-card .btn-success {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: #28a745;
     border: none;
     color: white;
     padding: 0.75rem 1.5rem;

@@ -1,7 +1,7 @@
 /* Wishlist Page Styles */
 .wishlist-container {
     padding: 2rem 0;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: #f8f9fa;
     min-height: 100vh;
 }
 
@@ -78,7 +78,7 @@
 
 /* Price Section */
 .price-section {
-    background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+    background: #fff5f5;
     padding: 1rem;
     border-radius: 10px;
     border-left: 4px solid #dc3545;
@@ -122,7 +122,7 @@
 }
 
 .action-buttons .btn-success {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: #28a745;
     border: none;
 }
 
@@ -222,7 +222,7 @@
     border-radius: 25px;
     padding: 0.75rem 2rem;
     font-weight: 500;
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: #007bff;
     border: none;
     transition: all 0.3s ease;
 }

@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="~/css/food-theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/FoodOrderingSystem.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     @await RenderSectionAsync("Styles", required: false)
     
@@ -33,13 +32,11 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: pulse 2s infinite;
+            transition: transform 0.3s ease;
         }
         
-        @@keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .notification-badge:hover {
+            transform: scale(1.1);
         }
         
         .support-chat-icon {
@@ -65,7 +62,7 @@
         .admin-support-icon {
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: #007bff;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -123,7 +120,7 @@
         }
         
         .admin-support-actions .btn-primary {
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: #007bff;
             border: none;
             box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
         }
@@ -161,6 +158,220 @@
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
         }
+
+        /* Global Custom Modal Styles */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .custom-modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            cursor: pointer;
+        }
+        
+        .custom-modal-content {
+            position: relative;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 80vw;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 10000;
+            margin: auto;
+        }
+        
+        .custom-modal-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .custom-modal-title {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+        
+        .custom-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: #6c757d;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            min-height: 32px;
+        }
+        
+        .custom-close-btn:hover {
+            color: #000;
+            background-color: #f8f9fa;
+        }
+        
+        .custom-close-btn:focus {
+            outline: 2px solid #007bff;
+            outline-offset: 2px;
+        }
+        
+        .custom-modal-body {
+            padding: 1rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .custom-modal-footer {
+            padding: 1rem;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        
+        /* Image Modal Specific Styles */
+        .custom-modal-image .custom-modal-content {
+            max-width: 80vw;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+        }
+        
+        .custom-modal-image .custom-modal-body {
+            padding: 0;
+            text-align: center;
+            max-height: 70vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .custom-modal-image .custom-modal-body img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Modal Content Improvements */
+        .modal-content {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-bottom: none;
+            padding: 1rem 1.5rem;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+            opacity: 0.8;
+        }
+
+        .modal-header .btn-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+        }
+
+        /* Image Modal Specific Styles */
+        .modal-lg {
+            max-width: 60vw;
+            max-height: 80vh;
+        }
+
+        .modal-lg .modal-body {
+            padding: 0;
+            text-align: center;
+            max-height: 70vh;
+            overflow: hidden;
+        }
+
+        .modal-lg .modal-body img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            width: auto;
+            height: auto;
+        }
+
+        /* Responsive modal sizing */
+        @@media (max-width: 768px) {
+            .modal-lg {
+                max-width: 95vw;
+                max-height: 90vh;
+            }
+            
+            .modal-lg .modal-body {
+                max-height: 80vh;
+            }
+            
+            .modal-lg .modal-body img {
+                max-height: 80vh;
+            }
+        }
+
+        /* Prevent body scroll when modal is open */
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        /* Smooth modal transitions */
+        .modal.fade .modal-dialog {
+            transition: transform 0.3s ease-out;
+            transform: translate(0, -50px);
+        }
+
+        .modal.show .modal-dialog {
+            transform: none;
+        }
+
+        /* Custom modal backdrop for better UX */
+        .modal-backdrop.fade {
+            opacity: 0;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.4;
+        }
     </style>
 </head>
 <body>
@@ -179,40 +390,144 @@
                     </button>
                     <div class="navbar-collapse collapse d-sm-inline-flex">
                         <ul class="navbar-nav flex-grow-1">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                    <i class="fas fa-home me-1"></i>Home
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Menu" asp-action="Index">
-                                    <i class="fas fa-utensils me-1"></i>Menu
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Deals" asp-action="Index">
-                                    <i class="fas fa-tags me-1"></i>Deals
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Orders" asp-action="History">
-                                    <i class="fas fa-receipt me-1"></i>My Orders
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="WishList" asp-action="Index">
-                                    <i class="fas fa-heart me-1"></i>Wishlist
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Deals" asp-action="MemberPurchase">
-                                    <i class="fas fa-crown me-1"></i>Subscription
-                                </a>
-                            </li>
+                            @if (!User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                        <i class="fas fa-home me-1"></i>Home
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Menu" asp-action="Index">
+                                        <i class="fas fa-utensils me-1"></i>Menu
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Deals" asp-action="Index">
+                                        <i class="fas fa-tags me-1"></i>Deals
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Orders" asp-action="History">
+                                        <i class="fas fa-receipt me-1"></i>My Orders
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="WishList" asp-action="Index">
+                                        <i class="fas fa-heart me-1"></i>Wishlist
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <!-- Admin Navigation Dropdowns -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="dashboardDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="dashboardDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
+                                                <i class="fas fa-home me-2"></i>Main Dashboard
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Reports">
+                                                <i class="fas fa-chart-bar me-2"></i>Sales Reports
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Orders">
+                                                <i class="fas fa-shopping-cart me-2"></i>Order Analytics
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="contentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-edit me-1"></i>Content
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="contentDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="MenuItems" asp-action="Index">
+                                                <i class="fas fa-utensils me-2"></i>Menu Items
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Categories" asp-action="Index">
+                                                <i class="fas fa-tags me-2"></i>Categories
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="usersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-users me-1"></i>Users
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="usersDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Users">
+                                                <i class="fas fa-user-cog me-2"></i>Manage Users
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="supportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-headset me-1"></i>Support
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="supportDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="AdminSupport" asp-action="Index">
+                                                <i class="fas fa-comments me-2"></i>Customer Support
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="AutoResponses">
+                                                <i class="fas fa-robot me-2"></i>Auto Responses
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="OrderCancellations">
+                                                <i class="fas fa-ban me-2"></i>Order Cancellations
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="dealsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-gift me-1"></i>Deals & Rewards
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="dealsDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="PromoCodes">
+                                                <i class="fas fa-percentage me-2"></i>Promo Codes
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="PointsRewards">
+                                                <i class="fas fa-star me-2"></i>Points Rewards
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="RedemptionHistory">
+                                                <i class="fas fa-history me-2"></i>Redemption History
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
                         </ul>
                         <ul class="navbar-nav">
                             <partial name="_LoginPartial" />
-                            @await Component.InvokeAsync("CartWidget")
+                            @if (!User.IsInRole("Admin"))
+                            {
+                                @await Component.InvokeAsync("CartWidget")
+                            }
                         </ul>
                     </div>
                 </div>
@@ -439,6 +754,77 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/notifications.js" asp-append-version="true"></script>
+    
+    <script>
+        // Global Custom Modal Functions
+        function showCustomModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.style.alignItems = 'center';
+                modal.style.justifyContent = 'center';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function hideCustomModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Generic modal close function
+        function closeModal(modalId) {
+            hideCustomModal(modalId);
+        }
+        
+        // Initialize custom modals
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle custom modal backdrops
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('custom-modal-backdrop')) {
+                    const modal = e.target.closest('.custom-modal');
+                    if (modal) {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+            
+            // Handle custom close buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('custom-close-btn') || e.target.closest('.custom-close-btn')) {
+                    const modal = e.target.closest('.custom-modal');
+                    if (modal) {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+            
+            // Escape key to close any custom modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const openModal = document.querySelector('.custom-modal[style*="flex"]');
+                    if (openModal) {
+                        openModal.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+            
+            // Handle Bootstrap modals (for backward compatibility)
+            document.addEventListener('show.bs.modal', function(event) {
+                document.body.style.overflow = 'hidden';
+            });
+            
+            document.addEventListener('hide.bs.modal', function(event) {
+                document.body.style.overflow = '';
+            });
+        });
+    </script>
     <script src="~/js/toast.js" asp-append-version="true"></script>
     <script src="~/js/support-chat.js" asp-append-version="true"></script>
     <script src="~/js/chat.js" asp-append-version="true"></script>

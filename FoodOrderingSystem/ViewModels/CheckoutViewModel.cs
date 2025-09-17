@@ -12,7 +12,6 @@ namespace FoodOrderingSystem.ViewModels
         public string DeliveryAddress { get; set; } = "";
 
         [Required(ErrorMessage = "Phone number is required")]
-        [Phone(ErrorMessage = "Please enter a valid phone number")]
         [StringLength(11, MinimumLength = 10, ErrorMessage = "Phone number must be between 10 and 11 digits")]
         [RegularExpression(@"^\d{10,11}$", ErrorMessage = "Phone number must contain only digits and be 10-11 characters long")]
         public string CustomerPhone { get; set; } = "";

@@ -342,3 +342,125 @@
         max-width: 200px;
     }
 }
+
+/* Enhanced Deals Section Styles */
+.promo-card {
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.promo-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.promo-card .card-img-top {
+    transition: transform 0.3s ease;
+}
+
+.promo-card:hover .card-img-top {
+    transform: scale(1.08);
+}
+
+.deal-badge .badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.4rem 0.8rem;
+    border-radius: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.bundle-offer {
+    border: 2px solid #ffc107;
+    background: #fff9e6;
+    position: relative;
+}
+
+.bundle-offer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #ffc107;
+    z-index: 1;
+}
+
+.bundle-offer .card-title {
+    color: #856404;
+    font-weight: 700;
+}
+
+.price-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0.5rem 0;
+}
+
+.claim-deal-btn {
+    font-weight: 600;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+.claim-deal-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Enhanced section title */
+.section-title {
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+/* Featured items section title - dark text for white background */
+.featured-section .section-title {
+    color: #2c3e50;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: #007bff;
+    border-radius: 2px;
+}
+
+/* User status badges enhancement */
+.user-status-badges .badge {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Special announcement alert */
+.alert-primary {
+    background: #007bff;
+    border: none;
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.alert-primary .alert-heading {
+    color: white;
+    font-weight: 700;
+}

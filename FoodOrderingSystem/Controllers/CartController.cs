@@ -41,14 +41,25 @@ namespace FoodOrderingSystem.Controllers
             }
             else
             {
-                // Clean up any duplicate cart items (merge them)
-                await CleanupDuplicateCartItems(cart.Id);
+                // Only clean up duplicates if there are more than 10 items (performance optimization)
+                if (cart.CartItems.Count > 10)
+                {
+                    await CleanupDuplicateCartItems(cart.Id);
+                    
+                    // Reload cart after cleanup
+                    cart = await _context.Carts
+                        .Include(c => c.CartItems)
+                        .ThenInclude(ci => ci.MenuItem)
+                        .FirstOrDefaultAsync(c => c.UserId == userId);
+                }
                 
-                // Reload cart after cleanup
-                cart = await _context.Carts
-                    .Include(c => c.CartItems)
-                    .ThenInclude(ci => ci.MenuItem)
-                    .FirstOrDefaultAsync(c => c.UserId == userId);
+                // Ensure cart is not null after cleanup
+                if (cart == null)
+                {
+                    cart = new Cart { UserId = userId ?? string.Empty };
+                    _context.Carts.Add(cart);
+                    await _context.SaveChangesAsync();
+                }
             }
 
             return View(cart);
@@ -56,34 +67,49 @@ namespace FoodOrderingSystem.Controllers
 
         private async Task CleanupDuplicateCartItems(int cartId)
         {
-            // Get all cart items for this cart
-            var cartItems = await _context.CartItems
-                .Where(ci => ci.CartId == cartId)
-                .ToListAsync();
-
-            // Group by MenuItemId and merge duplicates
-            var groupedItems = cartItems.GroupBy(ci => ci.MenuItemId).ToList();
-
-            foreach (var group in groupedItems)
+            try
             {
-                if (group.Count() > 1)
+                // Get all cart items for this cart with a single query
+                var cartItems = await _context.CartItems
+                    .Where(ci => ci.CartId == cartId)
+                    .ToListAsync();
+
+                // Group by MenuItemId and merge duplicates efficiently
+                var groupedItems = cartItems
+                    .GroupBy(ci => ci.MenuItemId)
+                    .Where(g => g.Count() > 1)
+                    .ToList();
+
+                if (groupedItems.Any())
                 {
-                    var items = group.ToList();
-                    var firstItem = items.First();
-                    
-                    // Sum up all quantities
-                    var totalQuantity = items.Sum(ci => ci.Quantity);
-                    firstItem.Quantity = totalQuantity;
-                    
-                    // Remove duplicate items
-                    for (int i = 1; i < items.Count; i++)
+                    var itemsToRemove = new List<CartItem>();
+
+                    foreach (var group in groupedItems)
                     {
-                        _context.CartItems.Remove(items[i]);
+                        var items = group.ToList();
+                        var firstItem = items.First();
+                        
+                        // Sum up all quantities
+                        var totalQuantity = items.Sum(ci => ci.Quantity);
+                        firstItem.Quantity = totalQuantity;
+                        
+                        // Mark duplicate items for removal
+                        itemsToRemove.AddRange(items.Skip(1));
+                    }
+
+                    // Remove all duplicate items in a single operation
+                    if (itemsToRemove.Any())
+                    {
+                        _context.CartItems.RemoveRange(itemsToRemove);
+                        await _context.SaveChangesAsync();
                     }
                 }
             }
-
-            await _context.SaveChangesAsync();
+            catch (Exception ex)
+            {
+                // Log the exception but don't throw to prevent cart access failure
+                Console.WriteLine($"Error cleaning up duplicate cart items: {ex.Message}");
+            }
         }
 
         // ... (The AddToCart method remains the same) ...
@@ -117,8 +143,13 @@ namespace FoodOrderingSystem.Controllers
                 }
 
                 // Check for existing cart item using direct database query
+                if (cart == null)
+                {
+                    return Json(new { success = false, message = "Cart not found." });
+                }
+                
                 var existingCartItem = await _context.CartItems
-                    .FirstOrDefaultAsync(ci => ci.CartId == cart!.Id && ci.MenuItemId == menuItemId);
+                    .FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.MenuItemId == menuItemId);
 
                 if (existingCartItem != null)
                 {
@@ -132,7 +163,7 @@ namespace FoodOrderingSystem.Controllers
                     var newCartItem = new CartItem
                     {
                         MenuItemId = menuItemId,
-                        CartId = cart!.Id,
+                        CartId = cart.Id,
                         Quantity = 1
                     };
                     _context.CartItems.Add(newCartItem);
@@ -200,3 +231,4 @@ namespace FoodOrderingSystem.Controllers
         }
     }
 }
+

@@ -166,7 +166,7 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
             .then(response => {

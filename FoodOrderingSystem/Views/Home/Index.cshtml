@@ -53,7 +53,7 @@
     </section>
 
     <!-- Featured Items Section -->
-    <section class="container mt-5">
+    <section class="container mt-5 featured-section">
         <h2 class="text-center mb-4 section-title">Our Featured Items</h2>
         <div class="row text-center">
             <!-- Featured Item 1 -->
@@ -126,7 +126,8 @@
     <!-- Enhanced Promotions Section -->
     <section class="bg-light py-5">
         <div class="container">
-            <h2 class="text-center mb-4 section-title">Deals & Promotions</h2>
+            <h2 class="text-center mb-4 section-title">🔥 Hot Deals & Exclusive Offers</h2>
+            <p class="text-center text-muted mb-5">Don't miss out on these amazing deals! Limited time offers that will make your taste buds dance.</p>
             
             <!-- User Status Display for Logged-in Users -->
             @if (Model.User != null)
@@ -135,109 +136,108 @@
                     <span class="badge bg-success me-2">
                         <i class="fas fa-coins me-1"></i>@Model.UserPoints Points
                     </span>
-                    @if (Model.IsMember)
-                    {
-                        <span class="badge bg-warning me-2">
-                            <i class="fas fa-crown me-1"></i>Member
-                        </span>
-                    }
-                    @if (Model.IsStudentVerified)
-                    {
-                        <span class="badge bg-primary me-2">
-                            <i class="fas fa-graduation-cap me-1"></i>Student
-                        </span>
-                    }
                 </div>
             }
             
             <div class="row">
-                <!-- Featured Deal 1 -->
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <div class="card promo-card h-100 d-flex flex-column">
-                            <img src="@Url.Content("~/images/5.png")" class="card-img-top" alt="Free Fries Friday" style="height: 150px; object-fit: cover;">
-                            <div class="card-body d-flex flex-column">
-                                <div class="deal-badge mb-2">
-                                    <span class="badge bg-danger">FRIDAY SPECIAL</span>
-                                </div>
-                                <h5 class="card-title">Free Fries Friday</h5>
-                                <p class="card-text">Get a FREE medium Fries with any purchase of RM1 or more, only on Fridays.</p>
-                                <div class="mt-auto">
-                                    <button type="button" class="btn btn-primary claim-deal-btn w-100" data-deal="Free Fries Friday" data-requirements="Any purchase RM1+ on Fridays">
-                                        <i class="fas fa-gift me-2"></i>Claim Deal
-                                    </button>
-                                </div>
+                <!-- Featured Deal 1 - Welcome Offer -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card promo-card h-100 d-flex flex-column shadow-sm">
+                        <div class="position-relative">
+                            <img src="@Url.Content("~/images/logo.png")" class="card-img-top" alt="Welcome to MackDihh" style="height: 150px; object-fit: contain; background: linear-gradient(135deg, #007bff, #0056b3);">
+                            <div class="deal-badge position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-success">NEW CUSTOMER</span>
                             </div>
                         </div>
-                    </div>
-                
-                <!-- Featured Deal 2 -->
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card promo-card h-100 d-flex flex-column">
-                        <img src="@Url.Content("~/images/6.png")" class="card-img-top" alt="New Crispy Chicken" style="height: 150px; object-fit: cover;">
                         <div class="card-body d-flex flex-column">
-                            <div class="deal-badge mb-2">
-                                <span class="badge bg-primary">NEW ITEM</span>
-                            </div>
-                            <h5 class="card-title">Try the new Crispy Chicken</h5>
-                            <p class="card-text">Juicy, crispy, and tender. Our new chicken sandwich is here to blow you away.</p>
+                            <h5 class="card-title">Welcome to MackDihh!</h5>
+                            <p class="card-text">Get 10% off your first order! Perfect for new customers trying our delicious food.</p>
                             <div class="mt-auto">
-                                <a asp-controller="Menu" asp-action="Index" class="btn btn-primary w-100">
-                                    <i class="fas fa-utensils me-2"></i>Learn More
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Featured Deal 3 - Bundle Offer -->
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card promo-card bundle-offer h-100 d-flex flex-column">
-                        <img src="@Url.Content("~/images/7.png")" class="card-img-top" alt="Family Bundle" style="height: 150px; object-fit: cover;">
-                        <div class="card-body d-flex flex-column">
-                            <div class="deal-badge mb-2">
-                                <span class="badge bg-primary">BUNDLE DEAL</span>
-                            </div>
-                            <h5 class="card-title">Family Bundle Special</h5>
-                            <p class="card-text">Save 20% on our family bundle! Perfect for sharing with loved ones.</p>
-                            <div class="price-info mb-2">
-                                <span class="original-price">RM45.00</span>
-                                <span class="discounted-price">RM36.00</span>
-                                <span class="discount-percentage">-20%</span>
-                            </div>
-                            <div class="mt-auto">
-                                <button type="button" class="btn btn-primary claim-deal-btn w-100" data-deal="Family Bundle Special" data-requirements="Minimum 4 items">
-                                    <i class="fas fa-box me-2"></i>Order Bundle
+                                <button type="button" class="btn btn-success claim-deal-btn w-100" data-deal="Welcome to MackDihh" data-requirements="First-time customers only">
+                                    <i class="fas fa-gift me-2"></i>Claim Welcome Deal
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Featured Deal 4 - Member Exclusive -->
+                <!-- Featured Deal 2 - Spicy Habanero Flash Sale -->
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card promo-card member-deal h-100 d-flex flex-column">
-                        <img src="@Url.Content("~/images/8.png")" class="card-img-top" alt="Member Exclusive" style="height: 150px; object-fit: cover;">
-                        <div class="card-body d-flex flex-column">
-                            <div class="deal-badge mb-2">
-                                <span class="badge bg-warning text-dark">MEMBERS ONLY</span>
-                            </div>
-                            <h5 class="card-title">Member Exclusive Deal</h5>
-                            <p class="card-text">Special 30% off for our valued members. Join now to unlock exclusive benefits!</p>
-                            <div class="mt-auto">
-                                @if (Model.IsMember)
-                                {
-                                    <button type="button" class="btn btn-primary claim-deal-btn w-100" data-deal="Member Exclusive Deal" data-requirements="Membership required">
-                                        <i class="fas fa-crown me-2"></i>Claim Deal
-                                    </button>
-                                }
-                                else
-                                {
-                                    <a asp-controller="Deals" asp-action="MemberPurchase" class="btn btn-primary w-100">
-                                        <i class="fas fa-crown me-2"></i>Become Member
-                                    </a>
-                                }
+                    <div class="card promo-card h-100 d-flex flex-column shadow-sm">
+                        <div class="position-relative">
+                            <img src="@Url.Content("~/images/4.png")" class="card-img-top" alt="Spicy Habanero Burger" style="height: 150px; object-fit: cover;">
+                            <div class="deal-badge position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-danger">FLASH SALE</span>
                             </div>
                         </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">Spicy Habanero Burger</h5>
+                            <p class="card-text">Limited time! Get 20% off our new Spicy Habanero Burger for the next 24 hours!</p>
+                            <div class="mt-auto">
+                                <button type="button" class="btn btn-danger claim-deal-btn w-100" data-deal="Spicy Habanero Burger" data-requirements="Limited time offer - 24 hours only">
+                                    <i class="fas fa-fire me-2"></i>Grab This Deal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Featured Deal 3 - Family Bucket -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card promo-card bundle-offer h-100 d-flex flex-column shadow-sm">
+                        <div class="position-relative">
+                            <img src="@Url.Content("~/images/mackfamilybucket.png")" class="card-img-top" alt="Family Bucket" style="height: 150px; object-fit: cover;">
+                            <div class="deal-badge position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-warning">FAMILY DEAL</span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">Family Feast Special</h5>
+                            <p class="card-text">Save RM15 on orders over RM50! Perfect for our Family Bucket meals.</p>
+                            <div class="price-info mb-2">
+                                <span class="text-muted">Min. Order: </span>
+                                <span class="fw-bold text-primary">RM50</span>
+                                <span class="badge bg-success ms-2">Save RM15</span>
+                            </div>
+                            <div class="mt-auto">
+                                <button type="button" class="btn btn-warning claim-deal-btn w-100" data-deal="Family Feast Special" data-requirements="Minimum order RM50">
+                                    <i class="fas fa-users me-2"></i>Order Family Deal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Featured Deal 4 - Happy Meal -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card promo-card h-100 d-flex flex-column shadow-sm">
+                        <div class="position-relative">
+                            <img src="@Url.Content("~/images/Doraemon_meal.png")" class="card-img-top" alt="Doraemon Happy Meal" style="height: 150px; object-fit: cover;">
+                            <div class="deal-badge position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-info">KIDS SPECIAL</span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">Doraemon Happy Meal</h5>
+                            <p class="card-text">Kids love our Doraemon Happy Meal! Get 10% off any Happy Meal order.</p>
+                            <div class="mt-auto">
+                                <button type="button" class="btn btn-info claim-deal-btn w-100" data-deal="Doraemon Happy Meal" data-requirements="Valid for Happy Meal orders only">
+                                    <i class="fas fa-child me-2"></i>Order Happy Meal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Special Announcement -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="alert alert-primary text-center" role="alert">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-star me-2"></i>Earn Points on Every Order!
+                        </h5>
+                        <p class="mb-0">Join our rewards program and earn points with every purchase. Redeem points for free food items!</p>
                     </div>
                 </div>
             </div>
@@ -280,7 +280,7 @@
                             <i class="fas fa-award fa-3x text-warning"></i>
                         </div>
                         <h5>Rewards & Points</h5>
-                        <p>Earn points with every order and redeem amazing rewards, plus exclusive member benefits!</p>
+                        <p>Earn points with every order and redeem amazing rewards!</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
@@ -378,8 +378,25 @@
                     const dealName = this.getAttribute('data-deal');
                     const requirements = this.getAttribute('data-requirements');
                     
+                    // Create a more engaging message based on the deal
+                    let message = `🎉 ${dealName}\n\n`;
+                    
+                    if (dealName.includes('Welcome')) {
+                        message += `Welcome to MackDihh! Use promo code "WELCOME10" for 10% off your first order.\n\nRequirements: ${requirements}`;
+                    } else if (dealName.includes('Spicy Habanero')) {
+                        message += `🔥 Hot Deal Alert! Use promo code "FLASH20" for 20% off our Spicy Habanero Burger.\n\nRequirements: ${requirements}`;
+                    } else if (dealName.includes('Family')) {
+                        message += `👨‍👩‍👧‍👦 Perfect for the whole family! Use promo code "FAMILY15" to save RM15.\n\nRequirements: ${requirements}`;
+                    } else if (dealName.includes('Doraemon')) {
+                        message += `🎁 Kids will love this! Use promo code "HAPPY10" for 10% off Happy Meals.\n\nRequirements: ${requirements}`;
+                    } else {
+                        message += `Requirements: ${requirements}`;
+                    }
+                    
+                    message += `\n\nThis deal will be automatically applied when you use the promo code during checkout.`;
+                    
                     // Show deal information
-                    alert(`🎉 ${dealName}\n\nRequirements: ${requirements}\n\nThis deal will be automatically applied when you place an order on Fridays with a minimum purchase of RM1.`);
+                    alert(message);
                     
                     // Optionally redirect to menu
                     if (confirm('Would you like to browse our menu to start your order?')) {
@@ -390,3 +407,4 @@
         });
     </script>
 }
+</div>

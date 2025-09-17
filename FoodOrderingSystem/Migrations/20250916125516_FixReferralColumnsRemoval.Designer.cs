@@ -4,6 +4,7 @@ using FoodOrderingSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FoodOrderingSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250916125516_FixReferralColumnsRemoval")]
+    partial class FixReferralColumnsRemoval
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,6 +67,8 @@ namespace FoodOrderingSystem.Migrations
                     b.Property<bool>("IsBlocked")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPremiumMember")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastLoginAttempt")
                         .HasColumnType("datetime2");
@@ -107,6 +112,8 @@ namespace FoodOrderingSystem.Migrations
                     b.Property<int>("Points")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("PremiumMembershipExpiry")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ProfilePhotoUrl")
                         .HasMaxLength(200)

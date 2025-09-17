@@ -6,7 +6,7 @@ html {
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f8f9fa;
+    /* background-color: #f8f9fa; - Removed to avoid conflict with food-theme.css */
     margin: 0;
     display: flex; /* Use body as the main flex container */
     flex-direction: column;
@@ -392,7 +392,7 @@ section {
 }
 
     .admin-dropdown-menu .dropdown-header {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        background: #f8f9fa;
         color: #495057;
         font-weight: 700;
         font-size: 13px;
@@ -422,14 +422,14 @@ section {
     }
 
         .admin-dropdown-menu .dropdown-item:hover {
-            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+            background: #dc3545;
             color: white;
             padding-left: 24px;
             transform: scale(1.02);
         }
 
         .admin-dropdown-menu .dropdown-item:active {
-            background: linear-gradient(135deg, #b02a37 0%, #8e212e 100%);
+            background: #b02a37;
             color: white;
         }
 
@@ -485,7 +485,7 @@ section {
     right: 30px !important;
     width: 60px !important;
     height: 60px !important;
-    background: linear-gradient(135deg, #D83028 0%, #b02a37 100%) !important;
+    background: #D83028 !important;
     border-radius: 50% !important;
     display: flex !important;
     align-items: center !important;
@@ -526,7 +526,7 @@ section {
 }
 
 .support-chat-header {
-    background: linear-gradient(135deg, #D83028 0%, #b02a37 100%);
+    background: #D83028;
     color: white;
     padding: 15px 20px;
     border-radius: 15px 15px 0 0;
@@ -583,7 +583,7 @@ section {
 }
 
 .support-message.user-message .support-message-content {
-    background: linear-gradient(135deg, #D83028 0%, #b02a37 100%);
+    background: #D83028;
     color: white;
     border-bottom-left-radius: 15px;
     border-bottom-right-radius: 5px;
@@ -617,7 +617,7 @@ section {
         height: 40px;
         border-radius: 50%;
         border: none;
-        background: linear-gradient(135deg, #D83028 0%, #b02a37 100%);
+        background: #D83028;
         color: white;
         display: flex;
         align-items: center;
@@ -650,12 +650,12 @@ section {
     }
 
     .support-chat-auth-prompt .btn-primary {
-        background: linear-gradient(135deg, #D83028 0%, #b02a37 100%);
+        background: #D83028;
         border: none;
     }
 
         .support-chat-auth-prompt .btn-primary:hover {
-            background: linear-gradient(135deg, #b02a37 0%, #8e212e 100%);
+            background: #b02a37;
             transform: translateY(-2px);
         }
 

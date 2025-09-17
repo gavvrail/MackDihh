@@ -4,6 +4,7 @@ using FoodOrderingSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FoodOrderingSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250908113917_RemoveRequiresMemberFromDeals")]
+    partial class RemoveRequiresMemberFromDeals
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,9 +64,17 @@ namespace FoodOrderingSystem.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("InstitutionName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsBlocked")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPremiumMember")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsStudentVerified")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastLoginAttempt")
                         .HasColumnType("datetime2");
@@ -107,13 +118,40 @@ namespace FoodOrderingSystem.Migrations
                     b.Property<int>("Points")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("PremiumMembershipExpiry")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ProfilePhotoUrl")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("ReferralCode")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ReferralCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReferralCredits")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReferredBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RewardPoints")
+                        .HasColumnType("int");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("StudentInstitution")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("StudentVerificationDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("TotalPointsEarned")
                         .HasColumnType("int");
@@ -140,6 +178,14 @@ namespace FoodOrderingSystem.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("ReferralCode")
+                        .IsUnique()
+                        .HasFilter("[ReferralCode] IS NOT NULL");
+
+                    b.HasIndex("StudentId")
+                        .IsUnique()
+                        .HasFilter("[StudentId] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -412,6 +458,9 @@ namespace FoodOrderingSystem.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("RequiresStudentVerification")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
@@ -606,7 +655,6 @@ namespace FoodOrderingSystem.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<decimal>("DeliveryFee")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("DeliveryInstructions")
@@ -663,15 +711,12 @@ namespace FoodOrderingSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Subtotal")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("Tax")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("Total")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("TotalAmount")
@@ -747,14 +792,12 @@ namespace FoodOrderingSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");

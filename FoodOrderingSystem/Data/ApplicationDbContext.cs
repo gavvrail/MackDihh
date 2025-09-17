@@ -24,7 +24,6 @@ namespace FoodOrderingSystem.Data
         public DbSet<Deal> Deals { get; set; }
         public DbSet<PointsReward> PointsRewards { get; set; }
         public DbSet<UserPointsTransaction> UserPointsTransactions { get; set; }
-        public DbSet<MemberSubscription> MemberSubscriptions { get; set; }
         public DbSet<UserRedemption> UserRedemptions { get; set; }
         public DbSet<UserPromoCode> UserPromoCodes { get; set; }
 
@@ -158,23 +157,19 @@ namespace FoodOrderingSystem.Data
             {
                 entity.Property(o => o.TotalAmount).HasPrecision(18, 2);
                 entity.Property(o => o.DiscountAmount).HasPrecision(18, 2);
+                entity.Property(o => o.Subtotal).HasPrecision(18, 2);
+                entity.Property(o => o.Tax).HasPrecision(18, 2);
+                entity.Property(o => o.DeliveryFee).HasPrecision(18, 2);
+                entity.Property(o => o.Total).HasPrecision(18, 2);
             });
 
             // Configurations for ApplicationUser
             builder.Entity<ApplicationUser>(entity =>
             {
                 // Existing unique constraint for referral codes
-                entity.HasIndex(u => u.ReferralCode)
-                    .IsUnique()
-                    .HasFilter("[ReferralCode] IS NOT NULL");
 
-                // Existing unique constraint for student IDs
-                entity.HasIndex(u => u.StudentId)
-                    .IsUnique()
-                    .HasFilter("[StudentId] IS NOT NULL");
 
                 // NEW: Added precision for decimal property
-                entity.Property(u => u.ReferralCredits).HasPrecision(18, 2);
             });
 
             // Configurations for Deal
@@ -192,11 +187,6 @@ namespace FoodOrderingSystem.Data
                 entity.Property(d => d.DiscountPercentage).HasPrecision(5, 2);
             });
 
-            // NEW: Added configuration for MemberSubscription
-            builder.Entity<MemberSubscription>(entity =>
-            {
-                entity.Property(ms => ms.Amount).HasPrecision(18, 2);
-            });
 
             // NEW: Added configuration for PointsReward
             builder.Entity<PointsReward>(entity =>
@@ -211,6 +201,13 @@ namespace FoodOrderingSystem.Data
                 entity.Property(upc => upc.DiscountPercentage).HasPrecision(5, 2);
                 entity.Property(upc => upc.DiscountedPrice).HasPrecision(18, 2);
                 entity.Property(upc => upc.MinimumOrderAmount).HasPrecision(18, 2);
+            });
+
+            // Add missing decimal precision configurations
+            builder.Entity<OrderItem>(entity =>
+            {
+                entity.Property(oi => oi.Price).HasPrecision(18, 2);
+                entity.Property(oi => oi.UnitPrice).HasPrecision(18, 2);
             });
 
             // NEW: Added configuration for OrderCancellation to fix cascade delete issue

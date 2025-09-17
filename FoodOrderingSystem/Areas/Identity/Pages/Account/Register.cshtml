@@ -14,6 +14,123 @@
 
     <!-- 1. ADD THE RECAPTCHA SCRIPT HERE -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+    <!-- Enhanced Password Validation Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const passwordRequirements = document.getElementById('passwordRequirements');
+            const lengthReq = document.getElementById('lengthReq');
+            const uppercaseReq = document.getElementById('uppercaseReq');
+            const digitReq = document.getElementById('digitReq');
+            const specialReq = document.getElementById('specialReq');
+
+            // Initialize password requirements with invalid state
+            function initializePasswordRequirements() {
+                lengthReq.classList.add('invalid');
+                uppercaseReq.classList.add('invalid');
+                digitReq.classList.add('invalid');
+                specialReq.classList.add('invalid');
+            }
+
+            // Show/hide password requirements
+            passwordInput.addEventListener('focus', function() {
+                passwordRequirements.style.display = 'block';
+                // Initialize with invalid state when first focused
+                if (passwordInput.value === '') {
+                    initializePasswordRequirements();
+                }
+            });
+
+            passwordInput.addEventListener('blur', function() {
+                if (passwordInput.value === '') {
+                    passwordRequirements.style.display = 'none';
+                }
+            });
+
+            // Real-time password validation
+            passwordInput.addEventListener('input', function() {
+                const password = passwordInput.value;
+                
+                // Check length requirement
+                if (password.length >= 6) {
+                    lengthReq.classList.remove('invalid');
+                    lengthReq.classList.add('valid');
+                } else {
+                    lengthReq.classList.remove('valid');
+                    lengthReq.classList.add('invalid');
+                }
+
+                // Check uppercase requirement
+                if (/[A-Z]/.test(password)) {
+                    uppercaseReq.classList.remove('invalid');
+                    uppercaseReq.classList.add('valid');
+                } else {
+                    uppercaseReq.classList.remove('valid');
+                    uppercaseReq.classList.add('invalid');
+                }
+
+                // Check digit requirement
+                if (/\d/.test(password)) {
+                    digitReq.classList.remove('invalid');
+                    digitReq.classList.add('valid');
+                } else {
+                    digitReq.classList.remove('valid');
+                    digitReq.classList.add('invalid');
+                }
+
+                // Check special character requirement
+                const hasSpecialChar = password.match(/[^a-zA-Z0-9]/);
+                if (hasSpecialChar) {
+                    specialReq.classList.remove('invalid');
+                    specialReq.classList.add('valid');
+                } else {
+                    specialReq.classList.remove('valid');
+                    specialReq.classList.add('invalid');
+                }
+            });
+
+            // Confirm password validation
+            confirmPasswordInput.addEventListener('input', function() {
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                if (confirmPassword && password !== confirmPassword) {
+                    confirmPasswordInput.setCustomValidity('Passwords do not match');
+                } else {
+                    confirmPasswordInput.setCustomValidity('');
+                }
+            });
+
+            // Handle validation message visibility
+            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+            inputs.forEach(input => {
+                // Hide validation messages on focus if they're empty
+                input.addEventListener('focus', function() {
+                    const validationSpan = this.parentElement.querySelector('.text-danger');
+                    if (validationSpan && validationSpan.textContent.trim() === '') {
+                        validationSpan.style.display = 'none';
+                    }
+                });
+
+                // Show validation messages on blur if they have content
+                input.addEventListener('blur', function() {
+                    const validationSpan = this.parentElement.querySelector('.text-danger');
+                    if (validationSpan && validationSpan.textContent.trim() !== '') {
+                        validationSpan.style.display = 'flex';
+                    }
+                });
+            });
+
+            // Initialize: hide empty validation messages on page load
+            document.querySelectorAll('.text-danger').forEach(span => {
+                if (span.textContent.trim() === '') {
+                    span.style.display = 'none';
+                }
+            });
+        });
+    </script>
 }
 
 <div class="account-container">
@@ -22,7 +139,7 @@
             <h1>@ViewData["Title"]</h1>
             <p class="text-muted">Create a new account to start ordering.</p>
             <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="Choose a username" />
                 <label asp-for="Input.Username">Username</label>
@@ -34,12 +151,23 @@
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" id="password" />
                 <label asp-for="Input.Password">Password</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
+                
+                <!-- Password Requirements -->
+                <div class="password-requirements" id="passwordRequirements" style="display: none;">
+                    <h6>Password Requirements:</h6>
+                    <ul>
+                        <li id="lengthReq">At least 6 characters long</li>
+                        <li id="uppercaseReq">Contains at least one uppercase letter (A-Z)</li>
+                        <li id="digitReq">Contains at least one digit (0-9)</li>
+                        <li id="specialReq">Contains at least one special character</li>
+                    </ul>
+                </div>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" id="confirmPassword" />
                 <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
