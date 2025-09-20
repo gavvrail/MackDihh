@@ -5,7 +5,7 @@ namespace FoodOrderingSystem.ViewModels
 {
     public class CheckoutViewModel : IValidatableObject
     {
-        public Cart Cart { get; set; } = null!;
+        public Cart? Cart { get; set; }
 
         [Required(ErrorMessage = "Delivery address is required")]
         [StringLength(200, ErrorMessage = "Address cannot be longer than 200 characters")]
@@ -33,7 +33,6 @@ namespace FoodOrderingSystem.ViewModels
         public string? CardHolderName { get; set; }
 
         [Display(Name = "Expiry Date")]
-        [RegularExpression(@"^(0[1-9]|1[0-2])\/([0-9]{2})$", ErrorMessage = "Please enter a valid expiry date in MM/YY format.")]
         public string? CardExpiry { get; set; }
 
         [Display(Name = "CVV")]
@@ -52,11 +51,14 @@ namespace FoodOrderingSystem.ViewModels
                     yield return new ValidationResult("Card holder name is required.", new[] { nameof(CardHolderName) });
                 if (string.IsNullOrWhiteSpace(CardExpiry))
                     yield return new ValidationResult("Expiry date is required.", new[] { nameof(CardExpiry) });
+                else if (!System.Text.RegularExpressions.Regex.IsMatch(CardExpiry, @"^(0[1-9]|1[0-2])\/([0-9]{2})$"))
+                    yield return new ValidationResult("Please enter a valid expiry date in MM/YY format.", new[] { nameof(CardExpiry) });
                 if (string.IsNullOrWhiteSpace(CardCvv))
                     yield return new ValidationResult("CVV is required.", new[] { nameof(CardCvv) });
             }
 
-            if (!string.IsNullOrEmpty(CardExpiry))
+            // Only validate card expiry if Card payment is selected and expiry is provided
+            if (PaymentMethod == "Card" && !string.IsNullOrEmpty(CardExpiry))
             {
                 if (IsCardExpired(CardExpiry))
                 {

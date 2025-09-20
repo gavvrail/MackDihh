@@ -89,27 +89,30 @@ namespace FoodOrderingSystem.Controllers
                     return RedirectToAction("Login", "Account", new { area = "Identity" });
                 }
 
+
                 var cart = await _context.Carts
                     .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.MenuItem)
                     .FirstOrDefaultAsync(c => c.UserId == userId);
 
+
                 if (cart == null || !cart.CartItems.Any())
                 {
-                    TempData["ErrorMessage"] = "Your cart is empty.";
+                    TempData["ErrorMessage"] = "Your cart is empty. Please add items before proceeding to checkout.";
                     return RedirectToAction("Index", "Cart");
                 }
 
+                // Always re-populate the cart data since it's not submitted with the form
+                model.Cart = cart;
+                
                 if (!ModelState.IsValid)
                 {
-                    // Re-populate the cart data for the view
-                    model.Cart = cart;
                     TempData["ErrorMessage"] = "Please correct the errors below.";
                     return View("Index", model);
                 }
 
-                // Calculate totals with validation
-                var subtotal = cart.CartItems.Sum(item => 
+                // Calculate totals with validation (excluding redeemed items)
+                var subtotal = cart.CartItems.Where(item => !item.IsRedeemedWithPoints).Sum(item => 
                 {
                     if (item.MenuItem?.Price == null || item.MenuItem.Price < 0)
                     {
@@ -122,9 +125,19 @@ namespace FoodOrderingSystem.Controllers
                     return item.Quantity * item.MenuItem.Price;
                 });
                 
-                if (subtotal <= 0)
+                // Track points used for redeemed items
+                var totalPointsUsed = cart.CartItems.Where(item => item.IsRedeemedWithPoints).Sum(item => item.PointsUsed);
+                
+                // Allow orders with only redeemed items (subtotal = 0)
+                if (subtotal < 0)
                 {
                     throw new InvalidOperationException("Invalid order total calculated.");
+                }
+                
+                // If cart has only redeemed items, ensure there are items in cart
+                if (subtotal == 0 && totalPointsUsed == 0)
+                {
+                    throw new InvalidOperationException("Cart is empty or contains invalid items.");
                 }
                 
                 // Get order settings from configuration
@@ -139,6 +152,7 @@ namespace FoodOrderingSystem.Controllers
                 // Apply promo code discount if provided
                 decimal discountAmount = 0;
                 string? appliedPromoCode = null;
+                Deal? appliedDeal = null;
                 
                 if (!string.IsNullOrWhiteSpace(model.PromoCode))
                 {
@@ -147,11 +161,27 @@ namespace FoodOrderingSystem.Controllers
                         .FirstOrDefaultAsync(d => d.PromoCode == model.PromoCode &&
                                                   d.IsActive &&
                                                   d.StartDate <= DateTime.UtcNow &&
-                                                  d.EndDate >= DateTime.UtcNow &&
-                                                  d.CurrentUses < d.MaxUses);
+                                                  (d.EndDate == null || d.EndDate >= DateTime.UtcNow) &&
+                                                  (d.MaxUses == -1 || d.CurrentUses < d.MaxUses));
 
                     if (deal != null && subtotal >= deal.MinimumOrderAmount)
                     {
+                        // Check if user has already used this promo code (if it has usage limits)
+                        if (deal.MaxUses > 0) // Only check if there are usage limits
+                        {
+                            var userPromoCodeUsage = await _context.UserPromoCodes
+                                .Where(upc => upc.UserId == userId && upc.DealId == deal.Id)
+                                .SumAsync(upc => upc.CurrentUses);
+
+                            if (userPromoCodeUsage >= deal.MaxUses)
+                            {
+                                TempData["ErrorMessage"] = $"You have already used the promo code '{model.PromoCode}' the maximum number of times.";
+                                model.Cart = cart;
+                                return View("Index", model);
+                            }
+                        }
+
+                        // Apply discount
                         if (deal.DiscountPercentage > 0)
                         {
                             discountAmount = subtotal * (deal.DiscountPercentage / 100);
@@ -162,9 +192,22 @@ namespace FoodOrderingSystem.Controllers
                         }
                         
                         appliedPromoCode = model.PromoCode;
+                        appliedDeal = deal;
                         
-                        // Update deal usage count
+                        // Update global deal usage count
                         deal.CurrentUses++;
+                    }
+                    else if (deal != null && subtotal < deal.MinimumOrderAmount)
+                    {
+                        TempData["ErrorMessage"] = $"Minimum order amount of RM{deal.MinimumOrderAmount:F2} required for promo code '{model.PromoCode}'.";
+                        model.Cart = cart;
+                        return View("Index", model);
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = $"Invalid or expired promo code '{model.PromoCode}'.";
+                        model.Cart = cart;
+                        return View("Index", model);
                     }
                 }
                 
@@ -200,7 +243,8 @@ namespace FoodOrderingSystem.Controllers
                         PaymentMethod = model.PaymentMethod,
                         PaymentStatus = model.PaymentMethod == "Cash" ? "Pending" : "Paid",
                         PromoCode = appliedPromoCode,
-                        DiscountAmount = discountAmount
+                        DiscountAmount = discountAmount,
+                        PointsUsed = totalPointsUsed
                     };
 
                     _context.Orders.Add(order);
@@ -214,8 +258,8 @@ namespace FoodOrderingSystem.Controllers
                             OrderId = order.Id,
                             MenuItemId = cartItem.MenuItemId,
                             Quantity = cartItem.Quantity,
-                            Price = cartItem.MenuItem.Price,
-                            UnitPrice = cartItem.MenuItem.Price
+                            Price = cartItem.IsRedeemedWithPoints ? 0 : cartItem.MenuItem.Price, // Set price to 0 for redeemed items
+                            UnitPrice = cartItem.IsRedeemedWithPoints ? 0 : cartItem.MenuItem.Price
                         };
                         _context.OrderItems.Add(orderItem);
                     }
@@ -226,21 +270,91 @@ namespace FoodOrderingSystem.Controllers
                     {
                         // Users earn 1 point for every RM1 spent
                         int pointsEarned = (int)Math.Floor(total);
+                        
+                        // Add bonus points from promo code if applicable
+                        int bonusPoints = 0;
+                        if (appliedDeal != null && appliedDeal.PointsReward > 0)
+                        {
+                            bonusPoints = appliedDeal.PointsReward;
+                            pointsEarned += bonusPoints;
+                        }
+                        
                         if (pointsEarned > 0)
                         {
                             user.Points += pointsEarned;
                             user.TotalPointsEarned += pointsEarned;
 
-                            // Create points transaction record
-                            var pointsTransaction = new UserPointsTransaction
+                            // Create points transaction record for regular points
+                            var regularPointsEarned = (int)Math.Floor(total);
+                            if (regularPointsEarned > 0)
                             {
-                                UserId = userId,
-                                Points = pointsEarned,
-                                Type = PointsTransactionType.Earned,
-                                Description = $"Order #{orderNumber} - Earned {pointsEarned} points"
-                            };
+                                var pointsTransaction = new UserPointsTransaction
+                                {
+                                    UserId = userId,
+                                    Points = regularPointsEarned,
+                                    Type = PointsTransactionType.Earned,
+                                    Description = $"Order #{orderNumber} - Earned {regularPointsEarned} points",
+                                    OrderId = order.Id
+                                };
+                                _context.UserPointsTransactions.Add(pointsTransaction);
+                            }
 
-                            _context.UserPointsTransactions.Add(pointsTransaction);
+                            // Create separate transaction for bonus points if applicable
+                            if (bonusPoints > 0)
+                            {
+                                var bonusPointsTransaction = new UserPointsTransaction
+                                {
+                                    UserId = userId,
+                                    Points = bonusPoints,
+                                    Type = PointsTransactionType.Bonus,
+                                    Description = $"Bonus points from promo code '{appliedPromoCode}' - {bonusPoints} points",
+                                    OrderId = order.Id,
+                                    DealId = appliedDeal?.Id
+                                };
+                                _context.UserPointsTransactions.Add(bonusPointsTransaction);
+                            }
+                        }
+
+                        // Track user promo code usage
+                        if (appliedDeal != null)
+                        {
+                            var existingUserPromoCode = await _context.UserPromoCodes
+                                .FirstOrDefaultAsync(upc => upc.UserId == userId && upc.DealId == appliedDeal.Id);
+
+                            if (existingUserPromoCode != null)
+                            {
+                                // Update existing usage
+                                existingUserPromoCode.CurrentUses++;
+                                existingUserPromoCode.UsedAt = DateTime.UtcNow;
+                                if (existingUserPromoCode.CurrentUses >= appliedDeal.MaxUses)
+                                {
+                                    existingUserPromoCode.IsUsed = true;
+                                }
+                            }
+                            else
+                            {
+                                // Create new user promo code usage record
+                                var userPromoCode = new UserPromoCode
+                                {
+                                    UserId = userId,
+                                    DealId = appliedDeal.Id,
+                                    PromoCode = appliedDeal.PromoCode ?? "",
+                                    Title = appliedDeal.Title,
+                                    Description = appliedDeal.Description,
+                                    DiscountPercentage = appliedDeal.DiscountPercentage,
+                                    DiscountedPrice = discountAmount,
+                                    MinimumOrderAmount = appliedDeal.MinimumOrderAmount,
+                                    StartDate = appliedDeal.StartDate,
+                                    EndDate = appliedDeal.EndDate,
+                                    MaxUses = appliedDeal.MaxUses,
+                                    CurrentUses = 1,
+                                    IsActive = true,
+                                    SavedAt = DateTime.UtcNow,
+                                    UsedAt = DateTime.UtcNow,
+                                    IsUsed = appliedDeal.MaxUses == 1 // Mark as used if it's single use
+                                };
+                                _context.UserPromoCodes.Add(userPromoCode);
+                            }
                         }
                     }
 
@@ -260,8 +374,18 @@ namespace FoodOrderingSystem.Controllers
                 var pointsMessage = "";
                 if (user != null)
                 {
-                    var pointsEarned = (int)Math.Floor(total);
-                    pointsMessage = $" You earned {pointsEarned} points!";
+                    var regularPointsEarned = (int)Math.Floor(total);
+                    var bonusPoints = appliedDeal?.PointsReward ?? 0;
+                    var totalPointsEarned = regularPointsEarned + bonusPoints;
+                    
+                    if (bonusPoints > 0)
+                    {
+                        pointsMessage = $" You earned {regularPointsEarned} points + {bonusPoints} bonus points = {totalPointsEarned} total points!";
+                    }
+                    else
+                    {
+                        pointsMessage = $" You earned {regularPointsEarned} points!";
+                    }
                 }
 
                 TempData["SuccessMessage"] = $"Order placed successfully!{pointsMessage}";
@@ -274,11 +398,6 @@ namespace FoodOrderingSystem.Controllers
             }
         }
 
-        // GET: /Checkout/Test - Simple test to verify routing
-        public IActionResult Test()
-        {
-            return Content("Checkout controller is working!");
-        }
 
         // GET: /Checkout/Confirmation/{orderId}
         public async Task<IActionResult> Confirmation(int orderId)
@@ -287,6 +406,7 @@ namespace FoodOrderingSystem.Controllers
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
+                .ThenInclude(mi => mi.Images)
                 .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
 
             if (order == null)
@@ -295,6 +415,100 @@ namespace FoodOrderingSystem.Controllers
             }
 
             return View(order);
+        }
+
+        // POST: /Checkout/ApplyPromoCode
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyPromoCode(string promoCode)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "Please log in to apply promo code." });
+                }
+
+                if (string.IsNullOrWhiteSpace(promoCode))
+                {
+                    return Json(new { success = false, message = "Please enter a promo code." });
+                }
+
+                // Get current cart to calculate subtotal
+                var cart = await _context.Carts
+                    .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.MenuItem)
+                    .FirstOrDefaultAsync(c => c.UserId == userId);
+
+                if (cart == null || !cart.CartItems.Any())
+                {
+                    return Json(new { success = false, message = "Your cart is empty." });
+                }
+
+                var subtotal = cart.CartItems.Sum(item => item.Quantity * item.MenuItem.Price);
+
+                // Check if it's a valid deal promo code
+                var deal = await _context.Deals
+                    .FirstOrDefaultAsync(d => d.PromoCode == promoCode &&
+                                              d.IsActive &&
+                                              d.StartDate <= DateTime.UtcNow &&
+                                              (d.EndDate == null || d.EndDate >= DateTime.UtcNow) &&
+                                              (d.MaxUses == -1 || d.CurrentUses < d.MaxUses));
+
+                if (deal == null)
+                {
+                    return Json(new { success = false, message = $"Invalid or expired promo code '{promoCode}'." });
+                }
+
+                // Check minimum order amount
+                if (subtotal < deal.MinimumOrderAmount)
+                {
+                    return Json(new { success = false, message = $"Minimum order amount of RM{deal.MinimumOrderAmount:F2} required for promo code '{promoCode}'." });
+                }
+
+                // Check if user has already used this promo code (if it has usage limits)
+                if (deal.MaxUses > 0) // Only check if there are usage limits
+                {
+                    var userPromoCodeUsage = await _context.UserPromoCodes
+                        .Where(upc => upc.UserId == userId && upc.DealId == deal.Id)
+                        .SumAsync(upc => upc.CurrentUses);
+
+                    if (userPromoCodeUsage >= deal.MaxUses)
+                    {
+                        return Json(new { success = false, message = $"You have already used the promo code '{promoCode}' the maximum number of times." });
+                    }
+                }
+
+                // Calculate discount
+                decimal discountAmount = 0;
+                if (deal.DiscountPercentage > 0)
+                {
+                    discountAmount = subtotal * (deal.DiscountPercentage / 100);
+                }
+                else if (deal.DiscountedPrice > 0)
+                {
+                    discountAmount = deal.DiscountedPrice;
+                }
+
+                string message = $"Promo code '{promoCode}' applied successfully!";
+                if (deal.PointsReward > 0)
+                {
+                    message += $" You'll earn {deal.PointsReward} bonus points with this order.";
+                }
+
+                return Json(new { 
+                    success = true, 
+                    message = message, 
+                    discountAmount = discountAmount,
+                    discountPercentage = deal.DiscountPercentage,
+                    bonusPoints = deal.PointsReward
+                });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "An error occurred while applying the promo code. Please try again." });
+            }
         }
     }
 }

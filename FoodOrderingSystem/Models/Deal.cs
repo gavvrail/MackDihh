@@ -57,7 +57,6 @@ namespace FoodOrderingSystem.Models
         SeasonalDiscount,
         PromoCode,
         LimitedTimeOffer,
-        StudentDiscount,
         PointsReward
     }
 } 

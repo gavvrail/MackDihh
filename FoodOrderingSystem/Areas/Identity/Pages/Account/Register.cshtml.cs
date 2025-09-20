@@ -60,6 +60,15 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
+            [Display(Name = "First Name")]
+            [StringLength(100, ErrorMessage = "The {0} must be at max {1} characters long.")]
+            public string FirstName { get; set; }
+
+            [Display(Name = "Last Name")]
+            [StringLength(100, ErrorMessage = "The {0} must be at max {1} characters long.")]
+            public string LastName { get; set; }
+
+            [Required]
             [Display(Name = "Username")]
             public string Username { get; set; }
 
@@ -101,9 +110,24 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
 
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            
+            // Check if username already exists
+            if (!string.IsNullOrEmpty(Input.Username))
+            {
+                var existingUser = await _userManager.FindByNameAsync(Input.Username);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("Input.Username", "This username is already taken. Please choose a different username.");
+                }
+            }
+            
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
+
+                // Set user properties
+                user.FirstName = Input.FirstName;
+                user.LastName = Input.LastName;
 
                 await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -140,6 +164,17 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
             return Page();
         }
 
+        public async Task<IActionResult> OnPostCheckUsernameAsync([FromBody] UsernameCheckRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Username))
+            {
+                return new JsonResult(new { isAvailable = false });
+            }
+
+            var existingUser = await _userManager.FindByNameAsync(request.Username);
+            return new JsonResult(new { isAvailable = existingUser == null });
+        }
+
         private ApplicationUser CreateUser()
         {
             try
@@ -162,5 +197,10 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
             }
             return (IUserEmailStore<ApplicationUser>)_userStore;
         }
+    }
+
+    public class UsernameCheckRequest
+    {
+        public string Username { get; set; } = "";
     }
 }

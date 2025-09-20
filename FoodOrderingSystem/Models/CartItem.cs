@@ -14,5 +14,10 @@ namespace FoodOrderingSystem.Models
         // Foreign key to link to the MenuItem
         public int MenuItemId { get; set; }
         public MenuItem MenuItem { get; set; } = null!;
+
+        // Properties for points redemption
+        public bool IsRedeemedWithPoints { get; set; } = false;
+        public int PointsUsed { get; set; } = 0;
+        public string? RedemptionCode { get; set; }
     }
 }

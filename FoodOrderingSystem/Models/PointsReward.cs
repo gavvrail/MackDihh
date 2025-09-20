@@ -59,7 +59,8 @@ namespace FoodOrderingSystem.Models
         Redeemed,
         Expired,
         Bonus,
-        Referral
+        Referral,
+        Refunded
     }
     
     public class UserRedemption

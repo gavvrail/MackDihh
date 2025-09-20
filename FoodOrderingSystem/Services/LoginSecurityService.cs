@@ -76,13 +76,21 @@ namespace FoodOrderingSystem.Services
             user.LoginAttempts++;
             user.LastLoginAttempt = DateTime.UtcNow;
 
-            // Block user after 5 failed attempts for 30 minutes
-            if (user.LoginAttempts >= 5)
+            // Check if user is admin - admins should not be blocked
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            
+            // Block user after 5 failed attempts for 30 minutes (but not admins)
+            if (user.LoginAttempts >= 5 && !isAdmin)
             {
                 user.IsBlocked = true;
                 user.BlockedUntil = DateTime.UtcNow.AddMinutes(30);
                 user.BlockReason = "Too many failed login attempts";
                 _logger.LogWarning("User {UserId} blocked due to {LoginAttempts} failed login attempts", userId, user.LoginAttempts);
+            }
+            else if (user.LoginAttempts >= 5 && isAdmin)
+            {
+                // Log warning for admin but don't block
+                _logger.LogWarning("Admin user {UserId} has {LoginAttempts} failed login attempts but was not blocked", userId, user.LoginAttempts);
             }
 
             await _userManager.UpdateAsync(user);
@@ -104,6 +112,14 @@ namespace FoodOrderingSystem.Services
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return;
+
+            // Check if user is admin - prevent blocking admin accounts
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            if (isAdmin)
+            {
+                _logger.LogWarning("Attempted to block admin user {UserId} but operation was prevented", userId);
+                return; // Don't block admin users
+            }
 
             user.IsBlocked = true;
             user.BlockReason = reason;
@@ -163,6 +179,28 @@ namespace FoodOrderingSystem.Services
                 return null;
             
             return user.LastLoginAttempt.Value.AddMinutes(30);
+        }
+
+        public async Task UnblockAllAdminAccountsAsync()
+        {
+            var blockedAdmins = await _context.Users
+                .Where(u => u.IsBlocked)
+                .ToListAsync();
+
+            foreach (var user in blockedAdmins)
+            {
+                var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+                if (isAdmin)
+                {
+                    user.IsBlocked = false;
+                    user.BlockedUntil = null;
+                    user.BlockReason = null;
+                    user.LoginAttempts = 0;
+                    
+                    await _userManager.UpdateAsync(user);
+                    _logger.LogInformation("Admin user {UserId} ({UserName}) was unblocked", user.Id, user.UserName);
+                }
+            }
         }
     }
 }

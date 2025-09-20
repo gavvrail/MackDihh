@@ -9,7 +9,9 @@
 
 @{
     ViewData["Title"] = "Your Cart";
-    decimal subtotal = Model.CartItems.Sum(item => item.Quantity * item.MenuItem.Price);
+    decimal subtotal = Model.CartItems.Where(item => !item.IsRedeemedWithPoints).Sum(item => item.Quantity * item.MenuItem.Price);
+    int totalRedeemedItems = Model.CartItems.Where(item => item.IsRedeemedWithPoints).Sum(item => item.Quantity);
+    int totalPointsUsed = Model.CartItems.Where(item => item.IsRedeemedWithPoints).Sum(item => item.PointsUsed);
 }
 
 @section Styles {
@@ -17,36 +19,6 @@
 }
 @section Scripts {
     <script src="~/js/cart.js" asp-append-version="true"></script>
-    <script>
-        // Voucher code functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const voucherInput = document.getElementById('voucherCode');
-            const applyBtn = document.getElementById('applyVoucher');
-            
-            if (applyBtn) {
-                applyBtn.addEventListener('click', function() {
-                    const voucherCode = voucherInput.value.trim();
-                    if (voucherCode) {
-                        // For now, just show a simple message
-                        // In a real implementation, this would make an AJAX call to validate the voucher
-                        alert('Voucher code "' + voucherCode + '" applied! (This is a demo - actual validation would happen server-side)');
-                        voucherInput.value = '';
-                    } else {
-                        alert('Please enter a voucher code');
-                    }
-                });
-            }
-            
-            // Allow Enter key to apply voucher
-            if (voucherInput) {
-                voucherInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        applyBtn.click();
-                    }
-                });
-            }
-        });
-    </script>
 }
 
 <input type="hidden" name="__RequestVerificationToken" value="@GetAntiXsrfRequestToken()">
@@ -72,10 +44,30 @@
                             <div class="col-md-10">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between">
-                        <h5 class="card-title">@item.MenuItem.Name</h5>
-                        <p class="card-text fw-bold text-food-primary">RM@((item.Quantity * item.MenuItem.Price).ToString("F2"))</p>
+                        <h5 class="card-title">
+                            @item.MenuItem.Name
+                            @if (item.IsRedeemedWithPoints)
+                            {
+                                <span class="badge bg-success ms-2">FREE - Redeemed with Points</span>
+                            }
+                        </h5>
+                        @if (item.IsRedeemedWithPoints)
+                        {
+                            <p class="card-text fw-bold text-success">FREE</p>
+                        }
+                        else
+                        {
+                            <p class="card-text fw-bold text-food-primary">RM@((item.Quantity * item.MenuItem.Price).ToString("F2"))</p>
+                        }
                                     </div>
-                                    <p class="card-text"><small class="text-muted">RM@(item.MenuItem.Price.ToString("F2")) each</small></p>
+                                    @if (item.IsRedeemedWithPoints)
+                                    {
+                                        <p class="card-text"><small class="text-success">Redeemed with @item.PointsUsed points</small></p>
+                                    }
+                                    else
+                                    {
+                                        <p class="card-text"><small class="text-muted">RM@(item.MenuItem.Price.ToString("F2")) each</small></p>
+                                    }
                                     <div class="d-flex align-items-center justify-content-between mt-3">
                                         <div class="input-group quantity-selector" style="width: 120px;">
                                             <button class="btn btn-outline-secondary btn-update-quantity" type="button" data-itemid="@item.Id" data-change="-1">-</button>
@@ -94,7 +86,7 @@
             }
             else
             {
-                <div class="text-center p-5 bg-food-light rounded">
+                <div class="text-center p-5 bg-white rounded border">
             <h4>Your cart is empty.</h4>
             <p>Looks like you haven't added anything delicious to your cart yet!</p>
             <a asp-controller="Menu" asp-action="Index" class="btn btn-primary mt-3">
@@ -115,6 +107,19 @@
                         <span class="summary-amount">RM @(subtotal.ToString("F2"))</span>
                     </div>
                     
+                    @if (totalRedeemedItems > 0)
+                    {
+                        <!-- Redeemed Items -->
+                        <div class="summary-row">
+                            <span>Redeemed Items (@totalRedeemedItems)</span>
+                            <span class="summary-amount text-success">FREE</span>
+                        </div>
+                        <div class="summary-row">
+                            <span><small class="text-muted">Points Used: @totalPointsUsed</small></span>
+                            <span></span>
+                        </div>
+                    }
+                    
                     <!-- Shipping -->
                     <div class="summary-row">
                         <span>Shipping</span>
@@ -123,16 +128,6 @@
                     
                     <hr>
                     
-                    <!-- Voucher Code Section -->
-                    <div class="voucher-section">
-                        <p class="voucher-prompt">Have a voucher code?</p>
-                        <div class="voucher-input-group">
-                            <input type="text" class="form-control voucher-input" placeholder="Enter code" id="voucherCode">
-                            <button type="button" class="btn btn-outline-secondary voucher-apply-btn" id="applyVoucher">Apply</button>
-                        </div>
-                    </div>
-                    
-                    <hr>
                     
                     <!-- Total -->
                     <div class="summary-row total-row">

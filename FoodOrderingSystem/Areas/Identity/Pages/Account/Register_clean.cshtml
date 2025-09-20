@@ -187,22 +187,6 @@
             <p class="text-muted">Create a new account to start ordering.</p>
             <hr />
             <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-floating mb-3">
-                        <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" aria-required="true" placeholder="First Name" />
-                        <label asp-for="Input.FirstName">First Name</label>
-                        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-floating mb-3">
-                        <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" placeholder="Last Name" />
-                        <label asp-for="Input.LastName">Last Name</label>
-                        <span asp-validation-for="Input.LastName" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="Choose a username" />
                 <label asp-for="Input.Username">Username</label>

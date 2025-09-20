@@ -55,7 +55,7 @@ else
             <div class="row align-items-center">
                 <div class="col-lg-6">
                     <div class="hero-content">
-                        <h1 class="hero-title">Welcome back, @Model.User.FirstName!</h1>
+                        <h1 class="hero-title">Welcome back, @(!string.IsNullOrEmpty(Model.User.FirstName) ? Model.User.FirstName : Model.User.UserName)!</h1>
                         <p class="hero-subtitle">Earn points on every order and redeem them for free food!</p>
                         
                         <!-- Points Display -->
@@ -76,7 +76,7 @@ else
                         </div>
                         
                         <div class="hero-actions">
-                            <a href="@Url.Action("ClaimPoints", "Deals")" class="btn btn-primary btn-lg me-3">
+                            <a href="#redeem-section" class="btn btn-primary btn-lg me-3" onclick="scrollToRedeemSection(event)">
                                 <i class="fas fa-gift me-2"></i>Claim Rewards
                             </a>
                             <a href="/Menu" class="btn btn-outline-light btn-lg">
@@ -99,6 +99,22 @@ else
     <!-- Main Content -->
     <div class="container deals-content">
         @Html.AntiForgeryToken()
+        
+        <!-- Error/Success Messages -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
         
         <!-- Points Summary Dashboard -->
         <div class="points-dashboard mb-5">
@@ -142,7 +158,7 @@ else
                             <i class="fas fa-ticket-alt"></i>
                         </div>
                         <div class="card-content">
-                            <h3>@Model.PromoCodes.Count</h3>
+                            <h3>@Model.PromoCodesWithUsage.Count</h3>
                             <p>Promo Codes</p>
                         </div>
                     </div>
@@ -192,7 +208,7 @@ else
         </div>
 
         <!-- Promo Codes Section -->
-        @if (Model.PromoCodes.Any())
+        @if (Model.PromoCodesWithUsage.Any())
         {
             <div class="section-container mb-5">
                 <div class="section-header">
@@ -200,7 +216,7 @@ else
                     <p class="text-muted">Use these codes at checkout for extra savings!</p>
                 </div>
                 <div class="row">
-                    @foreach (var deal in Model.PromoCodes)
+                    @foreach (var promoCode in Model.PromoCodesWithUsage)
                     {
                         <div class="col-lg-4 col-md-6 mb-4">
                             <div class="deal-card h-100 promo-code">
@@ -208,16 +224,39 @@ else
                                     <span class="badge bg-info">PROMO CODE</span>
                                 </div>
                                 <div class="card-body text-center d-flex flex-column">
-                                    <h5 class="card-title mt-3">@deal.Title</h5>
-                                    <p class="card-text">@deal.Description</p>
+                                    <h5 class="card-title mt-3">@promoCode.Deal.Title</h5>
+                                    <p class="card-text">@promoCode.Deal.Description</p>
                                     <div class="promo-code-display mb-3">
-                                        <span class="promo-code-text">@deal.PromoCode</span>
-                                        <button class="btn btn-sm btn-outline-secondary copy-btn" data-code="@deal.PromoCode">
+                                        <span class="promo-code-text">@promoCode.Deal.PromoCode</span>
+                                        <button class="btn btn-sm btn-outline-secondary copy-btn" data-code="@promoCode.Deal.PromoCode">
                                             <i class="fas fa-copy"></i>
                                         </button>
                                     </div>
                                     <div class="discount-info mb-3">
-                                        <span class="discount-percentage">-@deal.DiscountPercentage% OFF</span>
+                                        @if (promoCode.Deal.DiscountPercentage > 0)
+                                        {
+                                            <span class="discount-percentage">-@(promoCode.Deal.DiscountPercentage.ToString("0.##"))% OFF</span>
+                                        }
+                                        else if (promoCode.Deal.DiscountedPrice > 0)
+                                        {
+                                            <span class="discount-percentage">-RM@(promoCode.Deal.DiscountedPrice.ToString("F2")) OFF</span>
+                                        }
+                                    </div>
+                                    <!-- Usage Information -->
+                                    <div class="usage-info mb-3">
+                                        <div class="usage-badge">
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-sync-alt me-1"></i>Usage: @promoCode.UsageDisplay
+                                            </span>
+                                        </div>
+                                        @if (promoCode.Deal.MinimumOrderAmount > 0)
+                                        {
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-info-circle me-1"></i>Min order: RM@(promoCode.Deal.MinimumOrderAmount.ToString("F2"))
+                                                </small>
+                                            </div>
+                                        }
                                     </div>
                                     <div class="mt-auto">
                                         <p class="text-success small mb-0">
@@ -243,7 +282,22 @@ else
                         <div class="text-center py-5">
                             <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
                             <h4 class="text-muted">No available promo codes</h4>
-                            <p class="text-muted">Check back later for new promo codes or contact support for assistance.</p>
+                            <p class="text-muted">
+                                @if (Model.User != null)
+                                {
+                                    <span>You've either used all available promo codes or none are currently active. Check back later for new offers!</span>
+                                }
+                                else
+                                {
+                                    <span>Please <a href="/Identity/Account/Login" class="text-decoration-none">login</a> to see your available promo codes.</span>
+                                }
+                            </p>
+                            @if (Model.User != null)
+                            {
+                                <a href="/Menu" class="btn btn-primary mt-3">
+                                    <i class="fas fa-utensils me-2"></i>Start Ordering
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>
@@ -251,7 +305,7 @@ else
         }
 
         <!-- Points Redemption Section -->
-        <div class="section-container mb-5">
+        <div id="redeem-section" class="section-container mb-5">
             <div class="section-header">
                 <h2><i class="fas fa-utensils text-success me-2"></i>Redeem Points for Free Food</h2>
                 <p class="text-muted">Use your points to get free menu items! 1 Point = RM 1.00 value</p>
@@ -411,6 +465,40 @@ else
 @section Scripts {
     <script src="~/js/deals.js" asp-append-version="true"></script>
     <script>
+        // Smooth scroll to redeem section
+        function scrollToRedeemSection(event) {
+            event.preventDefault();
+            const target = document.getElementById('redeem-section');
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // Show loading state
+        function showLoading(button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            button.disabled = true;
+            button.dataset.originalText = originalText;
+        }
+        
+        // Hide loading state
+        function hideLoading(button) {
+            button.innerHTML = button.dataset.originalText || button.innerHTML;
+            button.disabled = false;
+        }
+        
+        // Add loading states to birthday benefit button
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('a[href*="ClaimBirthdayBenefit"]')) {
+                const btn = e.target.closest('a');
+                showLoading(btn);
+            }
+        });
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Handle copy promo code buttons
             const copyButtons = document.querySelectorAll('.copy-btn');

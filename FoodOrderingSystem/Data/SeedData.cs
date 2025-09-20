@@ -205,19 +205,19 @@ namespace FoodOrderingSystem.Data
                         },
                         new Deal
                         {
-                            Title = "Student Special - Big MackDihh Combo",
-                            Description = "Students get 15% off any order over RM20! Perfect for the Big MackDihh Combo.",
-                            Type = DealType.StudentDiscount,
-                            PromoCode = "STUDENT15",
+                            Title = "Loyalty Special - Big MackDihh Combo",
+                            Description = "Loyal customers get 15% off any order over RM20! Perfect for the Big MackDihh Combo.",
+                            Type = DealType.PromoCode,
+                            PromoCode = "LOYALTY15",
                             DiscountPercentage = 15.0m,
                             StartDate = DateTime.UtcNow,
                             EndDate = DateTime.UtcNow.AddMonths(12),
                             IsActive = true,
                             MaxUses = -1, // Unlimited
                             MinimumOrderAmount = 20.0m,
-                            BadgeText = "Student Only",
+                            BadgeText = "Loyalty Special",
                             BadgeColor = "primary",
-                            TermsAndConditions = "Valid student ID required. Minimum order RM20.",
+                            TermsAndConditions = "For valued customers. Minimum order RM20.",
                             ImageUrl = "/images/9.png"
                         },
                         new Deal

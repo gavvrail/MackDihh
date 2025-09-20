@@ -42,26 +42,39 @@
                     <form id="checkoutForm" asp-controller="Checkout" asp-action="PlaceOrder" method="post">
                         @Html.AntiForgeryToken()
                         
-                            <div class="row">
-                                <div class="col-md-6">
+                        <div class="row">
+                            <!-- Left Column - Form Sections -->
+                            <div class="col-lg-7 col-md-12">
+                                <!-- Delivery Information Section -->
                                 <div class="form-section">
                                     <h5><i class="fas fa-truck me-2"></i>Delivery Information</h5>
                                     
                                     <div class="mb-3">
                                         <label asp-for="DeliveryAddress" class="form-label">Delivery Address *</label>
-                                        <textarea asp-for="DeliveryAddress" id="deliveryAddress" name="DeliveryAddress" class="form-control" rows="3" required placeholder="Enter your complete delivery address"></textarea>
+                                        <textarea asp-for="DeliveryAddress" id="DeliveryAddress" name="DeliveryAddress" class="form-control" rows="3" required placeholder="Enter your complete delivery address"></textarea>
                                         <span asp-validation-for="DeliveryAddress" class="text-danger"></span>
                                     </div>
 
                                     <div class="mb-3">
                                         <label asp-for="CustomerPhone" class="form-label">Phone Number *</label>
-                                        <input asp-for="CustomerPhone" id="customerPhone" name="CustomerPhone" class="form-control" required placeholder="Enter your phone number" minlength="10" maxlength="11" pattern="[0-9]{10,11}" title="Phone number must be 10-11 digits">
+                                        <input asp-for="CustomerPhone" id="CustomerPhone" name="CustomerPhone" class="form-control" required placeholder="Enter your phone number" minlength="10" maxlength="11" pattern="[0-9]{10,11}" title="Phone number must be 10-11 digits">
                                         <span asp-validation-for="CustomerPhone" class="text-danger"></span>
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="DeliveryInstructions" class="form-label">Delivery Instructions</label>
+                                        <textarea asp-for="DeliveryInstructions" id="DeliveryInstructions" name="DeliveryInstructions" class="form-control" rows="2" placeholder="Special instructions for delivery (optional)"></textarea>
+                                        <span asp-validation-for="DeliveryInstructions" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="Notes" class="form-label">Order Notes</label>
+                                        <textarea asp-for="Notes" id="Notes" name="Notes" class="form-control" rows="2" placeholder="Additional notes for your order (optional)"></textarea>
+                                        <span asp-validation-for="Notes" class="text-danger"></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                <!-- Payment Method Section -->
                                 <div class="form-section">
                                     <h5><i class="fas fa-credit-card me-2"></i>Payment Method</h5>
                                     
@@ -84,71 +97,125 @@
 
                                     <!-- Card Details Section -->
                                     <div id="cardDetailsSection" style="display: none;">
-                                        <h6 class="mb-3"><i class="fas fa-credit-card me-2"></i>Card Information</h6>
-                                        
-                                        <div class="mb-3">
-                                            <label asp-for="CardNumber" class="form-label">Card Number *</label>
-                                            <input asp-for="CardNumber" id="CardNumber" name="CardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
-                                            <span asp-validation-for="CardNumber" class="text-danger"></span>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label asp-for="CardHolderName" class="form-label">Card Holder Name *</label>
-                                            <input asp-for="CardHolderName" id="CardHolderName" name="CardHolderName" class="form-control" placeholder="John Doe">
-                                            <span asp-validation-for="CardHolderName" class="text-danger"></span>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label asp-for="CardExpiry" class="form-label">Expiry Date *</label>
-                                                <input asp-for="CardExpiry" id="CardExpiry" name="CardExpiry" class="form-control" placeholder="MM/YY" maxlength="5">
-                                                <span asp-validation-for="CardExpiry" class="text-danger"></span>
+                                        <div class="card-information-container">
+                                            <h6 class="card-info-title"><i class="fas fa-credit-card me-2"></i>Card Information</h6>
+                                            
+                                            <div class="mb-3">
+                                                <label for="CardNumber" class="form-label">Card Number *</label>
+                                                <div class="card-input-container">
+                                                    <input asp-for="CardNumber" id="CardNumber" name="CardNumber" class="form-control card-input" placeholder="1234 5678 9012 3456" maxlength="23" autocomplete="cc-number">
+                                                    <div class="card-type-icon" id="cardTypeIcon"></div>
+                                                </div>
+                                                <span asp-validation-for="CardNumber" class="text-danger"></span>
+                                                <div class="validation-error" id="cardNumberError"></div>
                                             </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label asp-for="CardCvv" class="form-label">CVV *</label>
-                                                <input asp-for="CardCvv" id="CardCvv" name="CardCvv" class="form-control" placeholder="123" maxlength="4">
-                                                <span asp-validation-for="CardCvv" class="text-danger"></span>
+
+                                            <div class="mb-3">
+                                                <label for="CardHolderName" class="form-label">Card Holder Name *</label>
+                                                <input asp-for="CardHolderName" id="CardHolderName" name="CardHolderName" class="form-control card-input" placeholder="John Doe" autocomplete="cc-name">
+                                                <span asp-validation-for="CardHolderName" class="text-danger"></span>
+                                                <div class="validation-error" id="cardHolderError"></div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="CardExpiry" class="form-label">Expiry Date *</label>
+                                                    <input asp-for="CardExpiry" id="CardExpiry" name="CardExpiry" class="form-control card-input" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp">
+                                                    <span asp-validation-for="CardExpiry" class="text-danger"></span>
+                                                    <div class="validation-error" id="cardExpiryError"></div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="CardCvv" class="form-label">CVV *</label>
+                                                    <input asp-for="CardCvv" id="CardCvv" name="CardCvv" class="form-control card-input" placeholder="123" maxlength="4" autocomplete="cc-csc">
+                                                    <span asp-validation-for="CardCvv" class="text-danger"></span>
+                                                    <div class="validation-error" id="cardCvvError"></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    </div>
+                                <!-- Action Buttons -->
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                    <a asp-controller="Cart" asp-action="Index" class="btn-back">
+                                        <i class="fas fa-arrow-left me-2"></i>Back to Cart
+                                    </a>
+                                    <button type="submit" id="placeOrderBtn" class="btn-checkout">
+                                        <i class="fas fa-check me-2"></i>Place Food Order
+                                    </button>
                                 </div>
                             </div>
 
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="order-summary">
-                                    <h5><i class="fas fa-receipt me-2"></i>Order Summary</h5>
-                                    @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
-                                    {
-                                        <div class="table-responsive">
-                                            <table class="table summary-table">
-                                                <thead>
-                                                    <tr>
-                                                    <th><i class="fas fa-utensils me-2"></i>Food Item</th>
-                                                    <th><i class="fas fa-hashtag me-2"></i>Quantity</th>
-                                                    <th><i class="fas fa-tag me-2"></i>Price</th>
-                                                    <th><i class="fas fa-calculator me-2"></i>Total</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach (var item in Model.Cart.CartItems)
-                                                    {
+                            <!-- Right Column - Order Summary (Sticky) -->
+                            <div class="col-lg-5 col-md-12">
+                                <div class="order-summary-sticky">
+                                    <div class="order-summary">
+                                        <h5><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+                                        @if (Model.Cart?.CartItems != null && Model.Cart.CartItems.Any())
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table summary-table">
+                                                    <thead>
                                                         <tr>
-                                                            <td><strong>@item.MenuItem.Name</strong></td>
-                                                            <td><span class="badge bg-primary">@item.Quantity</span></td>
-                                                            <td>RM@(item.MenuItem.Price.ToString("F2"))</td>
-                                                            <td><strong>RM@((item.Quantity * item.MenuItem.Price).ToString("F2"))</strong></td>
+                                                        <th><i class="fas fa-utensils me-2"></i>Item</th>
+                                                        <th><i class="fas fa-hashtag me-2"></i>Qty</th>
+                                                        <th><i class="fas fa-calculator me-2"></i>Total</th>
                                                         </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-            </div>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in Model.Cart.CartItems)
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="menu-item-image-small me-3">
+                                                                            @if (!string.IsNullOrEmpty(item.MenuItem.ImageUrl))
+                                                                            {
+                                                                                <img src="@item.MenuItem.ImageUrl" alt="@item.MenuItem.Name" class="rounded" />
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <div class="no-image-placeholder rounded d-flex align-items-center justify-content-center">
+                                                                                    <i class="fas fa-utensils text-muted"></i>
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+                                                                        <div>
+                                                                            <strong>@item.MenuItem.Name</strong>
+                                                                            @if (item.IsRedeemedWithPoints)
+                                                                            {
+                                                                                <span class="badge bg-success ms-2">FREE</span>
+                                                                                <br><small class="text-success">Redeemed with @item.PointsUsed points</small>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <br><small class="text-muted">RM@(item.MenuItem.Price.ToString("F2")) each</small>
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td><span class="badge bg-primary">@item.Quantity</span></td>
+                                                                <td>
+                                                                    @if (item.IsRedeemedWithPoints)
+                                                                    {
+                                                                        <strong class="text-success">FREE</strong>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <strong>RM@((item.Quantity * item.MenuItem.Price).ToString("F2"))</strong>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
 
                                         <div class="totals-section">
                                             @{
-                                                var subtotal = Model.Cart.CartItems.Sum(item => item.Quantity * item.MenuItem.Price);
+                                                var subtotal = Model.Cart.CartItems.Where(item => !item.IsRedeemedWithPoints).Sum(item => item.Quantity * item.MenuItem.Price);
+                                                var totalRedeemedItems = Model.Cart.CartItems.Where(item => item.IsRedeemedWithPoints).Sum(item => item.Quantity);
+                                                var totalPointsUsed = Model.Cart.CartItems.Where(item => item.IsRedeemedWithPoints).Sum(item => item.PointsUsed);
                                                 var tax = subtotal * 0.06m;
                                                 var deliveryFee = subtotal >= 100 ? 0 : 5.00m;
                                                 var total = subtotal + tax + deliveryFee;
@@ -157,6 +224,17 @@
                                                         <span><i class="fas fa-shopping-basket me-2"></i>Subtotal:</span>
                                                 <span id="subtotal-amount">RM@(subtotal.ToString("F2"))</span>
                                             </div>
+                                            @if (totalRedeemedItems > 0)
+                                            {
+                                                <div class="totals-row">
+                                                    <span><i class="fas fa-gift me-2"></i>Redeemed Items (@totalRedeemedItems):</span>
+                                                    <span class="text-success">FREE</span>
+                                                </div>
+                                                <div class="totals-row">
+                                                    <span><small class="text-muted"><i class="fas fa-star me-1"></i>Points Used: @totalPointsUsed</small></span>
+                                                    <span></span>
+                                                </div>
+                                            }
                                             <div class="totals-row">
                                                 <span><i class="fas fa-percentage me-2"></i>Tax (6%):</span>
                                                 <span id="tax-amount">RM@(tax.ToString("F2"))</span>
@@ -166,6 +244,38 @@
                                                 <span id="delivery-amount">@(deliveryFee == 0 ? "FREE" : "RM" + deliveryFee.ToString("F2"))</span>
                                             </div>
                                             
+                                            <!-- Promo Code Section -->
+                                            <div class="promo-code-section mt-3 mb-3">
+                                                <div class="row g-2" id="promoCodeInputRow">
+                                                    <div class="col-8">
+                                                        <input asp-for="PromoCode" type="text" class="form-control" id="promoCode" placeholder="Enter promo code" />
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <button type="button" class="btn btn-outline-primary w-100" id="applyPromoCode">
+                                                            <i class="fas fa-tag me-1"></i>Apply
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Applied Promo Code Display (Hidden by default) -->
+                                                <div class="row g-2" id="appliedPromoCodeRow" style="display: none;">
+                                                    <div class="col-8">
+                                                        <div class="applied-promo-display">
+                                                            <i class="fas fa-ticket-alt me-2 text-success"></i>
+                                                            <span id="appliedPromoCodeText"></span>
+                                                            <small class="text-muted d-block" id="appliedPromoDetails"></small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <button type="button" class="btn btn-outline-danger w-100" id="removePromoCode">
+                                                            <i class="fas fa-times me-1"></i>Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div id="promoCodeMessage" class="alert mt-2" style="display: none;" role="alert"></div>
+                                            </div>
+
                                             <div class="totals-row discount" id="discount-line" style="display: none;">
                                                 <span><i class="fas fa-ticket-alt me-2"></i>Promo Discount:</span>
                                                 <span class="amount" id="discount-amount"></span>
@@ -173,21 +283,13 @@
                                             <div class="totals-row">
                                                 <span><i class="fas fa-calculator me-2"></i>Total:</span>
                                                 <span id="total-amount">RM@(total.ToString("F2"))</span>
+                                            </div>
                                         </div>
+                                    }
                                     </div>
-                                }
-                            </div>
                                 </div>
                             </div>
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a asp-controller="Cart" asp-action="Index" class="btn-back">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Cart
-                        </a>
-                        <button type="submit" class="btn-checkout">
-                            <i class="fas fa-check me-2"></i>Place Food Order
-                        </button>
-                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -205,9 +307,11 @@
         const originalDeliveryFee = originalSubtotal >= 100 ? 0 : 5.00;
         const originalTotal = originalSubtotal + originalTax + originalDeliveryFee;
         
+        // Pass user ID to checkout.js for auto-save functionality
+        window.checkoutUserId = '@UserManager.GetUserId(User)';
 
         // Phone number validation
-        document.getElementById('customerPhone').addEventListener('input', function() {
+        document.getElementById('CustomerPhone').addEventListener('input', function() {
             const phoneInput = this;
             const phoneValue = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
             

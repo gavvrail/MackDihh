@@ -94,52 +94,96 @@ namespace FoodOrderingSystem.Controllers
                 return NotFound();
             }
 
+            // Calculate points required (use PointsPerItem if set, otherwise use price as points)
+            int pointsRequired = menuItem.PointsPerItem > 0 ? menuItem.PointsPerItem : (int)Math.Ceiling(menuItem.Price);
+
             // Check if user has enough points
-            if (user.Points < 1)
-            {
-                TempData["ErrorMessage"] = "You need at least 1 point to redeem items. Start earning points by placing orders!";
-                return RedirectToAction("Index", "Deals");
-            }
-
-            // Calculate points required based on PointsPerItem field
-            int pointsRequired = Math.Max(1, menuItem.PointsPerItem);
-
             if (user.Points < pointsRequired)
             {
                 TempData["ErrorMessage"] = $"You need {pointsRequired} points to redeem this item. You have {user.Points} points.";
                 return RedirectToAction("Index", "Deals");
             }
 
-            // Deduct points from user
-            user.Points -= pointsRequired;
-            user.TotalPointsRedeemed += pointsRequired;
-
-            // Create points transaction record
-            var pointsTransaction = new UserPointsTransaction
+            try
             {
-                UserId = userId,
-                Points = -pointsRequired,
-                Type = PointsTransactionType.Redeemed,
-                Description = $"Redeemed: {menuItem.Name} for {pointsRequired} points"
-            };
+                using var transaction = await _context.Database.BeginTransactionAsync();
 
-            // Create redemption record
-            var redemptionCode = Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
-            var userRedemption = new UserRedemption
+                // Deduct points from user
+                user.Points -= pointsRequired;
+                user.TotalPointsRedeemed += pointsRequired;
+
+                // Create points transaction record
+                var pointsTransaction = new UserPointsTransaction
+                {
+                    UserId = userId,
+                    Points = -pointsRequired,
+                    Type = PointsTransactionType.Redeemed,
+                    Description = $"Redeemed: {menuItem.Name} for {pointsRequired} points"
+                };
+                _context.UserPointsTransactions.Add(pointsTransaction);
+
+                // Generate redemption code
+                var redemptionCode = Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+
+                // Get or create user's cart
+                var cart = await _context.Carts
+                    .Include(c => c.CartItems)
+                    .FirstOrDefaultAsync(c => c.UserId == userId);
+
+                if (cart == null)
+                {
+                    cart = new Cart { UserId = userId };
+                    _context.Carts.Add(cart);
+                    await _context.SaveChangesAsync(); // Save to get cart ID
+                }
+
+                // Check if this item is already in cart as a redeemed item
+                var existingCartItem = cart.CartItems.FirstOrDefault(ci => 
+                    ci.MenuItemId == menuItemId && ci.IsRedeemedWithPoints);
+
+                if (existingCartItem != null)
+                {
+                    // Increase quantity of existing redeemed item
+                    existingCartItem.Quantity += 1;
+                    existingCartItem.PointsUsed += pointsRequired;
+                }
+                else
+                {
+                    // Add new redeemed item to cart
+                    var cartItem = new CartItem
+                    {
+                        CartId = cart.Id,
+                        MenuItemId = menuItemId,
+                        Quantity = 1,
+                        IsRedeemedWithPoints = true,
+                        PointsUsed = pointsRequired,
+                        RedemptionCode = redemptionCode
+                    };
+                    _context.CartItems.Add(cartItem);
+                }
+
+                // Create redemption record for tracking
+                var userRedemption = new UserRedemption
+                {
+                    UserId = userId,
+                    MenuItemId = menuItemId,
+                    PointsSpent = pointsRequired,
+                    RedeemedAt = DateTime.UtcNow,
+                    RedemptionCode = redemptionCode
+                };
+                _context.UserRedemptions.Add(userRedemption);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = $"Successfully redeemed {menuItem.Name} for {pointsRequired} points! Item added to your cart as FREE. Proceed to checkout to complete your order.";
+                return RedirectToAction("Index", "Cart");
+            }
+            catch (Exception)
             {
-                UserId = userId,
-                MenuItemId = menuItemId, // Link to the specific menu item
-                PointsSpent = pointsRequired,
-                RedeemedAt = DateTime.UtcNow,
-                RedemptionCode = redemptionCode
-            };
-
-            _context.UserPointsTransactions.Add(pointsTransaction);
-            _context.UserRedemptions.Add(userRedemption);
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = $"Successfully redeemed {menuItem.Name}! Your redemption code is: {redemptionCode}. Show this code to claim your free item.";
-            return RedirectToAction("Index", "Deals");
+                TempData["ErrorMessage"] = "An error occurred while redeeming the item. Please try again.";
+                return RedirectToAction("Index", "Deals");
+            }
         }
     }
 }

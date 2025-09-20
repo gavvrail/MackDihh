@@ -946,6 +946,13 @@ namespace FoodOrderingSystem.Controllers
         // GET: /Admin/PromoCodes
         public async Task<IActionResult> PromoCodes()
         {
+            // Clear any non-admin related success messages
+            var successMessage = TempData["SuccessMessage"]?.ToString();
+            if (successMessage != null && (successMessage.Contains("Order placed") || successMessage.Contains("points")))
+            {
+                TempData.Remove("SuccessMessage");
+            }
+            
             var promoCodes = await _context.Deals
                 .Where(d => !string.IsNullOrEmpty(d.PromoCode))
                 .OrderByDescending(d => d.CreatedAt)

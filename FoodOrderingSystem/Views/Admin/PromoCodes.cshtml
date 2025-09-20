@@ -76,7 +76,7 @@
                                                 DealType.SeasonalDiscount => "info",
                                                 DealType.PromoCode => "primary",
                                                 DealType.LimitedTimeOffer => "secondary",
-                                                DealType.StudentDiscount => "dark",
+                                                DealType.PointsReward => "dark",
                                                 _ => "light"
                                             })">
                                                 @deal.Type
@@ -85,11 +85,11 @@
                                         <td>
                                             @if (deal.DiscountPercentage > 0)
                                             {
-                                                <span class="text-success">@deal.DiscountPercentage% OFF</span>
+                                                <span class="text-success">@(deal.DiscountPercentage.ToString("0.##"))% OFF</span>
                                             }
                                             else if (deal.DiscountedPrice > 0)
                                             {
-                                                <span class="text-success">RM@deal.DiscountedPrice OFF</span>
+                                                <span class="text-success">RM@(deal.DiscountedPrice.ToString("0.00")) OFF</span>
                                             }
                                             else
                                             {

@@ -52,20 +52,13 @@ namespace FoodOrderingSystem.Migrations
                 name: "StudentVerificationDate",
                 table: "AspNetUsers");
 
-            migrationBuilder.DropColumn(
-                name: "InstitutionName",
-                table: "AspNetUsers");
+            // InstitutionName column doesn't exist, so we skip dropping it
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Add columns back
-            migrationBuilder.AddColumn<string>(
-                name: "InstitutionName",
-                table: "AspNetUsers",
-                type: "nvarchar(max)",
-                nullable: true);
+            // Add columns back (InstitutionName was never added, so we skip it)
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "StudentVerificationDate",

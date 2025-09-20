@@ -23,7 +23,7 @@
                                 <h5>Order Details</h5>
                                 <p><strong>Order Number:</strong> @Model.OrderNumber</p>
                                 <p><strong>Order Date:</strong> @Model.OrderDate.ToString("MMM dd, yyyy HH:mm")</p>
-                                <p><strong>Total Amount:</strong> RM@Model.Total.ToString("F2")</p>
+                                <p><strong>Total Amount:</strong> RM@(Model.Total.ToString("F2"))</p>
                             </div>
                             <div class="col-md-6">
                                 <h5>Delivery Information</h5>
@@ -122,44 +122,147 @@
                             </div>
                         }
 
-                        <!-- Delivery Map (Placeholder) -->
+                        <!-- Enhanced Delivery Journey -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h5>Delivery Location</h5>
-                                <div class="map-container">
-                                    <div id="deliveryMap" style="height: 300px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                        <div class="text-center text-muted">
-                                            <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
-                                            <p>Delivery Map</p>
-                                            <small>Interactive map would be displayed here</small>
+                                <h5><i class="fas fa-route me-2"></i>Delivery Journey</h5>
+                                <div class="delivery-journey-card">
+                                    <div class="journey-header">
+                                        <div class="route-info">
+                                            <div class="route-point start-point">
+                                                <i class="fas fa-store"></i>
+                                                <div class="point-details">
+                                                    <h6>MackDihh Restaurant</h6>
+                                                    <small>Alamesra, Sabah</small>
+                                                </div>
+                                            </div>
+                                            <div class="route-arrow">
+                                                <i class="fas fa-arrow-right"></i>
+                                                <span class="distance-info">~45km</span>
+                                            </div>
+                                            <div class="route-point end-point">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                                <div class="point-details">
+                                                    <h6>Your Location</h6>
+                                                    <small>@Model.DeliveryAddress</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="journey-progress">
+                                        <div class="progress-track">
+                                            <div class="progress-fill @(Model.Status >= OrderStatus.OutForDelivery ? "active" : "")" 
+                                                 style="width: @(GetProgressPercentage(Model.Status))%"></div>
+                                            
+                                            <!-- Progress Points -->
+                                            <div class="progress-point start @(Model.Status >= OrderStatus.Pending ? "completed" : "")">
+                                                <i class="fas fa-shopping-cart"></i>
+                                                <span>Order Placed</span>
+                                            </div>
+                                            
+                                            <div class="progress-point preparing @(Model.Status >= OrderStatus.Preparing ? "completed" : "")">
+                                                <i class="fas fa-utensils"></i>
+                                                <span>Preparing</span>
+                                            </div>
+                                            
+                                            <div class="progress-point ready @(Model.Status >= OrderStatus.Ready ? "completed" : "")">
+                                                <i class="fas fa-clock"></i>
+                                                <span>Ready</span>
+                                            </div>
+                                            
+                                            <div class="progress-point delivery @(Model.Status >= OrderStatus.OutForDelivery ? "completed" : "")">
+                                                <i class="fas fa-truck"></i>
+                                                <span>On the Way</span>
+                                            </div>
+                                            
+                                            <div class="progress-point delivered @(Model.Status >= OrderStatus.Delivered ? "completed" : "")">
+                                                <i class="fas fa-home"></i>
+                                                <span>Delivered</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="delivery-info-grid">
+                                        <div class="info-card">
+                                            <div class="info-icon">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                            </div>
+                                            <div class="info-content">
+                                                <h6>Delivery Address</h6>
+                                                <p>@Model.DeliveryAddress</p>
+                                            </div>
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(Model.DeliveryInstructions))
+                                        {
+                                            <div class="info-card">
+                                                <div class="info-icon">
+                                                    <i class="fas fa-sticky-note"></i>
+                                                </div>
+                                                <div class="info-content">
+                                                    <h6>Special Instructions</h6>
+                                                    <p>@Model.DeliveryInstructions</p>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (Model.EstimatedDeliveryTime.HasValue)
+                                        {
+                                            <div class="info-card highlight">
+                                                <div class="info-icon">
+                                                    <i class="fas fa-clock"></i>
+                                                </div>
+                                                <div class="info-content">
+                                                    <h6>Estimated Arrival</h6>
+                                                    <p class="eta-time">@Model.EstimatedDeliveryTime.Value.ToString("h:mm tt")</p>
+                                                    <small>@Model.EstimatedDeliveryTime.Value.ToString("MMM dd, yyyy")</small>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        <div class="info-card">
+                                            <div class="info-icon">
+                                                <i class="fas fa-phone"></i>
+                                            </div>
+                                            <div class="info-content">
+                                                <h6>Contact Number</h6>
+                                                <p>@Model.CustomerPhone</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Contact Information -->
+                        <!-- Enhanced Need Help Section -->
                         <div class="row">
                             <div class="col-12">
-                                <div class="card bg-light">
-                                    <div class="card-body text-center">
+                                <div class="need-help-section">
+                                    <div class="help-header">
+                                        <i class="fas fa-headset me-2"></i>
                                         <h6>Need Help?</h6>
-                                        <p class="mb-2">If you have any questions about your order, please contact us:</p>
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <a href="tel:+60123456789" class="btn btn-outline-primary btn-sm">
-                                                    <i class="fas fa-phone me-1"></i>Call Us
-                                                </a>
+                                    </div>
+                                    <p class="help-description">If you have any questions about your order, please contact us:</p>
+                                    
+                                    <div class="help-buttons">
+                                        <a asp-controller="Home" asp-action="FAQ" class="help-btn faq-btn">
+                                            <div class="btn-icon">
+                                                <i class="fas fa-question-circle"></i>
                                             </div>
-                                            <div class="col-md-4">
-                                                <button class="btn btn-outline-success btn-sm" onclick="toggleSupportChat()">
-                                                    <i class="fas fa-comments me-1"></i>Live Chat
-                                                </button>
+                                            <div class="btn-content">
+                                                <span class="btn-title">FAQ</span>
+                                                <small class="btn-subtitle">Common questions</small>
                                             </div>
-                                            <div class="col-md-4">
-                                                <a asp-controller="Orders" asp-action="History" class="btn btn-outline-info btn-sm">
-                                                    <i class="fas fa-history me-1"></i>Order History
-                                                </a>
+                                        </a>
+                                        
+                                        <div class="help-btn contact-btn disabled">
+                                            <div class="btn-icon">
+                                                <i class="fas fa-headset"></i>
+                                            </div>
+                                            <div class="btn-content">
+                                                <span class="btn-title">Quick Support</span>
+                                                <small class="btn-subtitle">Chat widget coming soon</small>
                                             </div>
                                         </div>
                                     </div>
@@ -173,11 +276,84 @@
     </div>
 </div>
 
+@{
+    int GetProgressPercentage(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => 10,
+            OrderStatus.Confirmed => 20,
+            OrderStatus.Preparing => 40,
+            OrderStatus.Ready => 60,
+            OrderStatus.OutForDelivery => 80,
+            OrderStatus.Delivered => 100,
+            _ => 0
+        };
+    }
+}
+
 @section Scripts {
     <script>
-        // Auto-refresh order status every 30 seconds
-        setInterval(function() {
+
+        // Smart auto-refresh based on order status
+        function autoRefreshOrder() {
+            const orderStatus = '@Model.Status';
+            let refreshInterval;
+
+            // Different refresh intervals based on order status
+            switch(orderStatus) {
+                case 'Pending':
+                case 'Confirmed':
+                    refreshInterval = 60000; // 1 minute
+                    break;
+                case 'Preparing':
+                case 'Ready':
+                    refreshInterval = 30000; // 30 seconds
+                    break;
+                case 'OutForDelivery':
+                    refreshInterval = 15000; // 15 seconds
+                    break;
+                case 'Delivered':
+                case 'Cancelled':
+                    return; // No auto-refresh for completed orders
+                default:
+                    refreshInterval = 30000; // Default 30 seconds
+            }
+
+            setTimeout(function() {
+                // Check if page is still visible before refreshing
+                if (!document.hidden) {
             location.reload();
-        }, 30000);
+                }
+            }, refreshInterval);
+        }
+
+        // Start auto-refresh
+        autoRefreshOrder();
+
+        // Pause refresh when page is not visible
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                autoRefreshOrder();
+            }
+        });
+
+        // Add smooth scroll to sections
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate timeline items on load
+            const timelineItems = document.querySelectorAll('.timeline-item.completed');
+            timelineItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateY(20px)';
+                    item.style.transition = 'all 0.5s ease';
+                    
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 200);
+            });
+        });
     </script>
 }

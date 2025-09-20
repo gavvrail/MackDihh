@@ -4,61 +4,222 @@
     ViewData["Title"] = "Order Confirmation";
 }
 
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white text-center">
-                    <i class="fas fa-check-circle fa-3x mb-3"></i>
-                    <h3 class="mb-0">Order Confirmed!</h3>
+@section Styles {
+    <link rel="stylesheet" href="~/css/confirmation.css" asp-append-version="true" />
+}
+
+<div class="confirmation-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10">
+                <!-- Success Header -->
+                <div class="confirmation-header">
+                    <div class="success-animation">
+                        <div class="checkmark-circle">
+                            <div class="checkmark"></div>
+                        </div>
+                    </div>
+                    <h1 class="confirmation-title">ORDER CONFIRMED!</h1>
+                    <div class="order-number">Order #@Model.OrderNumber</div>
+                    <p class="order-date">Placed on @Model.OrderDate.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>
                 </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <h4 class="text-success">Order #@Model.OrderNumber</h4>
-                        <p class="text-muted">Placed on @Model.OrderDate.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5>Delivery Details</h5>
-                            <p><strong>Address:</strong><br>@Model.DeliveryAddress</p>
-                            <p><strong>Phone:</strong> @Model.CustomerPhone</p>
-                            <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+                <!-- Main Content -->
+                <div class="row g-4">
+                    <!-- Order Items -->
+                    <div class="col-lg-8">
+                        <div class="order-card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-shopping-bag me-2"></i>Your Order</h5>
+                            </div>
+                            <div class="card-body">
+                                @if (Model.OrderItems != null && Model.OrderItems.Any())
+                                {
+                                    <div class="order-items-list">
+                                        @foreach (var item in Model.OrderItems)
+                                        {
+                                            <div class="order-item">
+                                                <div class="item-image">
+                                                    @if (item.MenuItem.Images != null && item.MenuItem.Images.Any())
+                                                    {
+                                                        <img src="@item.MenuItem.Images.First().ImageUrl" alt="@item.MenuItem.Name" />
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(item.MenuItem.ImageUrl))
+                                                    {
+                                                        <img src="@item.MenuItem.ImageUrl" alt="@item.MenuItem.Name" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="no-image">
+                                                            <i class="fas fa-utensils"></i>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="item-details">
+                                                    <h6 class="item-name">@item.MenuItem.Name</h6>
+                                                    <p class="item-description">@item.MenuItem.Description</p>
+                                                    <div class="item-meta">
+                                                        <span class="quantity">Qty: @item.Quantity</span>
+                                                        <span class="unit-price">RM @item.UnitPrice.ToString("F2") each</span>
+                                                    </div>
+                                                </div>
+                                                <div class="item-total">
+                                                    <span class="price">RM @((item.Quantity * item.UnitPrice).ToString("F2"))</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-items">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <p>No items found in this order.</p>
+                                    </div>
+                                }
+                            </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <h5>Order Summary</h5>
-                            <div class="d-flex justify-content-between">
-                                <span>Subtotal:</span>
-                                <span>RM @Model.Subtotal.ToString("F2")</span>
+                        <!-- Delivery Information -->
+                        <div class="order-card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-truck me-2"></i>Delivery Information</h5>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Tax (6%):</span>
-                                <span>RM @Model.Tax.ToString("F2")</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Delivery Fee:</span>
-                                <span>@(Model.DeliveryFee == 0 ? "FREE" : $"RM {Model.DeliveryFee:F2}")</span>
-                            </div>
-                            @if (!string.IsNullOrEmpty(Model.PromoCode) && Model.DiscountAmount > 0)
-                            {
-                                <div class="d-flex justify-content-between text-success">
-                                    <span>Discount (@Model.PromoCode):</span>
-                                    <span>-RM @Model.DiscountAmount.ToString("F2")</span>
+                            <div class="card-body">
+                                <div class="delivery-info">
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <label>Delivery Address</label>
+                                            <p>@Model.DeliveryAddress</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="fas fa-phone"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <label>Contact Number</label>
+                                            <p>@Model.CustomerPhone</p>
+                                        </div>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(Model.DeliveryInstructions))
+                                    {
+                                        <div class="info-item">
+                                            <div class="info-icon">
+                                                <i class="fas fa-sticky-note"></i>
+                                            </div>
+                                            <div class="info-content">
+                                                <label>Delivery Instructions</label>
+                                                <p>@Model.DeliveryInstructions</p>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="fas fa-credit-card"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <label>Payment Method</label>
+                                            <p>@Model.PaymentMethod</p>
+                                        </div>
+                                    </div>
+
+                                    @if (Model.EstimatedDeliveryTime.HasValue)
+                                    {
+                                        <div class="info-item highlight">
+                                            <div class="info-icon">
+                                                <i class="fas fa-clock"></i>
+                                            </div>
+                                            <div class="info-content">
+                                                <label>Estimated Delivery Time</label>
+                                                <p class="eta">@Model.EstimatedDeliveryTime.Value.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
-                            }
-                            <hr>
-                            <div class="d-flex justify-content-between fw-bold">
-                                <span>Total:</span>
-                                <span class="text-success">RM @Model.Total.ToString("F2")</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="text-center mt-4">
-                        <a asp-controller="Menu" asp-action="Index" class="btn btn-primary">
-                            Continue Shopping
-                        </a>
+                    <!-- Order Summary -->
+                    <div class="col-lg-4">
+                        <div class="order-card summary-card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="summary-line">
+                                    <span>Subtotal</span>
+                                    <span>RM @Model.Subtotal.ToString("F2")</span>
+                                </div>
+                                
+                                <div class="summary-line">
+                                    <span>Tax (6%)</span>
+                                    <span>RM @Model.Tax.ToString("F2")</span>
+                                </div>
+                                
+                                <div class="summary-line">
+                                    <span>Delivery Fee</span>
+                                    <span>@(Model.DeliveryFee == 0 ? "FREE" : $"RM {Model.DeliveryFee:F2}")</span>
+                                </div>
+                                
+                                @if (!string.IsNullOrEmpty(Model.PromoCode) && Model.DiscountAmount > 0)
+                                {
+                                    <div class="summary-line discount">
+                                        <span>Discount (@Model.PromoCode)</span>
+                                        <span>-RM @Model.DiscountAmount.ToString("F2")</span>
+                                    </div>
+                                }
+                                
+                                <hr class="summary-divider">
+                                
+                                <div class="summary-line total">
+                                    <span>Total</span>
+                                    <span>RM @Model.Total.ToString("F2")</span>
+                                </div>
+                                
+                                @if (Model.PointsEarned > 0)
+                                {
+                                    <div class="points-earned">
+                                        <i class="fas fa-star"></i>
+                                        <span>You earned @Model.PointsEarned points!</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <a asp-controller="Orders" asp-action="Track" asp-route-orderId="@Model.Id" class="btn btn-primary btn-lg">
+                                <i class="fas fa-truck me-2"></i>Track Your Order
+                            </a>
+                            
+                            <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-primary">
+                                <i class="fas fa-shopping-cart me-2"></i>Continue Shopping
+                            </a>
+                            
+                            <a asp-controller="Orders" asp-action="History" class="btn btn-outline-secondary">
+                                <i class="fas fa-history me-2"></i>View Order History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thank You Message -->
+                <div class="thank-you-section">
+                    <div class="thank-you-card">
+                        <h4>Thank you for your order!</h4>
+                        <p>We're preparing your delicious meal with care. You'll receive updates about your order status.</p>
+                        <div class="contact-info">
+                            <span>Need help? Contact us at <a href="tel:+60123456789">+60 12-345-6789</a> or use our </span>
+                            <a asp-controller="CustomerSupport" asp-action="Index">live chat</a>
+                        </div>
                     </div>
                 </div>
             </div>

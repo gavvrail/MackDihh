@@ -60,6 +60,9 @@ builder.Services.AddScoped<SmsService>();
 builder.Services.AddScoped<FileUploadService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<RecaptchaService>();
+
+// Add background services
+builder.Services.AddHostedService<OrderStatusUpdateService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddHttpContextAccessor();
 
@@ -85,6 +88,10 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<ApplicationDbContext>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         await AutoResponseSeeder.SeedAutoResponsesAsync(context, userManager);
+        
+        // Unblock any admin accounts that might be blocked
+        var loginSecurityService = services.GetRequiredService<LoginSecurityService>();
+        await loginSecurityService.UnblockAllAdminAccountsAsync();
     }
     catch (Exception ex)
     {

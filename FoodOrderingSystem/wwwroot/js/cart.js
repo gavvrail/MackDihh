@@ -55,6 +55,23 @@ $(function () {
         $.post('/Cart/RemoveItem', { cartItemId: cartItemId, __RequestVerificationToken: token })
             .done(function (response) {
                 if (response.success) {
+                    // Show success message if points were refunded
+                    if (response.message && response.message.includes('points refunded')) {
+                        // Create a temporary success alert
+                        var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                       '<i class="fas fa-check-circle me-2"></i>' + response.message +
+                                       '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                                       '</div>';
+                        
+                        // Insert at the top of the page
+                        $('.cart-full-width .container-fluid').prepend(alertHtml);
+                        
+                        // Auto-dismiss after 5 seconds
+                        setTimeout(function() {
+                            $('.alert').fadeOut();
+                        }, 5000);
+                    }
+                    
                     // Find the card for the removed item and fade it out
                     var itemCard = $('[data-itemid="' + cartItemId + '"]').closest('.cart-item-card');
                     itemCard.fadeOut(400, function () {
@@ -62,7 +79,7 @@ $(function () {
                         location.reload();
                     });
                 } else {
-                    alert("There was an error removing the item. Please try again.");
+                    alert(response.message || "There was an error removing the item. Please try again.");
                 }
             })
             .fail(function () {

@@ -185,33 +185,190 @@ namespace FoodOrderingSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
         {
-            var cartItem = await _context.CartItems.FindAsync(cartItemId);
-            if (cartItem == null) return NotFound();
-
-            if (quantity > 0)
+            try
             {
-                cartItem.Quantity = quantity;
-            }
-            else
-            {
-                _context.CartItems.Remove(cartItem);
-            }
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var cartItem = await _context.CartItems
+                    .Include(ci => ci.MenuItem)
+                    .FirstOrDefaultAsync(ci => ci.Id == cartItemId);
 
-            await _context.SaveChangesAsync();
-            return await GetCartSummary();
+                if (cartItem == null) return NotFound();
+
+                using var transaction = await _context.Database.BeginTransactionAsync();
+
+                if (quantity > 0)
+                {
+                    // Handle quantity change for redeemed items
+                    if (cartItem.IsRedeemedWithPoints)
+                    {
+                        var originalQuantity = cartItem.Quantity;
+                        var quantityDifference = quantity - originalQuantity;
+                        
+                        if (quantityDifference != 0)
+                        {
+                            var user = await _context.Users.FindAsync(userId);
+                            if (user != null)
+                            {
+                                // Calculate points per item
+                                var pointsPerItem = cartItem.PointsUsed / originalQuantity;
+                                var pointsChange = pointsPerItem * quantityDifference;
+
+                                if (quantityDifference > 0)
+                                {
+                                    // Increasing quantity - deduct more points
+                                    if (user.Points >= pointsChange)
+                                    {
+                                        user.Points -= pointsChange;
+                                        user.TotalPointsRedeemed += pointsChange;
+                                        cartItem.PointsUsed += pointsChange;
+
+                                        // Create transaction record
+                                        var transaction_record = new UserPointsTransaction
+                                        {
+                                            UserId = userId,
+                                            Points = -pointsChange,
+                                            Type = PointsTransactionType.Redeemed,
+                                            Description = $"Additional redemption: {cartItem.MenuItem.Name} (qty +{quantityDifference}) - {pointsChange} points"
+                                        };
+                                        _context.UserPointsTransactions.Add(transaction_record);
+                                    }
+                                    else
+                                    {
+                                        await transaction.RollbackAsync();
+                                        return Json(new { success = false, message = $"Not enough points. You need {pointsChange} more points to increase quantity." });
+                                    }
+                                }
+                                else
+                                {
+                                    // Decreasing quantity - refund points
+                                    var pointsToRefund = Math.Abs(pointsChange);
+                                    user.Points += pointsToRefund;
+                                    user.TotalPointsRedeemed -= pointsToRefund;
+                                    cartItem.PointsUsed -= pointsToRefund;
+
+                                    // Create refund transaction record
+                                    var refundTransaction = new UserPointsTransaction
+                                    {
+                                        UserId = userId,
+                                        Points = pointsToRefund,
+                                        Type = PointsTransactionType.Refunded,
+                                        Description = $"Quantity refund: {cartItem.MenuItem.Name} (qty {quantityDifference}) - {pointsToRefund} points refunded"
+                                    };
+                                    _context.UserPointsTransactions.Add(refundTransaction);
+                                }
+                            }
+                        }
+                    }
+
+                    cartItem.Quantity = quantity;
+                }
+                else
+                {
+                    // Quantity is 0, remove the item (this will call the same logic as RemoveItem)
+                    if (cartItem.IsRedeemedWithPoints && cartItem.PointsUsed > 0)
+                    {
+                        var user = await _context.Users.FindAsync(userId);
+                        if (user != null)
+                        {
+                            // Refund all points for this item
+                            user.Points += cartItem.PointsUsed;
+                            user.TotalPointsRedeemed -= cartItem.PointsUsed;
+
+                            // Create refund transaction record
+                            var refundTransaction = new UserPointsTransaction
+                            {
+                                UserId = userId,
+                                Points = cartItem.PointsUsed,
+                                Type = PointsTransactionType.Refunded,
+                                Description = $"Refund: Removed {cartItem.MenuItem.Name} from cart - {cartItem.PointsUsed} points refunded"
+                            };
+                            _context.UserPointsTransactions.Add(refundTransaction);
+                        }
+                    }
+
+                    _context.CartItems.Remove(cartItem);
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return await GetCartSummary();
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "An error occurred while updating the cart." });
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveItem(int cartItemId)
         {
-            var cartItem = await _context.CartItems.FindAsync(cartItemId);
-            if (cartItem != null)
+            try
             {
-                _context.CartItems.Remove(cartItem);
-                await _context.SaveChangesAsync();
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var cartItem = await _context.CartItems
+                    .Include(ci => ci.MenuItem)
+                    .FirstOrDefaultAsync(ci => ci.Id == cartItemId);
+
+                if (cartItem != null)
+                {
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+
+                    // Check if this is a redeemed item and refund points
+                    if (cartItem.IsRedeemedWithPoints && cartItem.PointsUsed > 0)
+                    {
+                        var user = await _context.Users.FindAsync(userId);
+                        if (user != null)
+                        {
+                            // Calculate points to refund (points per quantity)
+                            var pointsToRefund = cartItem.PointsUsed;
+                            
+                            // Refund points to user
+                            user.Points += pointsToRefund;
+                            user.TotalPointsRedeemed -= pointsToRefund;
+
+                            // Create refund transaction record
+                            var refundTransaction = new UserPointsTransaction
+                            {
+                                UserId = userId,
+                                Points = pointsToRefund,
+                                Type = PointsTransactionType.Refunded,
+                                Description = $"Refund: Removed {cartItem.MenuItem.Name} from cart - {pointsToRefund} points refunded"
+                            };
+                            _context.UserPointsTransactions.Add(refundTransaction);
+
+                            // Remove the redemption record if it exists
+                            var redemptionRecord = await _context.UserRedemptions
+                                .FirstOrDefaultAsync(ur => ur.UserId == userId && 
+                                                          ur.MenuItemId == cartItem.MenuItemId && 
+                                                          ur.RedemptionCode == cartItem.RedemptionCode);
+                            if (redemptionRecord != null)
+                            {
+                                _context.UserRedemptions.Remove(redemptionRecord);
+                            }
+                        }
+                    }
+
+                    // Remove the cart item
+                    _context.CartItems.Remove(cartItem);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return Json(new { 
+                        success = true, 
+                        message = cartItem.IsRedeemedWithPoints ? 
+                            $"Item removed and {cartItem.PointsUsed} points refunded to your account." : 
+                            "Item removed from cart."
+                    });
+                }
+
+                return Json(new { success = false, message = "Item not found in cart." });
             }
-            return await GetCartSummary();
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "An error occurred while removing the item." });
+            }
         }
 
 
