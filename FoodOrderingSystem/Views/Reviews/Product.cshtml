@@ -1,4 +1,5 @@
 @model FoodOrderingSystem.Controllers.ProductReviewsViewModel
+@using FoodOrderingSystem.Models
 
 @{
     ViewData["Title"] = $"Reviews for {Model.MenuItem.Name}";
@@ -51,7 +52,7 @@
                                 </div>
                             </div>
                             <div class="col-md-3 text-end">
-                                <h3 class="text-danger mb-3">RM@Model.MenuItem.Price.ToString("F2")</h3>
+                                <h2 class="mb-3 fw-bold product-price-clean">RM@(Model.MenuItem.Price.ToString("F2"))</h2>
                                 <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-primary">
                                     <i class="fas fa-arrow-left me-1"></i>Back to Menu
                                 </a>
@@ -136,17 +137,58 @@
                                             }
                                         </div>
                                         <div class="col-md-4 text-end">
-                                            <div class="helpful-section">
-                                                <div class="d-flex justify-content-end gap-2 mb-2">
-                                                    <button class="btn btn-sm btn-outline-success helpful-btn" 
-                                                            data-review-id="@review.Id">
-                                                        <i class="fas fa-thumbs-up me-1"></i>Helpful (@review.HelpfulCount)
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger unhelpful-btn" 
-                                                            data-review-id="@review.Id">
-                                                        <i class="fas fa-thumbs-down me-1"></i>Unhelpful (@review.UnhelpfulCount)
-                                                    </button>
-                                                </div>
+                                            <div class="review-actions">
+                                                @if (!string.IsNullOrEmpty(Model.CurrentUserId) && review.UserId == Model.CurrentUserId)
+                                                {
+                                                    <!-- Delete button for review owner -->
+                                                    <div class="d-flex justify-content-end mb-2">
+                                                        <button class="btn btn-sm btn-outline-danger delete-review-btn" 
+                                                                data-review-id="@review.Id"
+                                                                title="Delete your review">
+                                                            <i class="fas fa-trash me-1"></i>Delete Review
+                                                        </button>
+                                                    </div>
+                                                }
+                                                
+                                                @if (!string.IsNullOrEmpty(Model.CurrentUserId) && review.UserId != Model.CurrentUserId)
+                                                {
+                                                    <!-- Voting buttons (only for other users' reviews) -->
+                                                    <div class="helpful-section">
+                                                        <div class="d-flex justify-content-end gap-2 mb-2">
+                                                            @{
+                                                                var userVote = Model.UserVotes.ContainsKey(review.Id) ? Model.UserVotes[review.Id] : null;
+                                                                var helpfulActive = userVote == VoteType.Helpful;
+                                                                var unhelpfulActive = userVote == VoteType.Unhelpful;
+                                                            }
+                                                            
+                                                            <button class="btn btn-sm @(helpfulActive ? "btn-success" : "btn-outline-success") helpful-btn" 
+                                                                    data-review-id="@review.Id"
+                                                                    data-user-vote="@(userVote?.ToString()?.ToLower() ?? "none")">
+                                                                <i class="fas fa-thumbs-up me-1"></i>Helpful (@review.HelpfulCount)
+                                                            </button>
+                                                            <button class="btn btn-sm @(unhelpfulActive ? "btn-danger" : "btn-outline-danger") unhelpful-btn" 
+                                                                    data-review-id="@review.Id"
+                                                                    data-user-vote="@(userVote?.ToString()?.ToLower() ?? "none")">
+                                                                <i class="fas fa-thumbs-down me-1"></i>Unhelpful (@review.UnhelpfulCount)
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else if (string.IsNullOrEmpty(Model.CurrentUserId))
+                                                {
+                                                    <!-- Show vote counts for non-logged-in users -->
+                                                    <div class="vote-display">
+                                                        <div class="d-flex justify-content-end gap-2 mb-2">
+                                                            <span class="text-muted">
+                                                                <i class="fas fa-thumbs-up me-1"></i>@review.HelpfulCount helpful
+                                                            </span>
+                                                            <span class="text-muted">
+                                                                <i class="fas fa-thumbs-down me-1"></i>@review.UnhelpfulCount unhelpful
+                                                            </span>
+                                                        </div>
+                                                        <small class="text-muted">Login to vote</small>
+                                                    </div>
+                                                }
                                             </div>
                                         </div>
                                     </div>
@@ -203,10 +245,11 @@
 
 @section Scripts {
     <script>
-        // Handle helpful/unhelpful buttons
+        // Handle helpful/unhelpful buttons and delete buttons
         document.addEventListener('DOMContentLoaded', function() {
             const helpfulButtons = document.querySelectorAll('.helpful-btn');
             const unhelpfulButtons = document.querySelectorAll('.unhelpful-btn');
+            const deleteButtons = document.querySelectorAll('.delete-review-btn');
 
             helpfulButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -221,10 +264,19 @@
                     markUnhelpful(reviewId, this);
                 });
             });
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const reviewId = this.dataset.reviewId;
+                    deleteReview(reviewId, this);
+                });
+            });
         });
 
         function markHelpful(reviewId, button) {
             const originalText = button.innerHTML;
+            const unhelpfulButton = button.parentElement.querySelector('.unhelpful-btn');
+            
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Loading...';
             button.disabled = true;
 
@@ -239,11 +291,27 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Update helpful button
                     button.innerHTML = `<i class="fas fa-thumbs-up me-1"></i>Helpful (${data.helpfulCount})`;
-                    button.classList.remove('btn-outline-success');
-                    button.classList.add('btn-success');
+                    
+                    // Update unhelpful button
+                    unhelpfulButton.innerHTML = `<i class="fas fa-thumbs-down me-1"></i>Unhelpful (${data.unhelpfulCount})`;
+                    
+                    // Update button states based on user vote
+                    if (data.userVote === 'helpful') {
+                        button.classList.remove('btn-outline-success');
+                        button.classList.add('btn-success');
+                        unhelpfulButton.classList.remove('btn-danger');
+                        unhelpfulButton.classList.add('btn-outline-danger');
+                    } else if (data.userVote === 'none') {
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-outline-success');
+                        unhelpfulButton.classList.remove('btn-danger');
+                        unhelpfulButton.classList.add('btn-outline-danger');
+                    }
                 } else {
                     button.innerHTML = originalText;
+                    alert(data.message || 'An error occurred while voting.');
                 }
                 button.disabled = false;
             })
@@ -251,11 +319,14 @@
                 console.error('Error:', error);
                 button.innerHTML = originalText;
                 button.disabled = false;
+                alert('An error occurred while voting. Please try again.');
             });
         }
 
         function markUnhelpful(reviewId, button) {
             const originalText = button.innerHTML;
+            const helpfulButton = button.parentElement.querySelector('.helpful-btn');
+            
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Loading...';
             button.disabled = true;
 
@@ -270,11 +341,27 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Update unhelpful button
                     button.innerHTML = `<i class="fas fa-thumbs-down me-1"></i>Unhelpful (${data.unhelpfulCount})`;
-                    button.classList.remove('btn-outline-danger');
-                    button.classList.add('btn-danger');
+                    
+                    // Update helpful button
+                    helpfulButton.innerHTML = `<i class="fas fa-thumbs-up me-1"></i>Helpful (${data.helpfulCount})`;
+                    
+                    // Update button states based on user vote
+                    if (data.userVote === 'unhelpful') {
+                        button.classList.remove('btn-outline-danger');
+                        button.classList.add('btn-danger');
+                        helpfulButton.classList.remove('btn-success');
+                        helpfulButton.classList.add('btn-outline-success');
+                    } else if (data.userVote === 'none') {
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-outline-danger');
+                        helpfulButton.classList.remove('btn-success');
+                        helpfulButton.classList.add('btn-outline-success');
+                    }
                 } else {
                     button.innerHTML = originalText;
+                    alert(data.message || 'An error occurred while voting.');
                 }
                 button.disabled = false;
             })
@@ -282,6 +369,69 @@
                 console.error('Error:', error);
                 button.innerHTML = originalText;
                 button.disabled = false;
+                alert('An error occurred while voting. Please try again.');
+            });
+        }
+
+        function deleteReview(reviewId, button) {
+            if (!confirm('Are you sure you want to delete your review? This action cannot be undone.')) {
+                return;
+            }
+
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+            button.disabled = true;
+
+            fetch('/Reviews/DeleteMyReview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: `reviewId=${reviewId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the review card from the page
+                    const reviewCard = button.closest('.card');
+                    reviewCard.style.transition = 'opacity 0.3s ease';
+                    reviewCard.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        reviewCard.remove();
+                        
+                        // Check if there are no more reviews
+                        const remainingReviews = document.querySelectorAll('.reviews-list .card');
+                        if (remainingReviews.length === 0) {
+                            location.reload(); // Reload to show "no reviews" message
+                        }
+                    }, 300);
+                    
+                    // Show success message
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success alert-dismissible fade show';
+                    successAlert.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i>Your review has been deleted successfully.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.container').insertBefore(successAlert, document.querySelector('.row'));
+                    
+                    // Auto-dismiss after 5 seconds
+                    setTimeout(() => {
+                        successAlert.remove();
+                    }, 5000);
+                } else {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    alert(data.message || 'An error occurred while deleting your review.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                button.innerHTML = originalText;
+                button.disabled = false;
+                alert('An error occurred while deleting your review. Please try again.');
             });
         }
     </script>

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FoodOrderingSystem.Data;
@@ -84,6 +85,7 @@ namespace FoodOrderingSystem.Controllers
 
         // POST: /Orders/Cancel/{id}
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id, OrderCancellationViewModel model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -101,6 +103,11 @@ namespace FoodOrderingSystem.Controllers
             {
                 model.Order = order;
                 model.CancellationReasons = GetCancellationReasons();
+                
+                // Add error message for debugging
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                TempData["ErrorMessage"] = $"Form validation failed: {string.Join(", ", errors)}";
+                
                 return View(model);
             }
 
@@ -153,8 +160,13 @@ namespace FoodOrderingSystem.Controllers
     public class OrderCancellationViewModel
     {
         public Order Order { get; set; } = null!;
+        
+        [Required(ErrorMessage = "Please select a reason for cancellation")]
         public CancellationReasonType SelectedReason { get; set; }
+        
+        [StringLength(500, ErrorMessage = "Additional details cannot exceed 500 characters")]
         public string? AdditionalDetails { get; set; }
+        
         public List<CancellationReasonType> CancellationReasons { get; set; } = new();
     }
 }

@@ -92,6 +92,9 @@ using (var scope = app.Services.CreateScope())
         // Unblock any admin accounts that might be blocked
         var loginSecurityService = services.GetRequiredService<LoginSecurityService>();
         await loginSecurityService.UnblockAllAdminAccountsAsync();
+        
+        // Seed sample reviews
+        await ReviewSeeder.SeedReviews(services);
     }
     catch (Exception ex)
     {

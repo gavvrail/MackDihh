@@ -41,6 +41,9 @@ namespace FoodOrderingSystem.Data
         
         // Order Cancellation
         public DbSet<OrderCancellation> OrderCancellations { get; set; }
+        
+        // Review Voting System
+        public DbSet<ReviewVote> ReviewVotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -236,6 +239,24 @@ namespace FoodOrderingSystem.Data
                     .WithMany()
                     .HasForeignKey(ar => ar.UpdatedBy)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // NEW: Added configuration for ReviewVote
+            builder.Entity<ReviewVote>(entity =>
+            {
+                entity.HasOne(rv => rv.Review)
+                    .WithMany()
+                    .HasForeignKey(rv => rv.ReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(rv => rv.User)
+                    .WithMany()
+                    .HasForeignKey(rv => rv.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Ensure one vote per user per review
+                entity.HasIndex(rv => new { rv.UserId, rv.ReviewId })
+                    .IsUnique();
             });
         }
     }

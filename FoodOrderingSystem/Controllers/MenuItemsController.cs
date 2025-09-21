@@ -58,18 +58,6 @@ namespace FoodOrderingSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,ImageUrl,Description,Price,CategoryId,IsAvailable,IsFeatured,PreparationTimeMinutes,Calories,Allergens,PointsPerItem")] MenuItem menuItem)
         {
-            // Debug: Log the incoming data
-            System.Diagnostics.Debug.WriteLine($"Creating menu item: Name={menuItem.Name}, Price={menuItem.Price}, CategoryId={menuItem.CategoryId}");
-            
-            // Debug: Log the model state
-            if (!ModelState.IsValid)
-            {
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    System.Diagnostics.Debug.WriteLine($"Validation Error: {error.ErrorMessage}");
-                }
-            }
-
             if (ModelState.IsValid)
             {
                 try
@@ -98,7 +86,7 @@ namespace FoodOrderingSystem.Controllers
             return View(menuItem);
         }
 
-        // Debug action to check database connection and menu items (remove in production)
+        /* Debug actions removed for production
         [AllowAnonymous]
         public async Task<IActionResult> DebugMenuItems()
         {
@@ -419,5 +407,6 @@ namespace FoodOrderingSystem.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+        */
     }
 }

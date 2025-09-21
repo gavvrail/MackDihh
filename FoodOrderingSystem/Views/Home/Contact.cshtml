@@ -82,11 +82,19 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="firstName" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="firstName" required>
+                            <input type="text" class="form-control name-input" id="firstName" 
+                                   pattern="[A-Za-z\s]+" 
+                                   title="First name should only contain letters and spaces"
+                                   placeholder="Enter your first name" required>
+                            <div class="invalid-feedback">First name should only contain letters and spaces</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="lastName" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" required>
+                            <input type="text" class="form-control name-input" id="lastName" 
+                                   pattern="[A-Za-z\s]+" 
+                                   title="Last name should only contain letters and spaces"
+                                   placeholder="Enter your last name" required>
+                            <div class="invalid-feedback">Last name should only contain letters and spaces</div>
                         </div>
                     </div>
                     <div class="mb-3">

@@ -386,4 +386,34 @@
     .contact-details {
         text-align: center;
     }
+}
+
+/* Name input validation styles */
+.name-input.is-invalid {
+    border-color: #dc3545 !important;
+    background-color: #fff5f5;
+    animation: shake 0.5s ease-in-out;
+}
+
+.name-input.is-valid {
+    border-color: #28a745 !important;
+    background-color: #f8fff8;
+}
+
+.invalid-feedback {
+    display: none;
+    font-size: 0.875rem;
+    color: #dc3545;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.name-input.is-invalid + .invalid-feedback {
+    display: block;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
 } 
