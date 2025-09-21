@@ -14,7 +14,7 @@ Go to your VS2022 and follow these steps:
 - find the .mdf database and right click it and select Properties
 - In the properties there copy the path of .mdf file
 
-  **Step 3**
+**Step 3**
 - After complete this u need to update your appsettings.json also (Can be found in Solution Explorer)
 - open appsettings.json and find the "ConnectionStrings" section and replace it with this:
 "ConnectionStrings": {
