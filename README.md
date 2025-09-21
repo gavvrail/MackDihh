@@ -17,6 +17,7 @@ Go to your VS2022 and follow these steps:
 **Step 3**
 - After complete this u need to update your appsettings.json also (Can be found in Solution Explorer)
 - open appsettings.json and find the "ConnectionStrings" section and replace it with this:
+
 "ConnectionStrings": {
   "DefaultConnection": "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\TheirName\\PathTo\\YourDatabase.mdf;Integrated Security=True;"
 }
