@@ -370,6 +370,43 @@ namespace FoodOrderingSystem.Controllers
             TempData["SuccessMessage"] = "Verification email has been sent! Please check your inbox and click the confirmation link to verify your email address.";
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> GetReferralCode()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return NotFound();
+            }
+            
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Generate referral code if user doesn't have one
+            if (string.IsNullOrEmpty(user.ReferralCode))
+            {
+                // Generate a unique referral code based on username and user ID
+                var baseCode = user.UserName?.ToUpper().Replace(" ", "") ?? "USER";
+                var userIdSuffix = user.Id.Substring(0, 4).ToUpper();
+                user.ReferralCode = $"{baseCode}{userIdSuffix}";
+                
+                // Ensure uniqueness
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.ReferralCode == user.ReferralCode);
+                if (existingUser != null)
+                {
+                    // If code exists, add timestamp
+                    user.ReferralCode = $"{baseCode}{userIdSuffix}{DateTime.Now:MM}";
+                }
+                
+                await _userManager.UpdateAsync(user);
+            }
+
+            TempData["SuccessMessage"] = $"Your referral code is: {user.ReferralCode}. Share this code with friends to earn 50 points per referral!";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     public class ProfileViewModel

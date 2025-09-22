@@ -178,7 +178,10 @@
                             <textarea asp-for="AdditionalDetails" class="form-control" rows="4" 
                                       placeholder="Please provide any additional details about your cancellation..."
                                       maxlength="500"></textarea>
-                            <div class="form-text">Maximum 500 characters</div>
+                            <div class="form-text">
+                                <span class="text-muted">Maximum 500 characters</span>
+                                <span class="float-end text-muted" id="charCount">0/500 characters</span>
+                            </div>
                             <span asp-validation-for="AdditionalDetails" class="text-danger"></span>
                         </div>
 
@@ -246,12 +249,9 @@
             const maxLength = 500;
             
             if (textarea.length) {
-                const counterDiv = $('<div class="form-text text-end mt-1"><span id="charCount">0</span>/' + maxLength + ' characters</div>');
-                textarea.parent().append(counterDiv);
-                
                 textarea.on('input', function() {
                     const currentLength = $(this).val().length;
-                    $('#charCount').text(currentLength);
+                    $('#charCount').text(currentLength + '/' + maxLength + ' characters');
                     
                     if (currentLength > maxLength * 0.9) {
                         $('#charCount').addClass('text-warning');
@@ -263,10 +263,11 @@
 
             // Enhanced form submission with better UX
             $('#cancelOrderForm').on('submit', function(e) {
-                e.preventDefault();
+                console.log('Form submission started');
                 
                 const selectedReason = $('#SelectedReason').val();
                 if (!selectedReason) {
+                    e.preventDefault();
                     alert('Please select a reason for cancellation.');
                     $('#SelectedReason').focus();
                     return false;
@@ -274,23 +275,25 @@
 
                 const confirmMessage = `Are you sure you want to cancel this order?\n\nReason: ${$('#SelectedReason option:selected').text()}\n\nThis action cannot be undone.`;
                 
-                if (confirm(confirmMessage)) {
-                    const submitBtn = $('#cancelBtn');
-                    const originalText = submitBtn.html();
-                    
-                    // Show loading state
-                    submitBtn.prop('disabled', true);
-                    submitBtn.html('<i class="fas fa-spinner fa-spin me-1"></i>Cancelling...');
-                    
-                    // Submit the form
-                    this.submit();
-                    
-                    // Reset button after a delay in case of error
-                    setTimeout(function() {
-                        submitBtn.prop('disabled', false);
-                        submitBtn.html(originalText);
-                    }, 5000);
+                if (!confirm(confirmMessage)) {
+                    e.preventDefault();
+                    console.log('User cancelled the confirmation');
+                    return false;
                 }
+                
+                console.log('User confirmed cancellation, submitting form');
+                
+                // If confirmed, allow form to submit naturally
+                const submitBtn = $('#cancelBtn');
+                const originalText = submitBtn.html();
+                
+                // Show loading state
+                submitBtn.prop('disabled', true);
+                submitBtn.html('<i class="fas fa-spinner fa-spin me-1"></i>Cancelling...');
+                
+                // Don't prevent default - let the form submit naturally
+                // The form will submit to the server and redirect
+                console.log('Form submitting to server...');
             });
 
             // Add validation styling

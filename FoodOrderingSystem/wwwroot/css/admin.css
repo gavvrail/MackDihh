@@ -675,3 +675,79 @@
 .modal .form-control:hover {
     border-color: #adb5bd !important;
 }
+
+/* Fix modal backdrop issues that can cause screen freeze */
+.modal-backdrop {
+    display: none !important;
+}
+
+.modal {
+    background: rgba(0,0,0,0.5) !important;
+}
+
+body.modal-open {
+    overflow: auto !important;
+}
+
+/* Ensure modals are properly displayed */
+.modal.show {
+    display: block !important;
+}
+
+/* Fix modal positioning - center it properly */
+.modal-dialog {
+    margin: 1.75rem auto !important;
+    max-width: 500px;
+}
+
+.modal-dialog.modal-lg {
+    max-width: 800px;
+}
+
+.modal-dialog.modal-xl {
+    max-width: 1140px;
+}
+
+/* Ensure modal is centered vertically */
+.modal {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+}
+
+/* Fix modal content positioning */
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    pointer-events: auto;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: 0.3rem;
+    outline: 0;
+}
+
+/* Additional modal positioning fixes */
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 3.5rem);
+}
+
+.modal-dialog-centered::before {
+    display: block;
+    height: calc(100vh - 3.5rem);
+    content: "";
+}
+
+/* Ensure modal is properly positioned */
+#orderDetailsModal .modal-dialog {
+    margin: 1.75rem auto;
+    transform: none !important;
+}
+
+#orderDetailsModal.show {
+    display: block !important;
+    padding-right: 17px;
+}

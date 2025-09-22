@@ -38,5 +38,10 @@ namespace FoodOrderingSystem.Models
         public int TotalPointsEarned { get; set; } = 0;
         public int TotalPointsRedeemed { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
+        // Referral system
+        [StringLength(20)]
+        public string? ReferralCode { get; set; }
+        public int ReferralPointsEarned { get; set; } = 0;
     }
 }

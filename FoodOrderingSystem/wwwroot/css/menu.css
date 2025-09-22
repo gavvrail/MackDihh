@@ -242,6 +242,23 @@
     height: 100%;
 }
 
+.food-menu-card {
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    background: white;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.food-menu-card:hover {
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
 .product-card-horizontal:hover {
     box-shadow: 0 5px 20px rgba(0,0,0,0.15);
     transform: translateY(-2px);
@@ -252,6 +269,22 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+}
+
+.food-menu-card .card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+}
+
+.food-menu-card .card-title {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
 }
 
 .product-card-horizontal .card-title {
@@ -307,15 +340,20 @@
     position: relative;
     overflow: hidden;
     background: #f8f9fa;
-    height: 100%;
-    min-height: 180px;
+    height: 200px; /* Fixed height for consistency */
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .product-image-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     transition: transform 0.3s ease;
+    border-radius: 0.375rem; /* Match Bootstrap's rounded class */
 }
 
 .product-card-horizontal:hover .product-image-container img {
@@ -454,8 +492,13 @@
         padding: 1rem;
     }
     
+    .food-menu-card .card-body {
+        padding: 1rem;
+    }
+    
     .product-image-container {
-        min-height: 140px;
+        height: 160px; /* Slightly smaller for mobile but still consistent */
+        min-height: 160px;
     }
     
     .btn-add-to-cart {

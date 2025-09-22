@@ -217,7 +217,7 @@
                                                 var totalRedeemedItems = Model.Cart.CartItems.Where(item => item.IsRedeemedWithPoints).Sum(item => item.Quantity);
                                                 var totalPointsUsed = Model.Cart.CartItems.Where(item => item.IsRedeemedWithPoints).Sum(item => item.PointsUsed);
                                                 var tax = subtotal * 0.06m;
-                                                var deliveryFee = subtotal >= 100 ? 0 : 5.00m;
+                                                var deliveryFee = subtotal >= 50 ? 0 : 2.00m;
                                                 var total = subtotal + tax + deliveryFee;
                                             }
                                             <div class="totals-row">
@@ -304,7 +304,7 @@
         // Store original totals for calculations
         const originalSubtotal = @(Model.Cart?.CartItems?.Sum(item => item.Quantity * item.MenuItem.Price) ?? 0);
         const originalTax = originalSubtotal * 0.06;
-        const originalDeliveryFee = originalSubtotal >= 100 ? 0 : 5.00;
+        const originalDeliveryFee = originalSubtotal >= 50 ? 0 : 2.00;
         const originalTotal = originalSubtotal + originalTax + originalDeliveryFee;
         
         // Pass user ID to checkout.js for auto-save functionality

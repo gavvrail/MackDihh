@@ -83,11 +83,18 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            _logger.LogInformation("Login attempt started for user: {EmailOrUsername}", Input?.EmailOrUsername);
+            
             // --- 3. ADD VALIDATION LOGIC AT THE BEGINNING OF OnPostAsync ---
             var recaptchaToken = Request.Form["g-recaptcha-response"];
+            _logger.LogInformation("reCAPTCHA token received: {TokenLength} characters", recaptchaToken.ToString().Length);
+            
             var isRecaptchaValid = await _recaptchaService.Validate(recaptchaToken);
+            _logger.LogInformation("reCAPTCHA validation result: {IsValid}", isRecaptchaValid);
+            
             if (!isRecaptchaValid)
             {
+                _logger.LogWarning("reCAPTCHA validation failed for user: {EmailOrUsername}", Input?.EmailOrUsername);
                 ModelState.AddModelError(string.Empty, "CAPTCHA validation failed. Please try again.");
                 return Page(); // Stop processing if CAPTCHA fails
             }
@@ -100,18 +107,23 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
                 var userName = Input.EmailOrUsername;
                 ApplicationUser user = null;
 
+                _logger.LogInformation("Looking up user: {UserName}", userName);
+
                 // Find user by email or username
                 if (userName.Contains("@"))
                 {
                     user = await _userManager.FindByEmailAsync(userName);
+                    _logger.LogInformation("User lookup by email result: {UserFound}", user != null);
                     if (user != null)
                     {
                         userName = user.UserName;
+                        _logger.LogInformation("Found user by email, username: {UserName}", userName);
                     }
                 }
                 else
                 {
                     user = await _userManager.FindByNameAsync(userName);
+                    _logger.LogInformation("User lookup by username result: {UserFound}", user != null);
                 }
 
                 // Check if user exists and is blocked
@@ -132,6 +144,9 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
                 }
 
                 var result = await _signInManager.PasswordSignInAsync(userName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+                
+                _logger.LogInformation("Sign-in result: Succeeded={Succeeded}, IsLockedOut={IsLockedOut}, RequiresTwoFactor={RequiresTwoFactor}, IsNotAllowed={IsNotAllowed}", 
+                    result.Succeeded, result.IsLockedOut, result.RequiresTwoFactor, result.IsNotAllowed);
 
                 if (result.Succeeded)
                 {

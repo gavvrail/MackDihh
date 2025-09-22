@@ -62,10 +62,12 @@ namespace FoodOrderingSystem.Areas.Identity.Pages.Account
             [Required]
             [Display(Name = "First Name")]
             [StringLength(100, ErrorMessage = "The {0} must be at max {1} characters long.")]
+            [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "First name can only contain letters and spaces.")]
             public string FirstName { get; set; }
 
             [Display(Name = "Last Name")]
             [StringLength(100, ErrorMessage = "The {0} must be at max {1} characters long.")]
+            [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "Last name can only contain letters and spaces.")]
             public string LastName { get; set; }
 
             [Required]

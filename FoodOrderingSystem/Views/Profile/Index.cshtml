@@ -182,7 +182,7 @@
 
                                     <div class="mb-3">
                                         <label asp-for="DateOfBirth" class="form-label">Date of Birth</label>
-                                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                                        <input asp-for="DateOfBirth" class="form-control" type="date" id="dateOfBirth" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
                                         <span asp-validation-for="DateOfBirth" class="text-danger"></span>
                                         <small class="form-text text-muted">Add your birthday to receive special offers and free desserts (members only)</small>
                                     </div>
@@ -392,6 +392,23 @@
                     // Ensure that it is a number and stop the keypress
                     if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
                         e.preventDefault();
+                    }
+                });
+            }
+
+            // Date of birth validation
+            const dateOfBirthInput = document.getElementById('dateOfBirth');
+            if (dateOfBirthInput) {
+                dateOfBirthInput.addEventListener('change', function() {
+                    const selectedDate = new Date(this.value);
+                    const today = new Date();
+                    
+                    if (selectedDate > today) {
+                        this.setCustomValidity('Date of birth cannot be in the future');
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.setCustomValidity('');
+                        this.classList.remove('is-invalid');
                     }
                 });
             }

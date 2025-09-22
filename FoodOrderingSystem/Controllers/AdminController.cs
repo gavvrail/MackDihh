@@ -20,13 +20,15 @@ namespace FoodOrderingSystem.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly LoginSecurityService _loginSecurityService;
         private readonly ILogger<AdminController> _logger;
+        private readonly TimeZoneService _timeZoneService;
 
-        public AdminController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, LoginSecurityService loginSecurityService, ILogger<AdminController> logger)
+        public AdminController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, LoginSecurityService loginSecurityService, ILogger<AdminController> logger, TimeZoneService timeZoneService)
         {
             _context = context;
             _userManager = userManager;
             _loginSecurityService = loginSecurityService;
             _logger = logger;
+            _timeZoneService = timeZoneService;
         }
 
         // GET: /Admin (Dashboard)
@@ -105,6 +107,23 @@ namespace FoodOrderingSystem.Controllers
             var orders = await query
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
+
+            // Update estimated delivery times for recent orders (within last 30 minutes)
+            foreach (var order in orders)
+            {
+                if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.Cancelled)
+                {
+                    var currentLocalTime = _timeZoneService.GetLocalTime();
+                    var orderLocalTime = _timeZoneService.ConvertFromUtc(order.OrderDate);
+                    var timeSinceOrder = currentLocalTime - orderLocalTime;
+                    
+                    // Only update if the order was placed within the last 30 minutes
+                    if (timeSinceOrder.TotalMinutes <= 30)
+                    {
+                        order.EstimatedDeliveryTime = _timeZoneService.ConvertToUtc(_timeZoneService.GetLocalTimePlusMinutes(30));
+                    }
+                }
+            }
 
             ViewBag.StatusFilter = status;
             ViewBag.SearchTerm = search;

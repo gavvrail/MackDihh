@@ -270,6 +270,15 @@ $(document).ready(function() {
     // CREDIT CARD VALIDATION SYSTEM
     // ========================================
 
+    // Override jQuery validation creditcard method to allow all valid card numbers
+    $.validator.addMethod("creditcard", function(value, element) {
+        // Use our custom Luhn validation instead of the restrictive default
+        if (this.optional(element)) {
+            return true;
+        }
+        return luhnCheck(value);
+    }, "Please enter a valid credit card number.");
+
     // Luhn Algorithm for card number validation
     function luhnCheck(cardNumber) {
         const digits = cardNumber.replace(/\D/g, '').split('').map(Number);
@@ -989,7 +998,7 @@ $(document).ready(function() {
             const subtotalText = $('#subtotal-amount').text().replace('RM', '').replace(',', '');
             const subtotal = parseFloat(subtotalText);
             const tax = subtotal * 0.06;
-            const deliveryFee = subtotal >= 100 ? 0 : 5.00;
+            const deliveryFee = subtotal >= 50 ? 0 : 2.00;
             const newTotal = subtotal + tax + deliveryFee - discountAmount;
             
             $('#total-amount').text('RM' + newTotal.toFixed(2));
@@ -1006,7 +1015,7 @@ $(document).ready(function() {
         const subtotalText = $('#subtotal-amount').text().replace('RM', '').replace(',', '');
         const subtotal = parseFloat(subtotalText);
         const tax = subtotal * 0.06;
-        const deliveryFee = subtotal >= 100 ? 0 : 5.00;
+        const deliveryFee = subtotal >= 50 ? 0 : 2.00;
         const originalTotal = subtotal + tax + deliveryFee;
         
         $('#total-amount').text('RM' + originalTotal.toFixed(2));

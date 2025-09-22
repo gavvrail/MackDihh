@@ -139,7 +139,7 @@
                                                 {
                                                     <span class="badge bg-warning">Disabled</span>
                                                     <div class="mt-2">
-                                                        <a href="#" class="btn btn-sm btn-outline-warning" onclick="alert('2FA functionality has been moved to the Profile page. Please use the Profile page to manage your account settings.');">
+                                                        <a asp-area="Identity" asp-page="/Account/Manage/TwoFactorAuthentication" class="btn btn-sm btn-outline-warning">
                                                             Enable 2FA
                                                         </a>
                                                     </div>
@@ -193,12 +193,12 @@
                                                 </a>
                                             </div>
                                             <div class="col-md-4">
-                                                <a href="#" class="btn btn-outline-warning w-100 mb-2" onclick="alert('2FA functionality has been moved to the Profile page. Please use the Profile page to manage your account settings.');">
+                                                <a asp-area="Identity" asp-page="/Account/Manage/TwoFactorAuthentication" class="btn btn-outline-warning w-100 mb-2">
                                                     <i class="fas fa-mobile-alt me-2"></i>Manage 2FA
                                                 </a>
                                             </div>
                                             <div class="col-md-4">
-                                                <a href="#" class="btn btn-outline-info w-100 mb-2" onclick="alert('Personal data download functionality has been moved to the Profile page. Please use the Profile page to manage your account settings.');">
+                                                <a asp-area="Identity" asp-page="/Account/Manage/PersonalData" class="btn btn-outline-info w-100 mb-2">
                                                     <i class="fas fa-download me-2"></i>Download Data
                                                 </a>
                                             </div>

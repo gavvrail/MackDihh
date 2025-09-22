@@ -176,6 +176,37 @@
                     span.style.display = 'none';
                 }
             });
+
+            // Name validation - prevent numbers and special characters
+            const firstNameInput = document.querySelector('input[name="Input.FirstName"]');
+            const lastNameInput = document.querySelector('input[name="Input.LastName"]');
+
+            function validateName(input, fieldName) {
+                input.addEventListener('input', function() {
+                    const value = this.value;
+                    // Remove any non-letter characters (except spaces)
+                    const cleanValue = value.replace(/[^A-Za-z\s]/g, '');
+                    if (value !== cleanValue) {
+                        this.value = cleanValue;
+                        // Show a brief warning
+                        this.style.borderColor = '#dc3545';
+                        setTimeout(() => {
+                            this.style.borderColor = '';
+                        }, 1000);
+                    }
+                });
+
+                input.addEventListener('keypress', function(e) {
+                    // Prevent typing numbers and special characters
+                    const char = String.fromCharCode(e.which);
+                    if (!/[A-Za-z\s]/.test(char)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            if (firstNameInput) validateName(firstNameInput, 'First Name');
+            if (lastNameInput) validateName(lastNameInput, 'Last Name');
         });
     </script>
 }

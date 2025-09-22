@@ -60,11 +60,13 @@ builder.Services.AddScoped<SmsService>();
 builder.Services.AddScoped<FileUploadService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<RecaptchaService>();
+builder.Services.AddScoped<TimeZoneService>();
 
 // Add background services
 builder.Services.AddHostedService<OrderStatusUpdateService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, EmailSender>();
 
 // Configure SignalR for real-time chat
 builder.Services.AddSignalR();

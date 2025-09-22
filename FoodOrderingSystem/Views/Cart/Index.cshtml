@@ -12,6 +12,10 @@
     decimal subtotal = Model.CartItems.Where(item => !item.IsRedeemedWithPoints).Sum(item => item.Quantity * item.MenuItem.Price);
     int totalRedeemedItems = Model.CartItems.Where(item => item.IsRedeemedWithPoints).Sum(item => item.Quantity);
     int totalPointsUsed = Model.CartItems.Where(item => item.IsRedeemedWithPoints).Sum(item => item.PointsUsed);
+    
+    // Calculate delivery fee: RM 0 if cart is empty, RM 2 if cart has items
+    decimal deliveryFee = Model.CartItems.Any() ? 2.00m : 0.00m;
+    decimal total = subtotal + deliveryFee;
 }
 
 @section Styles {
@@ -120,10 +124,10 @@
                         </div>
                     }
                     
-                    <!-- Shipping -->
+                    <!-- Delivery -->
                     <div class="summary-row">
-                        <span>Shipping</span>
-                        <span class="summary-amount">Calculated at next step</span>
+                        <span>Delivery</span>
+                        <span class="summary-amount">RM @(deliveryFee.ToString("F2"))</span>
                     </div>
                     
                     <hr>
@@ -132,7 +136,7 @@
                     <!-- Total -->
                     <div class="summary-row total-row">
                         <span>Total</span>
-                        <span class="summary-amount total-amount">RM @(subtotal.ToString("F2"))</span>
+                        <span class="summary-amount total-amount">RM @(total.ToString("F2"))</span>
                     </div>
 
                     @if (Model.CartItems.Any())

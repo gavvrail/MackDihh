@@ -152,7 +152,7 @@
 
                                     <div class="journey-progress">
                                         <div class="progress-track">
-                                            <div class="progress-fill @(Model.Status >= OrderStatus.OutForDelivery ? "active" : "")" 
+                                            <div class="progress-fill @(Model.Status >= OrderStatus.OutForDelivery || (TimeZoneService.GetLocalTime() - TimeZoneService.ConvertFromUtc(Model.OrderDate)).TotalMinutes >= 20 ? "active" : "")" 
                                                  style="width: @(GetProgressPercentage(Model.Status))%"></div>
                                             
                                             <!-- Progress Points -->
@@ -161,22 +161,22 @@
                                                 <span>Order Placed</span>
                                             </div>
                                             
-                                            <div class="progress-point preparing @(Model.Status >= OrderStatus.Preparing ? "completed" : "")">
+                                            <div class="progress-point preparing @(Model.Status >= OrderStatus.Preparing || (TimeZoneService.GetLocalTime() - TimeZoneService.ConvertFromUtc(Model.OrderDate)).TotalMinutes >= 10 ? "completed" : "")">
                                                 <i class="fas fa-utensils"></i>
                                                 <span>Preparing</span>
                                             </div>
                                             
-                                            <div class="progress-point ready @(Model.Status >= OrderStatus.Ready ? "completed" : "")">
+                                            <div class="progress-point ready @(Model.Status >= OrderStatus.Ready || (TimeZoneService.GetLocalTime() - TimeZoneService.ConvertFromUtc(Model.OrderDate)).TotalMinutes >= 15 ? "completed" : "")">
                                                 <i class="fas fa-clock"></i>
                                                 <span>Ready</span>
                                             </div>
                                             
-                                            <div class="progress-point delivery @(Model.Status >= OrderStatus.OutForDelivery ? "completed" : "")">
+                                            <div class="progress-point delivery @(Model.Status >= OrderStatus.OutForDelivery || (TimeZoneService.GetLocalTime() - TimeZoneService.ConvertFromUtc(Model.OrderDate)).TotalMinutes >= 20 ? "completed" : "")">
                                                 <i class="fas fa-truck"></i>
                                                 <span>On the Way</span>
                                             </div>
                                             
-                                            <div class="progress-point delivered @(Model.Status >= OrderStatus.Delivered ? "completed" : "")">
+                                            <div class="progress-point delivered @(Model.Status >= OrderStatus.Delivered || (TimeZoneService.GetLocalTime() - TimeZoneService.ConvertFromUtc(Model.OrderDate)).TotalMinutes >= 30 ? "completed" : "")">
                                                 <i class="fas fa-home"></i>
                                                 <span>Delivered</span>
                                             </div>
@@ -276,10 +276,27 @@
     </div>
 </div>
 
+@inject FoodOrderingSystem.Services.TimeZoneService TimeZoneService
+
 @{
     int GetProgressPercentage(OrderStatus status)
     {
-        return status switch
+        // Calculate time-based progress for delivery using local time
+        var currentLocalTime = TimeZoneService.GetLocalTime();
+        var orderLocalTime = TimeZoneService.ConvertFromUtc(Model.OrderDate);
+        var timeElapsed = currentLocalTime - orderLocalTime;
+        var totalDeliveryTime = TimeSpan.FromMinutes(30); // 30 minutes total delivery time
+        
+        // If more than 30 minutes have passed, show as 100% (delivered)
+        if (timeElapsed.TotalMinutes >= 30)
+        {
+            return 100;
+        }
+        
+        var timeBasedProgress = (int)((timeElapsed.TotalMinutes / totalDeliveryTime.TotalMinutes) * 100);
+        
+        // Get status-based progress
+        var statusProgress = status switch
         {
             OrderStatus.Pending => 10,
             OrderStatus.Confirmed => 20,
@@ -289,6 +306,10 @@
             OrderStatus.Delivered => 100,
             _ => 0
         };
+        
+        // Return the higher of the two progress values
+        // This ensures the progress bar moves forward even if status hasn't changed
+        return Math.Max(statusProgress, timeBasedProgress);
     }
 }
 

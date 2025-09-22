@@ -18,6 +18,7 @@ namespace FoodOrderingSystem.Services
             // If the token is null or empty, it's invalid.
             if (string.IsNullOrEmpty(token))
             {
+                Console.WriteLine("reCAPTCHA validation failed: Token is null or empty");
                 return false;
             }
 
@@ -40,7 +41,9 @@ namespace FoodOrderingSystem.Services
                 var recaptchaResponse = JsonSerializer.Deserialize<RecaptchaResponse>(responseString);
 
                 // Return true if Google says success is true, otherwise false.
-                return recaptchaResponse?.Success ?? false;
+                var isValid = recaptchaResponse?.Success ?? false;
+                Console.WriteLine($"reCAPTCHA validation result: {isValid}");
+                return isValid;
             }
             catch (HttpRequestException ex)
             {

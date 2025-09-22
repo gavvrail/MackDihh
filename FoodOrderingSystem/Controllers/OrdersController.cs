@@ -7,6 +7,7 @@ using FoodOrderingSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using FoodOrderingSystem.Services;
 
 namespace FoodOrderingSystem.Controllers
 {
@@ -14,10 +15,12 @@ namespace FoodOrderingSystem.Controllers
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly TimeZoneService _timeZoneService;
 
-        public OrdersController(ApplicationDbContext context)
+        public OrdersController(ApplicationDbContext context, TimeZoneService timeZoneService)
         {
             _context = context;
+            _timeZoneService = timeZoneService;
         }
 
         // GET: /Orders/History
@@ -34,6 +37,23 @@ namespace FoodOrderingSystem.Controllers
                 .OrderByDescending(o => o.OrderDate) // Show the most recent orders first
                 .ToListAsync();
 
+            // Update estimated delivery times for recent orders (within last 30 minutes)
+            foreach (var order in orders)
+            {
+                if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.Cancelled)
+                {
+                    var currentLocalTime = _timeZoneService.GetLocalTime();
+                    var orderLocalTime = _timeZoneService.ConvertFromUtc(order.OrderDate);
+                    var timeSinceOrder = currentLocalTime - orderLocalTime;
+                    
+                    // Only update if the order was placed within the last 30 minutes
+                    if (timeSinceOrder.TotalMinutes <= 30)
+                    {
+                        order.EstimatedDeliveryTime = _timeZoneService.ConvertToUtc(_timeZoneService.GetLocalTimePlusMinutes(30));
+                    }
+                }
+            }
+
             return View(orders);
         }
 
@@ -48,6 +68,25 @@ namespace FoodOrderingSystem.Controllers
             if (order == null)
             {
                 return NotFound();
+            }
+
+            // Only update estimated delivery time for recent orders (within last 30 minutes)
+            // This prevents old orders from showing unrealistic delivery times
+            if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.Cancelled)
+            {
+                var currentLocalTime = _timeZoneService.GetLocalTime();
+                var orderLocalTime = _timeZoneService.ConvertFromUtc(order.OrderDate);
+                var timeSinceOrder = currentLocalTime - orderLocalTime;
+                
+                // Only update if the order was placed within the last 30 minutes
+                if (timeSinceOrder.TotalMinutes <= 30)
+                {
+                    order.EstimatedDeliveryTime = _timeZoneService.ConvertToUtc(_timeZoneService.GetLocalTimePlusMinutes(30));
+                    
+                    // Update the database with the new estimated delivery time
+                    _context.Orders.Update(order);
+                    await _context.SaveChangesAsync();
+                }
             }
 
             return View(order);
@@ -88,28 +127,31 @@ namespace FoodOrderingSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id, OrderCancellationViewModel model)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var order = await _context.Orders
-                .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.MenuItem)
-                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
-
-            if (order == null)
+            try
             {
-                return NotFound();
-            }
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                    .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
 
-            if (!ModelState.IsValid)
-            {
-                model.Order = order;
-                model.CancellationReasons = GetCancellationReasons();
-                
-                // Add error message for debugging
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                TempData["ErrorMessage"] = $"Form validation failed: {string.Join(", ", errors)}";
-                
-                return View(model);
-            }
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Order not found or you don't have permission to cancel this order.";
+                    return RedirectToAction(nameof(History));
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    model.Order = order;
+                    model.CancellationReasons = GetCancellationReasons();
+                    
+                    // Add error message for debugging
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    TempData["ErrorMessage"] = $"Form validation failed: {string.Join(", ", errors)}";
+                    
+                    return View(model);
+                }
 
             // Check if order can be cancelled
             if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Confirmed)
@@ -144,11 +186,17 @@ namespace FoodOrderingSystem.Controllers
                 }
             }
 
-            _context.OrderCancellations.Add(cancellation);
-            await _context.SaveChangesAsync();
+                _context.OrderCancellations.Add(cancellation);
+                await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Order cancelled successfully. We're sorry to see you go!";
-            return RedirectToAction(nameof(History));
+                TempData["SuccessMessage"] = "Order cancelled successfully. We're sorry to see you go!";
+                return RedirectToAction(nameof(History));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"An error occurred while cancelling the order: {ex.Message}";
+                return RedirectToAction(nameof(History));
+            }
         }
 
         private List<CancellationReasonType> GetCancellationReasons()
