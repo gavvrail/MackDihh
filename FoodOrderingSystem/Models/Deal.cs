@@ -46,6 +46,8 @@ namespace FoodOrderingSystem.Models
         [StringLength(1000)]
         public string? TermsAndConditions { get; set; }
         
+        public bool RequiresStudentVerification { get; set; } = false;
+        
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
     }

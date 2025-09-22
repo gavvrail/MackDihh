@@ -946,7 +946,25 @@ namespace FoodOrderingSystem.Controllers
         // GET: /Admin/PromoCodes/Create
         public IActionResult CreatePromoCode()
         {
-            return View();
+            // Initialize a new Deal with default values
+            var deal = new Deal
+            {
+                Type = DealType.PromoCode,
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(30),
+                DiscountPercentage = 0,
+                DiscountedPrice = 0,
+                MinimumOrderAmount = 0,
+                PointsReward = 0,
+                MaxUses = 1,
+                CurrentUses = 0,
+                OriginalPrice = 0,
+                IsActive = true,
+                BadgeColor = "primary",
+                RequiresStudentVerification = false
+            };
+            
+            return View(deal);
         }
 
         // POST: /Admin/PromoCodes/Create
@@ -954,15 +972,48 @@ namespace FoodOrderingSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePromoCode(Deal deal)
         {
-            _logger.LogInformation($"CreatePromoCode called with Title: {deal.Title}, PromoCode: {deal.PromoCode}");
+            _logger.LogInformation($"CreatePromoCode POST action called!");
+            _logger.LogInformation($"Deal data received - Title: '{deal?.Title}', PromoCode: '{deal?.PromoCode}', Type: '{deal?.Type}'");
+            
+            // Log all form data for debugging
+            _logger.LogInformation("Form data received:");
+            foreach (var key in Request.Form.Keys)
+            {
+                _logger.LogInformation($"  {key}: {Request.Form[key]}");
+            }
+            
+            // Ensure the deal object is not null
+            if (deal == null)
+            {
+                _logger.LogError("Deal object is null!");
+                TempData["ErrorMessage"] = "Invalid form data received.";
+                return View(new Deal());
+            }
+            
+            // Validate required fields for promo codes
+            if (string.IsNullOrWhiteSpace(deal.Title))
+            {
+                ModelState.AddModelError("Title", "Promo name is required.");
+            }
+            
+            if (string.IsNullOrWhiteSpace(deal.PromoCode))
+            {
+                ModelState.AddModelError("PromoCode", "Promo code is required.");
+            }
             
             // Debug: Log ModelState errors
             if (!ModelState.IsValid)
             {
                 _logger.LogError("ModelState is not valid");
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                foreach (var kvp in ModelState)
                 {
-                    _logger.LogError($"ModelState Error: {error.ErrorMessage}");
+                    if (kvp.Value.Errors.Any())
+                    {
+                        foreach (var error in kvp.Value.Errors)
+                        {
+                            _logger.LogError($"ModelState Error [{kvp.Key}]: {error.ErrorMessage}");
+                        }
+                    }
                 }
                 TempData["ErrorMessage"] = "Please fix the validation errors and try again.";
                 return View(deal);
@@ -984,16 +1035,28 @@ namespace FoodOrderingSystem.Controllers
                     return View(deal);
                 }
 
+                // Ensure all required fields are set properly
                 deal.CreatedAt = DateTime.UtcNow;
                 deal.IsActive = true;
+                deal.Type = DealType.PromoCode;
+                deal.RequiresStudentVerification = false; // Default to false for promo codes
                 
-                // Handle "Never Expires" case - if start date is 0001 and end date is 2099, set EndDate to null
-                if (deal.StartDate.Year == 1 && deal.EndDate.HasValue && deal.EndDate.Value.Year == 2099)
+                // Set default values for numeric fields if they're not set
+                if (deal.DiscountPercentage < 0) deal.DiscountPercentage = 0;
+                if (deal.DiscountedPrice < 0) deal.DiscountedPrice = 0;
+                if (deal.MinimumOrderAmount < 0) deal.MinimumOrderAmount = 0;
+                if (deal.PointsReward < 0) deal.PointsReward = 0;
+                if (deal.MaxUses == 0) deal.MaxUses = -1; // -1 means unlimited
+                
+                // Handle "Never Expires" case - if end date is 2099, set EndDate to null
+                if (deal.EndDate.HasValue && deal.EndDate.Value.Year == 2099)
                 {
                     deal.EndDate = null;
-                    // Set start date to current time for never-expiring promos
-                    deal.StartDate = DateTime.UtcNow;
+                    _logger.LogInformation("Setting promo code to never expire");
                 }
+                
+                // Log the deal object before saving
+                _logger.LogInformation($"Deal object details: Title={deal.Title}, PromoCode={deal.PromoCode}, Type={deal.Type}, DiscountPercentage={deal.DiscountPercentage}, DiscountedPrice={deal.DiscountedPrice}, StartDate={deal.StartDate}, EndDate={deal.EndDate}");
                 
                 _logger.LogInformation($"Adding deal to context: {deal.Title}");
                 _context.Deals.Add(deal);
@@ -1001,15 +1064,78 @@ namespace FoodOrderingSystem.Controllers
                 _logger.LogInformation("Saving changes to database");
                 await _context.SaveChangesAsync();
                 
-                _logger.LogInformation("Promo code created successfully");
+                _logger.LogInformation($"Promo code created successfully with ID: {deal.Id}");
                 TempData["SuccessMessage"] = "Promo code created successfully!";
                 return RedirectToAction(nameof(PromoCodes));
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "Database error creating promo code");
+                _logger.LogError($"Inner exception: {dbEx.InnerException?.Message}");
+                TempData["ErrorMessage"] = $"Database error: {dbEx.InnerException?.Message ?? dbEx.Message}";
+                return View(deal);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating promo code");
-                TempData["ErrorMessage"] = "An error occurred while creating the promo code. Please try again.";
+                _logger.LogError($"Exception details: {ex.Message}");
+                _logger.LogError($"Stack trace: {ex.StackTrace}");
+                TempData["ErrorMessage"] = $"An error occurred: {ex.Message}";
                 return View(deal);
+            }
+        }
+
+        // Test action to check database connectivity (remove after debugging)
+        [AllowAnonymous]
+        public async Task<IActionResult> TestPromoCodeCreation()
+        {
+            try
+            {
+                // Test database connectivity
+                var dealCount = await _context.Deals.CountAsync();
+                _logger.LogInformation($"Current deals count: {dealCount}");
+                
+                // Create a simple test deal
+                var testDeal = new Deal
+                {
+                    Title = "Test Deal",
+                    PromoCode = "TEST" + DateTime.Now.Ticks,
+                    Type = DealType.PromoCode,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(30),
+                    DiscountPercentage = 10,
+                    DiscountedPrice = 0,
+                    MinimumOrderAmount = 0,
+                    PointsReward = 0,
+                    MaxUses = 1,
+                    CurrentUses = 0,
+                    OriginalPrice = 0,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    BadgeColor = "primary",
+                    RequiresStudentVerification = false
+                };
+                
+                _context.Deals.Add(testDeal);
+                await _context.SaveChangesAsync();
+                
+                return Json(new { 
+                    Success = true, 
+                    Message = "Test deal created successfully",
+                    DealId = testDeal.Id,
+                    DealTitle = testDeal.Title,
+                    PromoCode = testDeal.PromoCode
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in test promo code creation");
+                return Json(new { 
+                    Success = false, 
+                    Error = ex.Message,
+                    InnerError = ex.InnerException?.Message,
+                    StackTrace = ex.StackTrace
+                });
             }
         }
 

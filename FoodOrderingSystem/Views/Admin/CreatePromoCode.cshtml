@@ -233,10 +233,11 @@
                             </div>
 
                             <!-- Hidden fields for required values -->
-                            <input asp-for="Type" type="hidden" value="PromoCode" />
+                            <input asp-for="Type" type="hidden" value="@((int)FoodOrderingSystem.Models.DealType.PromoCode)" />
                             <input asp-for="OriginalPrice" type="hidden" value="0" />
                             <input asp-for="IsActive" type="hidden" value="true" />
                             <input asp-for="CurrentUses" type="hidden" value="0" />
+                            <input asp-for="RequiresStudentVerification" type="hidden" value="false" />
 
                             <div class="d-flex justify-content-between">
                                 <a asp-action="PromoCodes" class="btn btn-secondary">
@@ -338,17 +339,18 @@
             }
 
             // Handle unlimited expiry checkbox
-            unlimitedExpiryCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    // Disable both start and end date inputs and set them to infinite values
-                    startDateInput.disabled = true;
-                    endDateInput.disabled = true;
-                    
-                    // Set start date to year 0001 and end date to year 2099 to represent "never expires"
-                    const startDate = new Date('0001-01-01T00:00:00');
-                    const endDate = new Date('2099-12-31T23:59:59');
-                    startDateInput.value = startDate.toISOString().slice(0, 16);
-                    endDateInput.value = endDate.toISOString().slice(0, 16);
+            if (unlimitedExpiryCheckbox) {
+                unlimitedExpiryCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Disable both start and end date inputs and set them to infinite values
+                        startDateInput.disabled = true;
+                        endDateInput.disabled = true;
+                        
+                        // Set start date to current time and end date to year 2099 to represent "never expires"
+                        const startDate = new Date();
+                        const endDate = new Date('2099-12-31T23:59:59');
+                        startDateInput.value = startDate.toISOString().slice(0, 16);
+                        endDateInput.value = endDate.toISOString().slice(0, 16);
                     
                     // Add disabled styling classes and inline styles
                     startDateInput.classList.add('disabled');
@@ -382,8 +384,8 @@
                         const futureDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
                         endDateInput.value = futureDate.toISOString().slice(0, 16);
                     }
-                }
-            });
+                });
+            }
 
             // Form validation and helpful hints
             const form = document.querySelector('form');
@@ -393,6 +395,7 @@
             }
             
             form.addEventListener('submit', function(e) {
+                console.log('Form submit event triggered!');
                 
                 const title = titleInput.value.trim();
                 const promoCode = promoCodeInput.value.trim();
@@ -470,6 +473,7 @@
 
                 // Show success message
                 console.log('Validation passed, submitting form...');
+                
                 const submitBtn = document.querySelector('button[type="submit"]');
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating...';
                 submitBtn.disabled = true;
