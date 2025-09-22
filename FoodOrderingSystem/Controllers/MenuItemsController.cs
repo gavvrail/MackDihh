@@ -195,6 +195,7 @@ namespace FoodOrderingSystem.Controllers
                 });
             }
         }
+        */
 
         // GET: MenuItems/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -407,6 +408,5 @@ namespace FoodOrderingSystem.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-        */
     }
 }
