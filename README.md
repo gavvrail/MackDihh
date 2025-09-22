@@ -17,15 +17,16 @@ Go to your VS2022 and follow these steps:
 **Step 3**
 - After complete this u need to update your appsettings.json also (Can be found in Solution Explorer)
 - open appsettings.json and find the "ConnectionStrings" section and replace it with this:
-
+```
 "ConnectionStrings": {
   "DefaultConnection": "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\TheirName\\PathTo\\YourDatabase.mdf;Integrated Security=True;"
 }
-
+```
 - Make sure to change the "C:\\Users\\TheirName\\PathTo\\YourDatabase.mdf" to the path that u copied earlier
+
 WARNING: Make sure it only has 2 backslash and not 4
-Data Source=(LocalDB)\\MSSQLLocalDB ✅
-Data Source=(LocalDB)\\\\MSSQLLocalDB ❌
+<br>Data Source=(LocalDB)\\MSSQLLocalDB ✅
+<br>Data Source=(LocalDB)\\\\MSSQLLocalDB ❌
 
 **Last step**
 - Go to Tools > NuGet Package Manager > Package Manager Console
